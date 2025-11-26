@@ -5,7 +5,7 @@ library(fpp2)
 library(tseries)
 library(urca)
 
-CHILE <- read_csv("CLASES/ECONOMÍA AZUL-CHILE contaminación.csv")
+CHILE <- read_csv("ECONOMÍA AZUL-CHILE contaminación.csv")
 
 CHILE_ts <- CHILE %>%
   select(TIME_PERIOD, OBS_VALUE) %>%
