@@ -5,7 +5,7 @@ library(fpp2)
 library(tseries)
 library(urca)
 
-ESPAÑA <- read_csv("CLASES/PRODUCTIVIDAD EN ESPAÑA.csv")
+ESPAÑA <- read_csv("PRODUCTIVIDAD EN ESPAÑA.csv")
 
 ESPAÑA_ts <- ESPAÑA %>%
   select(TIME_PERIOD, OBS_VALUE) %>%

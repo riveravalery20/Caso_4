@@ -8,8 +8,6 @@ head(JAPON)
 
 colnames(JAPON)
 
-library(tidyverse)
-
 JAPON_sep <- JAPON %>%
   separate(
     col = `STRUCTURE,STRUCTURE_ID,STRUCTURE_NAME,ACTION,REF_AREA,,MEASURE,,FREQ,,TIME_PERIOD,,OBS_VALUE,,OBS_STATUS,,UNIT_MEASURE,,UNIT_MULT,,CURRENCY,,BASE_PER,,METHODOLOGY,,DECIMALS,,PRICE_BASE,,ADJUSTMENT,`,
@@ -41,7 +39,6 @@ plot(serie_JAPON, main = "Serie Temporal Anual", ylab = "Valor", xlab = "Año")
 
 #MODELO----------------------
 library(fpp2)
-library(tidyverse)
 
 autoplot(serie_JAPON)
 serie_JAPON
@@ -63,9 +60,11 @@ summary(ur.kpss(serie_JAPON))
 adf.test(serie_JAPON)
 adf.test(diff(serie_JAPON))
 
+
 fit <- auto.arima(serie_JAPON, seasonal=FALSE)
 fit
 fit %>% forecast(h=10) %>% autoplot(include=80)
 
-fit2 <- Arima(serie_JAPON, order=c(3,0,0))
+fit2 <- Arima(serie_JAPON, order=c(1,1,0))
 fit2
+fit2 %>% forecast(h=10) %>% autoplot(include=80)
