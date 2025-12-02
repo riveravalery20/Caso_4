@@ -1,0 +1,651 @@
+---
+title: "Título del Documento"
+author: "Nombre del Autor"
+date: "Fecha"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    theme: default
+    css: styles.css
+    code_folding: hide 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+```{css, echo=FALSE}
+/* Aquí va todo el CSS proporcionado */
+:root {
+  --bright-gold: #fee231;
+  --lemon-lime: #c2cd4b;
+  --willow-green: #84ba63;
+  --seaweed: #4aa77c;
+  --verdigris: #28947f;
+  --light-gold: #fef8d9;
+  --light-lime: #f3f5d7;
+  --light-green: #e8f1e4;
+  --light-seaweed: #e0f0e9;
+  --light-verdigris: #d9eae6;
+  --dark-text: #2c3e50;
+  --medium-gray: #95a5a6;
+  --light-gray: #ecf0f1;
+  --white: #ffffff;
+  --shadow-soft: 0 4px 20px rgba(40, 148, 127, 0.08);
+  --shadow-medium: 0 8px 30px rgba(40, 148, 127, 0.12);
+  --border-radius-lg: 12px;
+  --border-radius-md: 8px;
+  --border-radius-sm: 4px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Contenedor principal */
+body {
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  line-height: 1.8;
+  color: var(--dark-text);
+  background: linear-gradient(135deg, var(--light-verdigris) 0%, var(--light-green) 100%);
+  margin: 0;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+/* Container principal - compatible con RMarkdown */
+.container-fluid {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-medium);
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--seaweed);
+}
+
+.container-fluid::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, 
+    var(--bright-gold) 0%, 
+    var(--lemon-lime) 25%, 
+    var(--willow-green) 50%, 
+    var(--seaweed) 75%, 
+    var(--verdigris) 100%
+  );
+}
+
+/* Tabla de contenidos - específico para RMarkdown */
+#TOC {
+  position: fixed;
+  top: 40px;
+  left: 40px;
+  width: 280px;
+  max-height: calc(100vh - 80px);
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-medium);
+  padding: 30px;
+  overflow-y: auto;
+  border: 2px solid var(--verdigris);
+  z-index: 1000;
+}
+
+#TOC::before {
+  content: "📋 Navegación";
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--verdigris);
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid var(--bright-gold);
+}
+
+#TOC ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#TOC li {
+  margin: 8px 0;
+  position: relative;
+}
+
+#TOC > ul > li {
+  margin: 12px 0;
+}
+
+#TOC li ul {
+  padding-left: 15px;
+  margin-top: 8px;
+}
+
+#TOC a {
+  display: block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: var(--dark-text);
+  background: transparent;
+  border-radius: var(--border-radius-md);
+  transition: var(--transition);
+  font-weight: 500;
+  border-left: 4px solid transparent;
+  font-size: 0.95rem;
+}
+
+#TOC a::before {
+  content: "▸ ";
+  color: var(--willow-green);
+  transition: var(--transition);
+}
+
+#TOC a:hover {
+  background: var(--light-lime);
+  color: var(--verdigris);
+  border-left-color: var(--bright-gold);
+  padding-left: 20px;
+}
+
+#TOC a:hover::before {
+  color: var(--bright-gold);
+}
+
+/* Ajuste del contenido principal cuando hay TOC */
+body.toc-content {
+  padding-left: 360px;
+}
+
+/* Título principal */
+h1.title {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--verdigris);
+  margin-bottom: 20px;
+  padding-bottom: 25px;
+  position: relative;
+  background: linear-gradient(135deg, var(--verdigris), var(--seaweed));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h1.title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 6px;
+  background: linear-gradient(90deg, var(--bright-gold), var(--lemon-lime));
+  border-radius: 3px;
+}
+
+/* Metadatos del documento */
+.author, h4.author, h3.author, h2.author {
+  text-align: center;
+  color: var(--seaweed) !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  margin: 15px 0 !important;
+  padding: 15px !important;
+  background: var(--light-seaweed) !important;
+  border-radius: var(--border-radius-md) !important;
+  border-left: 5px solid var(--willow-green) !important;
+}
+
+.date, h4.date, h3.date {
+  text-align: center;
+  color: var(--willow-green) !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  margin: 10px 0 40px 0 !important;
+  padding: 12px !important;
+  background: var(--light-green) !important;
+  border-radius: var(--border-radius-md) !important;
+}
+
+/* Encabezados de sección */
+h1 {
+  font-size: 2.4rem;
+  color: var(--verdigris);
+  font-weight: 700;
+  margin-top: 50px;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 3px solid var(--bright-gold);
+}
+
+h2 {
+  font-size: 2rem;
+  color: var(--seaweed);
+  font-weight: 700;
+  margin-top: 40px;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--light-seaweed), transparent);
+  border-radius: var(--border-radius-md);
+  border-left: 6px solid var(--willow-green);
+  position: relative;
+}
+
+h2::before {
+  content: "▸";
+  position: absolute;
+  left: 8px;
+  color: var(--bright-gold);
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.6rem;
+  color: var(--willow-green);
+  font-weight: 600;
+  margin-top: 35px;
+  margin-bottom: 20px;
+  padding-left: 20px;
+  border-left: 4px solid var(--lemon-lime);
+}
+
+h4 {
+  font-size: 1.3rem;
+  color: var(--seaweed);
+  font-weight: 600;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  padding-left: 15px;
+  border-left: 3px solid var(--bright-gold);
+}
+
+h5 {
+  font-size: 1.1rem;
+  color: var(--lemon-lime);
+  font-weight: 600;
+  margin-top: 25px;
+  margin-bottom: 12px;
+}
+
+/* Párrafos y texto */
+p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--dark-text);
+  margin-bottom: 18px;
+  text-align: justify;
+}
+
+/* Tablas - compatible con RMarkdown */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 30px 0;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  background: var(--white);
+}
+
+thead {
+  background: linear-gradient(135deg, var(--seaweed), var(--verdigris));
+}
+
+thead th {
+  color: var(--white);
+  font-weight: 700;
+  padding: 18px 15px;
+  text-align: left;
+  font-size: 1.05rem;
+  border-bottom: 3px solid var(--bright-gold);
+}
+
+tbody tr:nth-child(even) {
+  background: var(--light-verdigris);
+}
+
+tbody tr:hover {
+  background: var(--light-gold);
+}
+
+tbody td {
+  padding: 15px;
+  border-bottom: 1px solid var(--light-gray);
+  font-size: 1rem;
+  color: var(--dark-text);
+}
+
+tbody th {
+  padding: 15px;
+  font-weight: 600;
+  text-align: left;
+  background: var(--light-lime);
+  border-bottom: 1px solid var(--light-gray);
+}
+
+/* Bloques de código */
+pre {
+  background: linear-gradient(135deg, var(--light-verdigris), var(--light-green));
+  border: 2px solid var(--willow-green);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  margin: 25px 0;
+  overflow-x: auto;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  box-shadow: var(--shadow-soft);
+}
+
+code {
+  background: var(--light-gold);
+  color: var(--verdigris);
+  padding: 3px 8px;
+  border-radius: var(--border-radius-sm);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid var(--lemon-lime);
+}
+
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--dark-text);
+}
+
+/* Imágenes y figuras */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-soft);
+  margin: 20px 0;
+}
+
+.figure {
+  margin: 30px 0;
+  padding: 20px;
+  background: var(--light-green);
+  border: 2px solid var(--willow-green);
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+}
+
+/* Listas */
+ul, ol {
+  padding-left: 30px;
+  margin: 20px 0;
+}
+
+ul li, ol li {
+  margin-bottom: 10px;
+  padding-left: 5px;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--dark-text);
+}
+
+ul li::marker {
+  color: var(--bright-gold);
+  font-weight: bold;
+}
+
+ol li::marker {
+  color: var(--seaweed);
+  font-weight: bold;
+}
+
+/* Blockquotes */
+blockquote {
+  background: var(--light-lime);
+  border-left: 6px solid var(--lemon-lime);
+  border-radius: var(--border-radius-md);
+  padding: 20px 25px;
+  margin: 25px 0;
+  font-style: italic;
+  color: var(--dark-text);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Links */
+a {
+  color: var(--verdigris);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+a:hover {
+  color: var(--seaweed);
+  border-bottom-color: var(--bright-gold);
+}
+
+a:visited {
+  color: var(--willow-green);
+}
+
+/* Líneas horizontales */
+hr {
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bright-gold), var(--lemon-lime), var(--willow-green));
+  margin: 40px 0;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--seaweed), var(--verdigris));
+  border-radius: var(--border-radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--willow-green), var(--seaweed));
+}
+
+/* Diseño responsivo */
+@media (max-width: 1400px) {
+  #TOC {
+    width: 250px;
+    left: 30px;
+  }
+  
+  body.toc-content {
+    padding-left: 320px;
+  }
+}
+
+@media (max-width: 1024px) {
+  #TOC {
+    position: static;
+    width: 100%;
+    max-height: 400px;
+    margin-bottom: 30px;
+  }
+  
+  body.toc-content {
+    padding-left: 20px;
+  }
+  
+  .container-fluid {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+  
+  .container-fluid {
+    padding: 30px 20px;
+  }
+  
+  h1.title {
+    font-size: 2.2rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.6rem;
+    padding: 15px;
+  }
+  
+  h3 {
+    font-size: 1.3rem;
+  }
+  
+  table {
+    font-size: 0.9rem;
+  }
+  
+  thead th, tbody td {
+    padding: 10px 8px;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+  
+  #TOC {
+    display: none;
+  }
+  
+  .container-fluid {
+    box-shadow: none;
+    border: none;
+  }
+  
+  .container-fluid::before {
+    display: none;
+  }
+  
+  a {
+    color: var(--dark-text);
+    border-bottom: none;
+  }
+}
+
+/* Accesibilidad */
+:focus {
+  outline: 3px solid var(--bright-gold);
+  outline-offset: 2px;
+}
+
+/* Compatibilidad con elementos de RMarkdown */
+.section {
+  margin: 20px 0;
+}
+
+.level1, .level2, .level3 {
+  margin-top: 30px;
+}
+
+div.sourceCode {
+  overflow: visible;
+}
+
+/* Tabset panels */
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: var(--light-green);
+  border: none;
+  border-radius: var(--border-radius-md);
+}
+
+.tabset-dropdown > .nav-tabs > li.active > a {
+  background: var(--verdigris);
+  color: white;
+}
+
+/* Footnotes */
+.footnotes {
+  margin-top: 50px;
+  padding-top: 25px;
+  border-top: 3px solid var(--bright-gold);
+  font-size: 0.95rem;
+}
+
+.footnotes ol {
+  padding-left: 20px;
+}
+
+/* Referencias */
+#refs {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+#refs .csl-entry {
+  margin-bottom: 15px;
+  padding-left: 20px;
+  text-indent: -20px;
+}
+
+/* Estilos para los botones de code folding */
+.showopt {
+  background-color: var(--light-lime) !important;
+  color: var(--verdigris) !important;
+  border: 1px solid var(--willow-green) !important;
+  border-radius: var(--border-radius-sm) !important;
+  padding: 5px 10px !important;
+  font-size: 0.9rem !important;
+  cursor: pointer !important;
+  transition: var(--transition) !important;
+}
+
+.showopt:hover {
+  background-color: var(--lemon-lime) !important;
+  color: var(--seaweed) !important;
+}
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
