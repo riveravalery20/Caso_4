@@ -137,75 +137,88 @@ donut_interactive
 ```{r ficha tecnica}
 library(kableExtra)
 
-# Datos básicos de la ficha técnica (sin distribución)
+# Crear tabla comparativa estilo profesional
 ficha_tecnica <- data.frame(
-  Métrica = c(
+  Característica = c(
     "Nombre del ETF",
     "Símbolo/Ticker",
     "Tipo de activo",
     "Activos subyacentes",
+    "Composición actual",
     "Activos bajo gestión (AUM)",
     "Expense Ratio",
     "Beta (vs. S&P 500)",
     "Rango 52 semanas",
+    "Precio actual (aprox)",
     "Rendimiento 2024",
-    "Rendimiento YTD 2025"
+    "Rendimiento YTD 2025",
+    "Volumen promedio diario",
+    "Bolsa de cotización",
+    "Fecha de lanzamiento"
   ),
   Valor = c(
     "Aberdeen Standard Physical Precious Metals Basket Shares ETF",
     "GLTR",
     "ETF de metales preciosos físicos",
     "Oro, plata, paladio, platino físicos",
+    "Oro: 62%, Plata: 31%, Paladio: 4%, Platino: 3%",
     "$1,850 millones USD",
-    "0.60% anual",
-    "0.21 (baja correlación)",
+    "0.60%",
+    "0.21",
     "$109.20 - $171.85",
+    "$168.50",
     "+20.3%",
-    "+38.5% (hasta octubre)"
+    "+38.5% (hasta octubre)",
+    "150,000 acciones",
+    "NYSE Arca",
+    "Octubre 2010"
+  ),
+  Nota = c(
+    "Nombre completo del instrumento",
+    "Ticker de negociación principal",
+    "Clasificación del producto",
+    "Metales físicos almacenados en bóvedas",
+    "Distribución basada en valores de mercado actuales",
+    "Ha crecido 35% en los últimos 12 meses",
+    "Competitivo dentro del sector de ETFs de metales",
+    "Baja correlación con el mercado accionario",
+    "Mínimo histórico: $109.20 (Oct 2024)",
+    "Precio de cierre más reciente disponible",
+    "Impulsado por rally de metales preciosos",
+    "Fuerte desempeño por demanda de activos refugio",
+    "Alta liquidez para entrada/salida",
+    "Principal exchange para ETFs en EE.UU.",
+    "Más de 15 años en el mercado"
   )
 )
 
-# Crear tabla simple y profesional
-tabla_simple <- ficha_tecnica %>%
-  kbl(
-    format = "html",
-    col.names = c("MÉTRICA", "VALOR"),
-    align = c("l", "l"),
-    caption = "<center><b>FICHA TÉCNICA DEL ETF GLTR</b></center>"
-  ) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover"),
-    full_width = FALSE,
-    position = "center",
-    font_size = 14
-  ) %>%
-  row_spec(
-    0,
-    bold = TRUE,
-    color = "white",
-    background = "#1E3A8A",
-    align = "center"
-  ) %>%
-  column_spec(
-    1,
-    bold = TRUE,
-    background = "#EFF6FF",
-    width = "30%"
-  ) %>%
-  column_spec(
-    2,
-    background = "#F8FAFC",
-    width = "70%"
-  ) %>%
-  # Añadir bordes laterales
-  column_spec(
-    1:2,
-    border_right = "1px solid #E5E7EB",
-    border_left = "1px solid #E5E7EB"
-  )
+# Formatear la tabla profesional
+ficha_tecnica %>%
+  kable(align = "lcl", 
+        caption = "Tabla 1. FICHA TÉCNICA DEL ETF GLTR - METALES PRECIOSOS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE,
+                font_size = 12) %>%
+  row_spec(0, background = "#1E3A8A", color = "white", bold = TRUE) %>%
+  column_spec(1, bold = TRUE, width = "25%") %>%
+  column_spec(2, width = "35%") %>%
+  column_spec(3, width = "40%", 
+              color = "#666666") %>%
+  # Resaltar valores importantes
+  column_spec(2,
+              color = ifelse(
+                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  # Verde para rendimientos positivos
+                ifelse(
+                  grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    # Azul para valores monetarios
+                  "black"
+                )
+              ),
+              bold = ifelse(
+                grepl("\\+[0-9]|^\\$", ficha_tecnica$Valor),
+                TRUE,
+                FALSE
+              ))
 
-# Mostrar la tabla
-tabla_simple
 ```
 
 ```{r serie}
@@ -276,7 +289,11 @@ plot_ly(datos_2020, x = ~Fecha) %>%
   layout(
     title = list(
       text = '<b>Comportamiento del ETF GLTR durante la Pandemia COVID-19 (2020)</b>',
-      font = list(size = 20, color = '#1E3A8A')
+      font = list(size = 18, color = '#1E3A8A', family = 'Arial'),
+      y = 0.98,  # Posición vertical del título
+      x = 0.5,   # Posición horizontal centrada
+      xanchor = 'center',
+      yanchor = 'top'
     ),
     xaxis = list(
       title = '<b>Fecha</b>',
@@ -292,7 +309,15 @@ plot_ly(datos_2020, x = ~Fecha) %>%
     hovermode = 'x unified',
     plot_bgcolor = 'white',
     paper_bgcolor = '#F8F9FA',
-    margin = list(t = 80, b = 80, l = 80, r = 40)
+    margin = list(t = 120, b = 80, l = 80, r = 40),  # Aumentado margen superior
+    showlegend = TRUE,
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      xanchor = 'center',
+      y = -0.2,
+      yanchor = 'top'
+    )
   )
 ```
 
@@ -554,59 +579,91 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
   )
 ```
 
+```{r sintesis}
 
-```{r comparativo indice}
-# Descargar S&P 500 para mismo período
-sp500 <- getSymbols("^GSPC", src = "yahoo", 
-                    from = "2022-10-31", to = "2025-10-31", 
-                    auto.assign = FALSE)
-sp500_close <- Cl(sp500)
+library(kableExtra)
 
-# Normalizar ambas series
-fechas_comunes <- intersect(index(GLTR_close_full), index(sp500_close))
-gltr_alin <- as.numeric(GLTR_close_full[fechas_comunes])
-sp500_alin <- as.numeric(sp500_close[fechas_comunes])
-
-gltr_norm <- gltr_alin / gltr_alin[1] * 100
-sp500_norm <- sp500_alin / sp500_alin[1] * 100
-
-# Crear dataframe comparativo
-comparison_index <- data.frame(
-  fecha = fechas_comunes,
-  GLTR = gltr_norm,
-  SP500 = sp500_norm
+# Crear tabla de síntesis histórica
+sintesis_historica <- data.frame(
+  Período = c(
+    "2010–2012",
+    "2013–2015", 
+    "2016–2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024–2025"
+  ),
+  Comportamiento = c(
+    "Rally alcista",
+    "Corrección",
+    "Laterización volátil",
+    "Rally extremo",
+    "Corrección",
+    "Volatilidad extrema",
+    "Recuperación táctica",
+    "Rally estructural"
+  ),
+  Factores_clave = c(
+    "Estímulos post-2008, temor inflación, búsqueda refugio",
+    "Tapering Fed, fortaleza dólar, normalización monetaria",
+    "Incertidumbre política (Brexit, Trump, guerra comercial), tasas moderadas",
+    "Pandemia COVID, pánico financiero, QE infinito, máximos oro",
+    "Recuperación económica, rotación a cíclicos, normalización de tasas",
+    "Invasión Ucrania (alcista) vs. endurecimiento Fed (bajista) → plano",
+    "Crisis bancaria puntual, demanda refugio momentánea, luego normalización",
+    "Deuda pública ↑, tasas reales esperadas ↓, incertidumbre geopolítica, máximos históricos"
+  )
 )
 
-# Gráfico comparativo
-index_comparison <- ggplot(comparison_index, aes(x = fecha)) +
-  geom_line(aes(y = GLTR, color = "GLTR"), size = 1.2, alpha = 0.9) +
-  geom_line(aes(y = SP500, color = "S&P 500"), size = 1.2, alpha = 0.9) +
-  geom_ribbon(aes(ymin = pmin(GLTR, SP500), ymax = pmax(GLTR, SP500)), 
-              fill = "grey80", alpha = 0.3) +
-  scale_color_manual(values = c("GLTR" = color_palette[4], "S&P 500" = color_palette[5])) +
-  scale_y_continuous(labels = function(x) paste0(x, "%")) +
-  geom_hline(yintercept = 100, linetype = "dashed", color = "grey50", alpha = 0.6) +
-  labs(
-    title = "Comparativo de Desempeño: GLTR vs. S&P 500 (Oct 2022 - Oct 2025)",
-    subtitle = "Ambas series normalizadas a 100 en octubre 2022",
-    x = "Fecha",
-    y = "Retorno Acumulado (%)",
-    color = "Índice",
-    caption = "Beta estimado: ~0.2 | GLTR muestra menor correlación y rol de diversificador de portafolio"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 14, color = color_palette[1]),
-    plot.subtitle = element_text(size = 11, color = color_palette[3]),
-    legend.position = "bottom",
-    legend.title = element_text(face = "bold"),
-    panel.grid.major = element_line(color = "grey92"),
-    panel.grid.minor = element_line(color = "grey96")
-  ) +
-  annotate("text", x = as.Date("2023-06-01"), y = 180, 
-           label = "GLTR: +85.3%", color = color_palette[4], fontface = "bold") +
-  annotate("text", x = as.Date("2023-06-01"), y = 145, 
-           label = "S&P 500: +52.7%", color = color_palette[5], fontface = "bold")
-
-print(index_comparison)
+# Crear tabla profesional
+sintesis_historica %>%
+  kable(
+    align = "lll",
+    col.names = c("PERÍODO", "COMPORTAMIENTO", "FACTORES CLAVE"),
+    caption = "<center><h3 style='color: #1E3A8A;'>Tabla 2. SÍNTESIS HISTÓRICA - TRAYECTORIA DEL ETF GLTR (2010-2025)</h3></center>",
+    escape = FALSE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 13,
+    fixed_thead = TRUE
+  ) %>%
+  row_spec(
+    0,
+    background = "#1E3A8A",
+    color = "white",
+    bold = TRUE,
+    align = "center",
+    extra_css = "border-bottom: 2px solid #FFFFFF;"
+  ) %>%
+  column_spec(
+    1,
+    bold = TRUE,
+    width = "15%",
+    background = "#F8FAFC",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    2,
+    width = "20%",
+    background = "#FFFFFF",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    3,
+    width = "65%",
+    background = "#FFFFFF"
+  ) %>%
+  # Añadir notas al pie
+  footnote(
+    general = "Fuente: Análisis histórico basado en datos de Yahoo Finance, Bloomberg y Aberdeen Standard Investments",
+    general_title = "Nota:",
+    footnote_as_chunk = TRUE,
+    title_format = c("italic", "bold")
+  )
 ```
+
