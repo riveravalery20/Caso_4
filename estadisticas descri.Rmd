@@ -709,7 +709,107 @@ fig_estacionalidad_heatmap
 
 ```
 
+```{r volatilidad bandas , include=FALSE}
+library(plotly)
+library(dplyr)
+library(TTR)
 
+# Calcular medias móviles y bandas de volatilidad
+volatilidad_df <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Media_Movil_20 = SMA(Precio, n = 20),
+    Desviacion_20 = runSD(Precio, n = 20),
+    Banda_Superior = Media_Movil_20 + (2 * Desviacion_20),
+    Banda_Inferior = Media_Movil_20 - (2 * Desviacion_20),
+    Ancho_Banda = Banda_Superior - Banda_Inferior
+  )
+
+# Gráfico elegante de bandas de volatilidad
+fig_bandas <- plot_ly(volatilidad_df, x = ~Fecha) %>%
+  # Área entre bandas (volatilidad) - SOLO MUESTRA ANCHO
+  add_ribbons(
+    ymin = ~Banda_Inferior,
+    ymax = ~Banda_Superior,
+    name = 'Banda de Volatilidad',
+    fillcolor = 'rgba(46, 134, 171, 0.15)',
+    line = list(color = 'transparent'),
+    hovertemplate = 'Ancho: $%{customdata:.2f}<extra></extra>',
+    customdata = ~Ancho_Banda  # Solo muestra el ancho de banda
+  ) %>%
+  # Línea de precio
+  add_trace(
+    y = ~Precio, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Precio GLTR',
+    line = list(color = '#2c3e50', width = 1.5),
+    hovertemplate = 'Precio: $%{y:.2f}<extra></extra>'
+  ) %>%
+  # Media móvil
+  add_trace(
+    y = ~Media_Movil_20, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Media Móvil 20 días',
+    line = list(color = '#FF6F61', width = 2, dash = 'dash'),
+    hovertemplate = 'Media 20d: $%{y:.2f}<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Bandas de Volatilidad del ETF GLTR</b><br><sub>Las bandas se expanden en periodos de alta volatilidad y se contraen en calma</sub>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      rangeslider = list(visible = FALSE),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Precio (USD)",
+      tickformat = "$.2f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, TRUE)),
+            label = "Mostrar Todo"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, FALSE)),
+            label = "Ocultar Media"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, TRUE)),
+            label = "Ocultar Precio"
+          )
+        )
+      )
+    )
+  )
+
+fig_bandas
+
+```
 
 ```{r volatilidad , include=FALSE}
 library(plotly)
