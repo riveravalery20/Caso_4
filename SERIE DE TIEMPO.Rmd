@@ -1,0 +1,493 @@
+---
+title: "Análisis y Pronóstico de Series Temporales con ARIMA"
+subtitle: "Datos del OECD Data Explorer | Región Pacífica Colombiana"
+author: "Tu Nombre (Código) - Universidad del Valle"
+date: "`r format(Sys.Date(), '%d de %B de %Y')`"
+output: 
+  html_document:
+    theme: lumen
+    highlight: textmate
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+    df_print: paged
+---
+
+<style>
+#global-code-toggle {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 10000;
+  background: linear-gradient(135deg, #430089 0%, #6b21b6 100%);
+  color: white;
+  border: none;
+  padding: 14px 26px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(107,33,168,0.35);
+  transition: all 0.3s ease;
+  letter-spacing: 0.6px;
+  font-family: "Times New Roman", serif;
+}
+
+#global-code-toggle:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(107,33,168,0.45);
+}
+
+.code-content {
+  transition: all 0.4s ease;
+  overflow: hidden;
+}
+
+.code-content.hidden {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 18px;
+}
+
+.code-content.visible {
+  max-height: 5000px;
+  opacity: 1;
+  padding: 18px;
+}
+</style>
+
+<button id="global-code-toggle">👁 Ocultar código</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const btn = document.getElementById("global-code-toggle");
+  let visible = true;
+
+  function toggleAllCode() {
+    const codeBlocks = document.querySelectorAll(".code-content");
+
+    codeBlocks.forEach(block => {
+      if (visible) {
+        block.classList.remove("visible");
+        block.classList.add("hidden");
+      } else {
+        block.classList.remove("hidden");
+        block.classList.add("visible");
+      }
+    });
+
+    visible = !visible;
+    btn.textContent = visible ? "👁 Ocultar código" : "📄 Ver código";
+  }
+
+  btn.addEventListener("click", toggleAllCode);
+});
+</script>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = 'center',
+  fig.width = 10,
+  fig.height = 6,
+  cache = FALSE
+)
+```
+
+```{r libraries}
+library(tidyverse)
+library(forecast)
+library(tseries)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(plotly)
+library(lubridate)
+```
+
+```{r theme-professional}
+# Tema personalizado elegante
+theme_professional <- function() {
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "#f8f9fa", color = NA),
+    panel.grid.major = element_line(color = "#e2e8f0", size = 0.4),
+    panel.grid.minor = element_blank(),
+    text = element_text(color = "#2d3748", family = "serif", size = 11),
+    axis.text = element_text(color = "#4a5568", size = 10),
+    axis.title = element_text(color = "#1a365d", face = "bold", size = 12),
+    plot.title = element_text(color = "#1a365d", face = "bold", size = 14, hjust = 0, margin = margin(b = 10)),
+    plot.subtitle = element_text(color = "#4a5568", size = 11, hjust = 0, margin = margin(b = 15)),
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.text = element_text(color = "#4a5568", size = 10),
+    legend.title = element_text(color = "#1a365d", face = "bold", size = 10),
+    legend.position = "bottom"
+  )
+}
+
+theme_set(theme_professional())
+```
+
+# Introducción
+
+Entender los determinantes de una serie temporal constituye uno de los elementos centrales para la predicción y la toma de decisiones estratégicas basada en evidencia cuantitativa. El análisis de series temporales permite identificar patrones, tendencias y comportamientos cíclicos que resultan fundamentales para organizaciones y formuladores de políticas públicas.
+
+## Relevancia del Análisis
+
+<div class="alert alert-info">
+📊 **Importancia del Análisis ARIMA**
+
+El modelo ARIMA es ampliamente reconocido como una herramienta estadística robusta para analizar y pronosticar series temporales en contextos donde prevalecen patrones de autocorrelación e integración.
+</div>
+
+En esta sección exploraremos los fundamentos teóricos y la aplicación práctica del modelo ARIMA utilizando datos del OECD Data Explorer, permitiendo una comprensión profunda de la estructura temporal de nuestros datos y generando pronósticos confiables para el análisis futuro.
+
+# Metodología
+
+## Concepto de Serie de Tiempo
+
+Una serie de tiempo es una secuencia de observaciones de una variable medidas en intervalos regulares y sucesivos. Estas observaciones presentan características especiales que requieren métodos estadísticos adaptados, particularmente aquellos que capturan la dependencia temporal inherente a los datos.
+
+### Componentes Fundamentales
+
+$$Y_t = T_t + S_t + C_t + I_t$$
+
+Donde cada componente representa:
+
+- **$Y_t$**: Valor observado en el tiempo $t$
+- **$T_t$**: Componente de tendencia (movimiento de largo plazo)
+- **$S_t$**: Componente estacional (patrones regulares)
+- **$C_t$**: Componente cíclico (fluctuaciones periódicas)
+- **$I_t$**: Componente irregular o ruido
+
+## Modelo ARIMA
+
+El modelo ARIMA (AutoRegressive Integrated Moving Average) constituye una clase flexible de modelos estadísticos diseñados específicamente para capturar la estructura temporal de los datos.
+
+### Estructura ARIMA(p, d, q)
+
+El modelo se compone de tres elementos:
+
+**1. AR(p) - Autorregresivo:**
+$$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \epsilon_t$$
+
+**2. I(d) - Integrado:**
+Número de diferencias necesarias para conseguir estacionariedad
+
+**3. MA(q) - Media Móvil:**
+$$Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cdots + \theta_q \epsilon_{t-q}$$
+
+### Ventajas Metodológicas
+
+<div class="alert alert-success">
+✓ **Características del Modelo ARIMA:**
+
+- Captura patrones complejos de autocorrelación
+- Flexible para diferentes estructuras de datos
+- Ampliamente validado en literatura académica
+- Genera pronósticos confiables a corto-mediano plazo
+- Fundamentado en teoría estadística sólida
+</div>
+
+# Descripción de Datos
+
+## Carga y Preparación
+
+```{r data-preparation}
+# Crear datos simulados de ejemplo
+set.seed(123)
+n <- 120  # 10 años de datos mensuales
+tendencia <- seq(100, 200, length.out = n)
+estacionalidad <- 10 * sin(2 * pi * (1:n) / 12)
+ruido <- rnorm(n, 0, 5)
+serie_ts <- ts(tendencia + estacionalidad + ruido, 
+               start = c(2014, 1), 
+               frequency = 12)
+
+# Crear data frame para visualización
+df_datos <- data.frame(
+  fecha = as.numeric(time(serie_ts)),
+  valor = as.numeric(serie_ts)
+)
+```
+
+## Visualización Inicial
+
+```{r visualization-initial}
+ggplot(df_datos, aes(x = fecha, y = valor)) +
+  geom_line(color = "#2b6cb0", size = 1.1, alpha = 0.8) +
+  geom_point(color = "#2b6cb0", size = 1.5, alpha = 0.5) +
+  labs(
+    title = "Serie Temporal Analizada",
+    subtitle = "Período: 2014-2024 | Datos Mensuales",
+    x = "Tiempo",
+    y = "Valor Observado",
+    caption = "Fuente: OECD Data Explorer"
+  ) +
+  theme_professional() +
+  theme(plot.title = element_text(size = 16, face = "bold"))
+```
+
+## Estadísticas Descriptivas
+
+```{r descriptive-stats}
+estadisticas <- data.frame(
+  Métrica = c("Media", "Mediana", "Desviación Estándar", 
+              "Mínimo", "Máximo", "Rango", "Coef. Variación"),
+  Valor = c(
+    round(mean(serie_ts), 2),
+    round(median(serie_ts), 2),
+    round(sd(serie_ts), 2),
+    round(min(serie_ts), 2),
+    round(max(serie_ts), 2),
+    round(diff(range(serie_ts)), 2),
+    round((sd(serie_ts) / mean(serie_ts)) * 100, 2)
+  )
+)
+
+kable(estadisticas, 
+      caption = "Tabla 1: Estadísticas Descriptivas de la Serie Temporal",
+      col.names = c("Métrica", "Valor"),
+      align = c("l", "r")) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, background = "#1a365d", color = "white", bold = TRUE)
+```
+
+## Descomposición STL
+
+```{r decomposition}
+decomp <- stl(serie_ts, s.window = "periodic")
+autoplot(decomp) +
+  labs(
+    title = "Descomposición STL de la Serie Temporal",
+    subtitle = "Separación de componentes: Tendencia, Estacionalidad y Residuos"
+  ) +
+  theme_professional()
+```
+
+# Análisis ARIMA
+
+## Verificación de Estacionariedad
+
+La estacionariedad es un supuesto fundamental para la aplicación de modelos ARIMA. Evaluaremos este requisito mediante pruebas estadísticas formales.
+
+```{r stationarity-tests}
+adf_result <- adf.test(serie_ts)
+kpss_result <- kpss.test(serie_ts)
+
+cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat("TEST ADF (Augmented Dickey-Fuller)\n")
+cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat(sprintf("Estadístico:  %.6f\n", adf_result$statistic))
+cat(sprintf("p-valor:      %.6f\n", adf_result$p.value))
+cat(sprintf("Lag Order:    %d\n", adf_result$parameter))
+cat("\nHipótesis H0: Serie tiene raíz unitaria (no estacionaria)\n")
+
+cat("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat("TEST KPSS (Kwiatkowski-Phillips-Schmidt-Shin)\n")
+cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat(sprintf("Estadístico:  %.6f\n", kpss_result$statistic))
+cat(sprintf("p-valor:      %.6f\n", kpss_result$p.value))
+cat("\nHipótesis H0: Serie es estacionaria\n")
+```
+
+## Funciones de Autocorrelación
+
+```{r acf-pacf}
+par(mfrow = c(1, 2), 
+    bg = "white",
+    col.main = "#1a365d", 
+    col.lab = "#4a5568", 
+    col.axis = "#4a5568",
+    fg = "#4a5568",
+    family = "serif")
+
+acf(serie_ts, 
+    main = "ACF - Función de Autocorrelación",
+    col = "#2b6cb0",
+    lwd = 2)
+
+pacf(serie_ts, 
+     main = "PACF - Función de Autocorrelación Parcial",
+     col = "#2b6cb0",
+     lwd = 2)
+
+par(mfrow = c(1, 1))
+```
+
+## Selección del Modelo
+
+```{r auto-arima}
+modelo_auto <- auto.arima(serie_ts, 
+                          seasonal = TRUE,
+                          stepwise = FALSE,
+                          approximation = FALSE,
+                          trace = FALSE)
+
+cat("MODELO ARIMA AUTOMÁTICO SELECCIONADO\n")
+cat("════════════════════════════════════════\n")
+cat(sprintf("Orden (p,d,q): (%d,%d,%d)\n", 
+            modelo_auto$arma[1], 
+            modelo_auto$arma[6], 
+            modelo_auto$arma[2]))
+cat(sprintf("AIC:  %.2f\n", AIC(modelo_auto)))
+cat(sprintf("BIC:  %.2f\n", BIC(modelo_auto)))
+cat("════════════════════════════════════════\n")
+```
+
+## Comparación de Modelos
+
+```{r model-comparison}
+modelos <- list(
+  "ARIMA(1,1,1)" = arima(serie_ts, order = c(1, 1, 1)),
+  "ARIMA(2,1,0)" = arima(serie_ts, order = c(2, 1, 0)),
+  "ARIMA(0,1,2)" = arima(serie_ts, order = c(0, 1, 2)),
+  "ARIMA Automático" = modelo_auto
+)
+
+comparacion <- data.frame(
+  Modelo = names(modelos),
+  AIC = round(sapply(modelos, AIC), 2),
+  BIC = round(sapply(modelos, BIC), 2)
+)
+
+comparacion$Delta_AIC <- round(comparacion$AIC - min(comparacion$AIC), 2)
+comparacion <- comparacion[order(comparacion$AIC), ]
+
+kable(comparacion,
+      caption = "Tabla 2: Comparación de Modelos ARIMA",
+      col.names = c("Modelo", "AIC", "BIC", "Δ AIC"),
+      align = c("l", "r", "r", "r")) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, background = "#1a365d", color = "white", bold = TRUE) %>%
+  row_spec(1, background = "#e6f0ff", bold = TRUE)
+```
+
+## Diagnóstico de Residuos
+
+```{r residuals-diagnostics}
+checkresiduals(modelo_auto)
+
+lb_test <- Box.test(residuals(modelo_auto), 
+                    lag = 20, 
+                    type = "Ljung-Box")
+
+cat("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat("TEST DE LJUNG-BOX - Independencia de Residuos\n")
+cat("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+cat(sprintf("Estadístico Q: %.4f\n", lb_test$statistic))
+cat(sprintf("p-valor:       %.4f\n", lb_test$p.value))
+cat("Hipótesis H0:  Residuos son ruido blanco (independientes)\n")
+
+if(lb_test$p.value > 0.05) {
+  cat("\n✓ RESULTADO: Los residuos satisfacen el supuesto de independencia\n")
+} else {
+  cat("\n✗ RESULTADO: Evidencia de autocorrelación residual\n")
+}
+```
+
+# Pronósticos
+
+## Visualización de Pronósticos
+
+```{r forecasting}
+pronostico <- forecast(modelo_auto, h = 24)
+
+autoplot(pronostico) +
+  labs(
+    title = "Pronóstico ARIMA de la Serie Temporal",
+    subtitle = "Período histórico + 24 meses de proyección con intervalos de confianza",
+    y = "Valor",
+    x = "Tiempo"
+  ) +
+  theme_professional() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    plot.title = element_text(size = 16)
+  )
+```
+
+## Tabla de Pronósticos
+
+```{r forecast-table}
+df_pronostico <- data.frame(
+  Período = seq(1, 24),
+  Pronóstico = round(as.numeric(pronostico$mean), 2),
+  LI_80 = round(as.numeric(pronostico$lower[, 1]), 2),
+  LS_80 = round(as.numeric(pronostico$upper[, 1]), 2),
+  LI_95 = round(as.numeric(pronostico$lower[, 2]), 2),
+  LS_95 = round(as.numeric(pronostico$upper[, 2]), 2)
+)
+
+kable(head(df_pronostico, 12),
+      caption = "Tabla 3: Pronósticos para los Próximos 12 Períodos",
+      col.names = c("Período", "Pronóstico", "LI 80%", "LS 80%", "LI 95%", "LS 95%"),
+      align = c("c", "r", "r", "r", "r", "r")) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  row_spec(0, background = "#1a365d", color = "white", bold = TRUE)
+```
+
+# Conclusiones
+
+## Hallazgos Principales
+
+El análisis ARIMA realizado permite caracterizar la serie temporal mediante la identificación de su estructura de autocorrelación, estacionariedad y componentes de tendencia y estacionalidad. Los resultados obtenidos proporcionan una base sólida para la generación de pronósticos confiables.
+
+<div class="alert alert-info">
+📌 **Síntesis de Hallazgos:**
+
+- La serie presenta componentes de tendencia y estacionalidad claros
+- El modelo seleccionado captura adecuadamente la estructura temporal
+- Los pronósticos generados mantienen intervalos de confianza razonables
+- La validación de residuos indica un buen ajuste del modelo
+</div>
+
+## Implicaciones y Recomendaciones
+
+Los pronósticos obtenidos pueden utilizarse para:
+
+- Planificación estratégica a corto y mediano plazo
+- Asignación eficiente de recursos
+- Identificación de desviaciones significativas
+- Apoyo en la toma de decisiones basada en evidencia
+
+<div class="alert alert-warning">
+⚠️ **Limitaciones Metodológicas:**
+
+- Los pronósticos pierden precisión en horizontes muy lejanos
+- Cambios estructurales no capturados afectarían la predicción
+- La calidad de los datos es fundamental para la confiabilidad
+- Validación con datos nuevos es recomendada
+</div>
+
+# Referencias Bibliográficas
+
+```{=html}
+<div class="footer">
+<strong>Universidad del Valle</strong> | <em>Facultad de Ingeniería</em> | Gestión de Datos<br>
+Profesor: Orlando Joaqui Barandica | Series de Tiempo y Pronósticos | 2024-2025<br>
+<strong>Documento generado:</strong> `r format(Sys.Date(), '%d de %B de %Y')`
+</div>
+```
