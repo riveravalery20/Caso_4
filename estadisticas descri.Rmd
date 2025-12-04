@@ -1,0 +1,940 @@
+---
+title: "estadistica descrip"
+author: "La p"
+date: "2025-12-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 12,
+  fig.height = 7,
+  fig.align = 'center'
+)
+```
+
+```{r librerias, include=FALSE}
+library(quantmod)
+library(tseries)
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r cargar datos, include=FALSE}
+
+AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
+                         from = "2022-10-31")
+
+names(AccionesEX)
+GLTR <- AccionesEX$GLTR.Close
+
+# Preparar dataframe para análisis descriptivo
+GLTR_df <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(GLTR),
+  Año = year(index(GLTR)),
+  Mes = month(index(GLTR), label = TRUE, abbr = FALSE),
+  Dia_Semana = wday(index(GLTR), label = TRUE, abbr = FALSE)
+)
+
+```
+
+```{r estadisticas basicas, include=FALSE}
+library(gt)
+library(dplyr)
+
+# Calcular estadísticas básicas
+estadisticas_basicas <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  summarise(
+    Media = mean(Precio),
+    Mediana = median(Precio),
+    Desviacion = sd(Precio),
+    Minimo = min(Precio),
+    Maximo = max(Precio),
+    Q1 = quantile(Precio, 0.25),
+    Q3 = quantile(Precio, 0.75)
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+# Crear el data frame directamente
+estadisticas_df <- data.frame(
+  Estadistica = c("Media", "Mediana", "Desviación Estándar", 
+                  "Mínimo", "Máximo", "Primer Cuartil (Q1)", 
+                  "Tercer Cuartil (Q3)"),
+  Valor = c(
+    estadisticas_basicas$Media,
+    estadisticas_basicas$Mediana,
+    estadisticas_basicas$Desviacion,
+    estadisticas_basicas$Minimo,
+    estadisticas_basicas$Maximo,
+    estadisticas_basicas$Q1,
+    estadisticas_basicas$Q3
+  )
+)
+
+# Crear tabla con GT - versión simplificada
+tabla_estadisticas <- estadisticas_df %>%
+  gt() %>%
+  tab_header(
+    title = "Tabla 1. Estadísticas Descriptivas del ETF GLTR",
+    subtitle = "Período: Octubre 2022 - Octubre 2025"
+  ) %>%
+  fmt_currency(
+    columns = Valor,
+    currency = "USD",
+    decimals = 2
+  ) %>%
+  cols_label(
+    Estadistica = "Estadística",
+    Valor = "Valor (USD)"
+  ) %>%
+  # Estilo para encabezado de columnas
+  tab_style(
+    style = list(
+      cell_fill(color = "#2E86AB"),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  # Estilo para filas alternas
+  tab_style(
+    style = cell_fill(color = "#f8f9fa"),
+    locations = cells_body(rows = seq(1, nrow(estadisticas_df), 2))
+  ) %>%
+  # Bordes
+  tab_style(
+    style = cell_borders(
+      sides = c("top", "bottom"),
+      color = "#dee2e6",
+      weight = px(1)
+    ),
+    locations = cells_body()
+  ) %>%
+  # Fuente de nota
+  tab_source_note(
+    source_note = "Fuente: Datos históricos del ETF GLTR"
+  ) %>%
+  # Opciones básicas de tabla
+  tab_options(
+    table.font.names = "Arial",
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(14),
+    table_body.hlines.color = "transparent",
+    source_notes.font.size = px(12)
+  )
+
+# Mostrar la tabla
+tabla_estadisticas
+
+
+
+```
+
+
+```{r boxplot por años , include=FALSE}
+library(plotly)
+library(dplyr)
+
+# Asegurarnos de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Extraer el año para el análisis
+GLTR_df <- GLTR_df %>%
+  mutate(Año = as.factor(format(Fecha, "%Y"))) %>%
+  filter(Año %in% c("2022", "2023", "2024", "2025"))
+
+# Crear dataframes separados para cada año
+df_2022 <- GLTR_df %>% filter(Año == "2022")
+df_2023 <- GLTR_df %>% filter(Año == "2023")
+df_2024 <- GLTR_df %>% filter(Año == "2024")
+df_2025 <- GLTR_df %>% filter(Año == "2025")
+
+# Definir colores elegantes para cada año
+colors <- c(
+  "2022" = "#2E86AB",    # Azul profesional
+  "2023" = "#A23B72",    # Púrpura elegante
+  "2024" = "#F18F01",    # Naranja cálido
+  "2025" = "#73AB84",    # Verde natural
+  "Todos" = "#6C757D"    # Gris para "Todos"
+)
+
+# Crear el gráfico base con todos los años
+fig <- plot_ly() %>%
+  # Trazo para 2022
+  add_boxplot(
+    data = df_2022,
+    y = ~Precio,
+    name = "2022",
+    marker = list(
+      color = colors["2022"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2022"], width = 2),
+    fillcolor = 'rgba(46, 134, 171, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2023
+  add_boxplot(
+    data = df_2023,
+    y = ~Precio,
+    name = "2023",
+    marker = list(
+      color = colors["2023"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2023"], width = 2),
+    fillcolor = 'rgba(162, 59, 114, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2024
+  add_boxplot(
+    data = df_2024,
+    y = ~Precio,
+    name = "2024",
+    marker = list(
+      color = colors["2024"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2024"], width = 2),
+    fillcolor = 'rgba(241, 143, 1, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2025
+  add_boxplot(
+    data = df_2025,
+    y = ~Precio,
+    name = "2025",
+    marker = list(
+      color = colors["2025"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2025"], width = 2),
+    fillcolor = 'rgba(115, 171, 132, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 14,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      )
+    ),
+    hovermode = "x unified",
+    # Definir los botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.8)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar TODOS los años
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE, TRUE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (Todos los Años)</b>",
+                   xaxis = list(title = "<b>Año</b>"))
+            ),
+            label = "Todos los Años"
+          ),
+          # Botón para mostrar solo 2022
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2022)</b>",
+                   xaxis = list(title = "<b>2022</b>"))
+            ),
+            label = "2022"
+          ),
+          # Botón para mostrar solo 2023
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2023)</b>",
+                   xaxis = list(title = "<b>2023</b>"))
+            ),
+            label = "2023"
+          ),
+          # Botón para mostrar solo 2024
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, TRUE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2024)</b>",
+                   xaxis = list(title = "<b>2024</b>"))
+            ),
+            label = "2024"
+          ),
+          # Botón para mostrar solo 2025
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, FALSE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2025)</b>",
+                   xaxis = list(title = "<b>2025</b>"))
+            ),
+            label = "2025"
+          )
+        )
+      )
+    )
+  ) %>%
+  # Añadir información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>Haz clic en los botones para ver la distribución de precios por año</i>",
+    x = 0.5,
+    y = -0.2,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig
+
+```
+
+```{r tendencia , include=FALSE}
+library(plotly)
+library(forecast)
+
+# Convertir a serie temporal para descomposición
+serie_ts <- ts(GLTR_df$Precio, 
+               start = c(2022, 10), 
+               frequency = 365)
+
+# Descomposición STL (Seasonal and Trend decomposition using Loess)
+descomposicion <- stl(serie_ts, s.window = "periodic")
+
+# Crear dataframe para plotly
+descomp_df <- data.frame(
+  Fecha = GLTR_df$Fecha,
+  Original = GLTR_df$Precio,
+  Tendencia = as.numeric(descomposicion$time.series[, "trend"])
+)
+
+# Gráfico interactivo de solo Original + Tendencia
+fig_original_tendencia <- plot_ly(descomp_df) %>%
+  # Serie original
+  add_trace(x = ~Fecha, y = ~Original, type = 'scatter', mode = 'lines',
+            name = 'Serie Original', 
+            line = list(color = 'rgba(46, 134, 171, 0.4)', width = 1),
+            hovertemplate = '<b>Original</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Tendencia
+  add_trace(x = ~Fecha, y = ~Tendencia, type = 'scatter', mode = 'lines',
+            name = 'Tendencia', 
+            line = list(color = '#FF6F61', width = 3),
+            hovertemplate = '<b>Tendencia</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Fecha</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 12,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5,
+      rangeslider = list(visible = FALSE)  # Range slider desactivado
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    hovermode = "x unified",
+    # Botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.9)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar AMBAS series
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE)),
+              list(title = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>")
+            ),
+            label = "Mostrar Ambas"
+          ),
+          # Botón para mostrar solo la SERIE ORIGINAL
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE)),
+              list(title = "<b>Serie Temporal Original del ETF GLTR</b>")
+            ),
+            label = "Solo Original"
+          ),
+          # Botón para mostrar solo la TENDENCIA
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE)),
+              list(title = "<b>Tendencia de la Serie Temporal del ETF GLTR</b>")
+            ),
+            label = "Solo Tendencia"
+          )
+        )
+      )
+    ),
+    # Leyenda
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      ),
+      bgcolor = "rgba(255, 255, 255, 0.8)",
+      bordercolor = "#dee2e6",
+      borderwidth = 1
+    )
+  ) %>%
+  # Información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>La línea azul clara muestra los precios originales diarios. La línea roja muestra la tendencia suavizada extraída de la serie.</i>",
+    x = 0.5,
+    y = -0.25,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig_original_tendencia
+
+```
+
+```{r heatmap estacionalidad , include=FALSE}
+library(plotly)
+library(dplyr)
+
+# Asegurarse de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Preparar datos para heatmap mensual
+heatmap_df <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  mutate(
+    Año = format(Fecha, "%Y"),
+    Mes_num = as.numeric(format(Fecha, "%m")),
+    Mes = factor(
+      Mes_num,
+      levels = 1:12,
+      labels = c("Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                 "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+    )
+  ) %>%
+  group_by(Año, Mes, Mes_num) %>%
+  summarise(
+    Precio_Inicial = first(Precio, order_by = Fecha),
+    Precio_Final = last(Precio, order_by = Fecha),
+    Precio_Promedio = mean(Precio, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    Rendimiento = ifelse(Precio_Inicial > 0, 
+                         (Precio_Final - Precio_Inicial) / Precio_Inicial * 100,
+                         0)
+  ) %>%
+  arrange(Año, Mes_num)
+
+# Gráfico de heatmap con escala ajustada a -15% a 15%
+fig_estacionalidad_heatmap <- plot_ly(
+  data = heatmap_df,
+  x = ~Mes,
+  y = ~Año,
+  z = ~Rendimiento,
+  type = 'heatmap',
+  colorscale = list(
+    c(0, 'rgb(229, 57, 53)'),      # Rojo para rendimientos negativos
+    c(0.5, 'rgb(244, 244, 244)'),  # Blanco neutro
+    c(1, 'rgb(46, 134, 171)')      # Azul para rendimientos positivos
+  ),
+  zmin = -15,  # ESCALA AJUSTADA: Límite inferior -15%
+  zmax = 15,   # ESCALA AJUSTADA: Límite superior 15%
+  colorbar = list(
+    title = "Rendimiento (%)",
+    titleside = "right",
+    tickformat = ".1f",
+    len = 0.8,
+    tickvals = seq(-15, 15, by = 5)  # Marcas cada 5%
+  ),
+  hovertemplate = paste(
+    '<b>Año</b>: %{y}<br>',
+    '<b>Mes</b>: %{x}<br>',
+    '<b>Rendimiento</b>: %{z:.2f}%<br>',
+    '<b>Precio inicial</b>: $%{text:.2f}<br>',
+    '<extra></extra>'
+  ),
+  text = ~Precio_Inicial
+) %>%
+  layout(
+    title = list(
+      text = "<b>Heatmap de Estacionalidad Mensual - Rendimientos por Mes</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Mes</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickangle = 0,
+      showgrid = FALSE
+    ),
+    yaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      autorange = "reversed",
+      showgrid = FALSE,
+      type = "category"
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    annotations = list(
+      list(
+        x = 0.5,
+        y = -0.15,
+        text = "<i>Cada celda muestra el rendimiento porcentual mensual. Escala: -15% a +15%. Rojo = rendimiento negativo, Azul = rendimiento positivo.</i>",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "center",
+        font = list(
+          family = "Arial, sans-serif",
+          size = 12,
+          color = "#6c757d"
+        )
+      )
+    )
+  )
+
+# Mostrar el heatmap
+fig_estacionalidad_heatmap
+
+```
+
+```{r volatilidad bandas , include=FALSE}
+library(plotly)
+library(dplyr)
+library(TTR)
+
+# Calcular medias móviles y bandas de volatilidad
+volatilidad_df <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Media_Movil_20 = SMA(Precio, n = 20),
+    Desviacion_20 = runSD(Precio, n = 20),
+    Banda_Superior = Media_Movil_20 + (2 * Desviacion_20),
+    Banda_Inferior = Media_Movil_20 - (2 * Desviacion_20),
+    Ancho_Banda = Banda_Superior - Banda_Inferior
+  )
+
+# Gráfico elegante de bandas de volatilidad
+fig_bandas <- plot_ly(volatilidad_df, x = ~Fecha) %>%
+  # Área entre bandas (volatilidad) - SOLO MUESTRA ANCHO
+  add_ribbons(
+    ymin = ~Banda_Inferior,
+    ymax = ~Banda_Superior,
+    name = 'Banda de Volatilidad',
+    fillcolor = 'rgba(46, 134, 171, 0.15)',
+    line = list(color = 'transparent'),
+    hovertemplate = 'Ancho: $%{customdata:.2f}<extra></extra>',
+    customdata = ~Ancho_Banda  # Solo muestra el ancho de banda
+  ) %>%
+  # Línea de precio
+  add_trace(
+    y = ~Precio, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Precio GLTR',
+    line = list(color = '#2c3e50', width = 1.5),
+    hovertemplate = 'Precio: $%{y:.2f}<extra></extra>'
+  ) %>%
+  # Media móvil
+  add_trace(
+    y = ~Media_Movil_20, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Media Móvil 20 días',
+    line = list(color = '#FF6F61', width = 2, dash = 'dash'),
+    hovertemplate = 'Media 20d: $%{y:.2f}<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Bandas de Volatilidad del ETF GLTR</b><br><sub>Las bandas se expanden en periodos de alta volatilidad y se contraen en calma</sub>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      rangeslider = list(visible = FALSE),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Precio (USD)",
+      tickformat = "$.2f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, TRUE)),
+            label = "Mostrar Todo"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, FALSE)),
+            label = "Ocultar Media"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, TRUE)),
+            label = "Ocultar Precio"
+          )
+        )
+      )
+    )
+  )
+
+fig_bandas
+
+```
+
+```{r volatilidad , include=FALSE}
+library(plotly)
+library(dplyr)    # AÑADE ESTA LÍNEA - para el operador %>%
+library(TTR)
+library(zoo)
+
+# Calcular volatilidad en diferentes ventanas temporales
+comparador_volatilidad <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Rendimiento = (Precio / lag(Precio) - 1) * 100
+  ) %>%
+  filter(!is.na(Rendimiento)) %>%
+  mutate(
+    Vol_5d = rollapply(Rendimiento, width = 5, FUN = sd, fill = NA, align = "right"),
+    Vol_20d = rollapply(Rendimiento, width = 20, FUN = sd, fill = NA, align = "right"),
+    Vol_60d = rollapply(Rendimiento, width = 60, FUN = sd, fill = NA, align = "right"),
+    Vol_252d = rollapply(Rendimiento, width = 252, FUN = sd, fill = NA, align = "right")
+  )
+
+# Gráfico comparativo elegante
+fig_comparativo <- plot_ly(comparador_volatilidad, x = ~Fecha) %>%
+  # Volatilidad a 5 días (corto plazo)
+  add_trace(
+    y = ~Vol_5d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 5 días',
+    line = list(color = '#73AB84', width = 1.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 5d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 20 días
+  add_trace(
+    y = ~Vol_20d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 20 días',
+    line = list(color = '#2E86AB', width = 2),
+    visible = TRUE,
+    hovertemplate = 'Vol 20d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 60 días
+  add_trace(
+    y = ~Vol_60d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 60 días',
+    line = list(color = '#FF6F61', width = 2.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 60d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 252 días (anualizada)
+  add_trace(
+    y = ~Vol_252d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol Anual',
+    line = list(color = '#F18F01', width = 3),
+    visible = TRUE,
+    hovertemplate = 'Vol Anual: %{y:.2f}%<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Comparativo de Volatilidad en Diferentes Ventanas Temporales</b>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Volatilidad (% desviación estándar)",
+      tickformat = ".1f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        showactive = TRUE,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", rep(TRUE, 4)),
+            label = "Mostrar Todas"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, FALSE, FALSE)),
+            label = "Solo 5 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, TRUE, FALSE, FALSE)),
+            label = "Solo 20 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, TRUE, FALSE)),
+            label = "Solo 60 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, FALSE, TRUE)),
+            label = "Solo Anual"
+          )
+        )
+      )
+    )
+  )
+
+# Mostrar el gráfico
+fig_comparativo
+```
