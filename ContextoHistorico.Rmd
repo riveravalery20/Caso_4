@@ -1,0 +1,612 @@
+---
+title: "Contexto"
+author: "Yo"
+date: "2025-12-04"
+output: html_document
+---
+
+```{r}
+# Cargar librerías adicionales para visualización
+library(quantmod)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+library(scales)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(RColorBrewer)
+library(zoo)
+library(tseries)
+library(forecast)
+library(fpp2)
+
+# Definir paleta de colores profesional
+color_palette <- c(
+  "#1E3A8A",  # Azul oscuro principal
+  "#DC2626",  # Rojo para eventos críticos
+  "#059669",  # Verde para crecimiento
+  "#D97706",  # Ámbar para metales
+  "#7C3AED",  # Púrpura para comparaciones
+  "#0EA5E9"   # Azul claro para fondos
+)
+```
+
+```{r grafico dona}
+# Cargar librerías necesarias
+library(plotly)
+library(dplyr)
+library(RColorBrewer)
+
+# Datos de composición del ETF
+composition_data <- data.frame(
+  Metal = c("Oro Físico", "Plata Física", "Paladio Físico", "Platino Físico"),
+  Porcentaje = c(61.77, 30.72, 4.26, 3.26),
+  Valor_Mercado = c("1B", "702M", "97M", "74M")
+)
+
+# Añadir etiquetas detalladas
+composition_data <- composition_data %>%
+  mutate(
+    Etiqueta = paste0(
+      "<b>", Metal, "</b><br>",
+      Porcentaje, "%<br>",
+      "(", Valor_Mercado, ")"
+    ),
+    # Colores metálicos realistas
+    Color = c("#FFD700", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
+    # Texto para hover
+    HoverText = paste0(
+      "<b>", Metal, "</b><br>",
+      "Composición: <b>", Porcentaje, "%</b><br>",
+      "Valor de mercado: <b>", Valor_Mercado, "</b><br>",
+      "Aproximado en cartera:<br>",
+      case_when(
+        Metal == "Oro Físico" ~ "60-65%",
+        Metal == "Plata Física" ~ "25-30%",
+        Metal == "Paladio Físico" ~ "3-5%",
+        Metal == "Platino Físico" ~ "3-5%"
+      )
+    )
+  )
+
+# Crear donut chart interactivo
+donut_interactive <- plot_ly(
+  composition_data,
+  labels = ~Metal,
+  values = ~Porcentaje,
+  type = 'pie',
+  hole = 0.5,  # Esto crea el efecto donut
+  textposition = 'outside',
+  textinfo = 'label+percent',
+  hoverinfo = 'text',
+  text = ~HoverText,
+  marker = list(
+    colors = ~Color,
+    line = list(color = '#FFFFFF', width = 2)
+  ),
+  # Añadir texto en el centro
+  domain = list(x = c(0, 1), y = c(0, 1))
+) %>%
+  layout(
+    title = list(
+      text = "<b>Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares</b>",
+      font = list(
+        size = 20,
+        color = "#1E3A8A",
+        family = "Arial, sans-serif"
+      ),
+      x = 0.5,
+      y = 0.95
+    ),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "v",
+      x = 1.05,
+      y = 0.5,
+      font = list(size = 12),
+      title = list(
+        text = "<b>Metales</b>",
+        font = list(size = 14)
+      )
+    ),
+    # Añadir anotación en el centro del donut
+    annotations = list(
+      list(
+        text = "<b>Total AUM</b><br>~$1.9B",
+        x = 0.5,
+        y = 0.5,
+        font = list(
+          size = 16,
+          color = "#1E3A8A",
+          family = "Arial, sans-serif"
+        ),
+        showarrow = FALSE
+      )
+    ),
+    paper_bgcolor = "#F8F9FA",
+    plot_bgcolor = "#F8F9FA",
+    margin = list(t = 100, b = 80, l = 20, r = 150)
+  )
+
+# Mostrar donut chart
+donut_interactive
+```
+
+
+```{r ficha tecnica}
+library(kableExtra)
+
+# Datos básicos de la ficha técnica (sin distribución)
+ficha_tecnica <- data.frame(
+  Métrica = c(
+    "Nombre del ETF",
+    "Símbolo/Ticker",
+    "Tipo de activo",
+    "Activos subyacentes",
+    "Activos bajo gestión (AUM)",
+    "Expense Ratio",
+    "Beta (vs. S&P 500)",
+    "Rango 52 semanas",
+    "Rendimiento 2024",
+    "Rendimiento YTD 2025"
+  ),
+  Valor = c(
+    "Aberdeen Standard Physical Precious Metals Basket Shares ETF",
+    "GLTR",
+    "ETF de metales preciosos físicos",
+    "Oro, plata, paladio, platino físicos",
+    "$1,850 millones USD",
+    "0.60% anual",
+    "0.21 (baja correlación)",
+    "$109.20 - $171.85",
+    "+20.3%",
+    "+38.5% (hasta octubre)"
+  )
+)
+
+# Crear tabla simple y profesional
+tabla_simple <- ficha_tecnica %>%
+  kbl(
+    format = "html",
+    col.names = c("MÉTRICA", "VALOR"),
+    align = c("l", "l"),
+    caption = "<center><b>FICHA TÉCNICA DEL ETF GLTR</b></center>"
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 14
+  ) %>%
+  row_spec(
+    0,
+    bold = TRUE,
+    color = "white",
+    background = "#1E3A8A",
+    align = "center"
+  ) %>%
+  column_spec(
+    1,
+    bold = TRUE,
+    background = "#EFF6FF",
+    width = "30%"
+  ) %>%
+  column_spec(
+    2,
+    background = "#F8FAFC",
+    width = "70%"
+  ) %>%
+  # Añadir bordes laterales
+  column_spec(
+    1:2,
+    border_right = "1px solid #E5E7EB",
+    border_left = "1px solid #E5E7EB"
+  )
+
+# Mostrar la tabla
+tabla_simple
+```
+
+```{r serie}
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(zoo)
+
+# Descargar datos
+GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2010-01-01")
+
+# Preparar datos
+GLTR_df <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(Cl(GLTR))
+)
+
+# Gráfico interactivo
+plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
+        line = list(color = "#1E3A8A", width = 2),
+        hoverinfo = "text",
+        text = ~paste("Fecha:", Fecha, "<br>Precio: $", round(Precio, 2))) %>%
+  layout(
+    title = "<b>ETF GLTR - Serie Histórica (2010-2025)</b>",
+    xaxis = list(title = "Fecha", rangeslider = list(visible = TRUE)),
+    yaxis = list(title = "Precio (USD)", tickformat = "$,.2f"),
+    hovermode = "x unified"
+  )
+```
+
+```{r 2020}
+library(plotly)
+library(quantmod)
+library(dplyr)
+
+# Descargar datos si no los tienes
+GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2020-01-01", to = "2020-12-31")
+
+# Preparar datos para 2020
+datos_2020 <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(Cl(GLTR))
+)
+
+# Crear gráfico interactivo
+plot_ly(datos_2020, x = ~Fecha) %>%
+  add_trace(y = ~Precio, type = 'scatter', mode = 'lines',
+            line = list(color = '#1E3A8A', width = 3),
+            name = 'Precio GLTR',
+            hoverinfo = 'text',
+            text = ~paste('<b>Fecha:</b>', Fecha, '<br><b>Precio:</b> $', round(Precio, 2))) %>%
+  
+  # Eventos clave
+  add_trace(x = as.Date('2020-03-16'), y = ~Precio[Fecha == as.Date('2020-03-16')],
+            type = 'scatter', mode = 'markers',
+            marker = list(color = '#DC2626', size = 12, symbol = 'circle'),
+            name = 'Colapso mercados',
+            hoverinfo = 'text',
+            text = '<b>16 Mar 2020:</b> Colapso de mercados globales<br>Fed anuncia estímulos de emergencia') %>%
+  
+  add_trace(x = as.Date('2020-08-07'), y = ~Precio[Fecha == as.Date('2020-08-07')],
+            type = 'scatter', mode = 'markers',
+            marker = list(color = '#059669', size = 12, symbol = 'diamond'),
+            name = 'Récord oro',
+            hoverinfo = 'text',
+            text = '<b>07 Ago 2020:</b> Oro supera $2,000/oz<br>Rally histórico de metales preciosos') %>%
+  
+  layout(
+    title = list(
+      text = '<b>Comportamiento del ETF GLTR durante la Pandemia COVID-19 (2020)</b>',
+      font = list(size = 20, color = '#1E3A8A')
+    ),
+    xaxis = list(
+      title = '<b>Fecha</b>',
+      type = 'date',
+      tickformat = '%b %Y',
+      rangeslider = list(visible = TRUE)
+    ),
+    yaxis = list(
+      title = '<b>Precio (USD)</b>',
+      tickformat = '$.2f',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    margin = list(t = 80, b = 80, l = 80, r = 40)
+  )
+```
+
+```{r 2023vs2024}
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(tidyr)
+
+# Descargar datos para 2023 y 2024
+GLTR_2023 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01", to = "2023-12-31")
+GLTR_2024 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2024-01-01", to = "2024-12-31")
+
+# Preparar datos para 2023
+datos_2023 <- data.frame(
+  Fecha = index(GLTR_2023),
+  Precio = as.numeric(Cl(GLTR_2023))
+) %>%
+  mutate(
+    Dia = seq_along(Fecha),
+    Año = "2023",
+    Precio_Norm = Precio / first(Precio) * 100
+  )
+
+# Preparar datos para 2024
+datos_2024 <- data.frame(
+  Fecha = index(GLTR_2024),
+  Precio = as.numeric(Cl(GLTR_2024))
+) %>%
+  mutate(
+    Dia = seq_along(Fecha),
+    Año = "2024",
+    Precio_Norm = Precio / first(Precio) * 100
+  )
+
+# Combinar datos
+datos_comparativos <- bind_rows(datos_2023, datos_2024)
+
+# Crear gráfico comparativo interactivo
+plot_ly(datos_comparativos, x = ~Dia) %>%
+  # Línea para 2023
+  add_trace(data = subset(datos_comparativos, Año == "2023"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = '#DC2626', width = 3),
+            name = '2023',
+            hoverinfo = 'text',
+            text = ~paste('<b>2023 - Día', Dia, '</b><br>',
+                          'Fecha:', Fecha, '<br>',
+                          'Precio: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1))) %>%
+  
+  # Línea para 2024
+  add_trace(data = subset(datos_comparativos, Año == "2024"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = '#059669', width = 3),
+            name = '2024',
+            hoverinfo = 'text',
+            text = ~paste('<b>2024 - Día', Dia, '</b><br>',
+                          'Fecha:', Fecha, '<br>',
+                          'Precio: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1))) %>%
+  
+  # Línea de referencia en 100
+  add_trace(x = c(0, max(datos_comparativos$Dia)),
+            y = c(100, 100),
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = 'gray', width = 1, dash = 'dash'),
+            name = 'Línea base (100)',
+            showlegend = FALSE) %>%
+  
+  # Layout
+  layout(
+    title = list(
+      text = '<b>Comparativo de Desempeño: ETF GLTR 2023 vs 2024</b>',
+      font = list(size = 22, color = '#1E3A8A')
+    ),
+    xaxis = list(
+      title = '<b>Días de negociación en el año</b>',
+      gridcolor = 'lightgray'
+    ),
+    yaxis = list(
+      title = '<b>Precio Normalizado (Inicio = 100)</b>',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      y = -0.15,
+      xanchor = 'center'
+    ),
+    margin = list(t = 80, b = 100, l = 80, r = 40)
+  )
+```
+
+```{r desempeño por año}
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(lubridate)
+
+# Descargar datos desde 2023
+GLTR_all <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01")
+
+# Función para preparar datos por año
+preparar_datos_año <- function(año, datos) {
+  # Filtrar por año
+  datos_año <- datos[year(index(datos)) == año]
+  
+  if (nrow(datos_año) == 0) return(NULL)
+  
+  # Crear dataframe
+  df <- data.frame(
+    Fecha = index(datos_año),
+    Precio = as.numeric(Cl(datos_año))
+  )
+  
+  # Calcular día del año y precio normalizado
+  df <- df %>%
+    mutate(
+      Dia_del_año = row_number(),
+      Año = as.character(año),
+      Precio_Norm = Precio / first(Precio) * 100,
+      Retorno = (Precio / first(Precio) - 1) * 100
+    )
+  
+  return(df)
+}
+
+# Preparar datos para cada año
+datos_2023 <- preparar_datos_año(2023, GLTR_all)
+datos_2024 <- preparar_datos_año(2024, GLTR_all)
+datos_2025 <- preparar_datos_año(2025, GLTR_all)
+
+# Combinar todos los datos
+datos_todos <- bind_rows(datos_2023, datos_2024, datos_2025)
+
+# Crear gráfico interactivo
+plot_ly(datos_todos, x = ~Dia_del_año) %>%
+  
+  # Año 2023
+  add_trace(data = subset(datos_todos, Año == "2023"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#DC2626', width = 2.5),
+            marker = list(size = 6, color = '#DC2626'),
+            name = '2023',
+            hoverinfo = 'text',
+            text = ~paste('<b>2023 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Año 2024
+  add_trace(data = subset(datos_todos, Año == "2024"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#059669', width = 2.5),
+            marker = list(size = 6, color = '#059669'),
+            name = '2024',
+            hoverinfo = 'text',
+            text = ~paste('<b>2024 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Año 2025 (hasta la fecha disponible)
+  add_trace(data = subset(datos_todos, Año == "2025"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#1E3A8A', width = 2.5),
+            marker = list(size = 6, color = '#1E3A8A'),
+            name = '2025 (hasta fecha)',
+            hoverinfo = 'text',
+            text = ~paste('<b>2025 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Línea de referencia en 100
+  add_trace(x = c(0, max(datos_todos$Dia_del_año, na.rm = TRUE)),
+            y = c(100, 100),
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = 'gray', width = 1, dash = 'dash'),
+            name = 'Línea base (100)',
+            showlegend = FALSE,
+            hoverinfo = 'skip') %>%
+  
+  # Layout
+  layout(
+    title = list(
+      text = '<b>Comparativo de Desempeño Anual - ETF GLTR</b><br><span style="font-size:14px">Cada año normalizado a 100 en su primer día de negociación</span>',
+      font = list(size = 22, color = '#1E3A8A')
+    ),
+    xaxis = list(
+      title = '<b>Día del año de negociación</b>',
+      gridcolor = 'lightgray'
+    ),
+    yaxis = list(
+      title = '<b>Índice Normalizado (Inicio = 100)</b>',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      y = -0.15,
+      xanchor = 'center',
+      bgcolor = 'rgba(255,255,255,0.8)'
+    ),
+    margin = list(t = 100, b = 100, l = 80, r = 40),
+    
+    # Anotaciones con rendimiento final de cada año
+    annotations = list(
+      list(
+        x = max(datos_2023$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2023$Precio_Norm, 1),
+        text = paste('2023:', round(tail(datos_2023$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#DC2626'),
+        xanchor = 'left',
+        xshift = 10
+      ),
+      list(
+        x = max(datos_2024$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2024$Precio_Norm, 1),
+        text = paste('2024:', round(tail(datos_2024$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#059669'),
+        xanchor = 'left',
+        xshift = 10
+      ),
+      list(
+        x = max(datos_2025$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2025$Precio_Norm, 1),
+        text = paste('2025:', round(tail(datos_2025$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#1E3A8A'),
+        xanchor = 'left',
+        xshift = 10
+      )
+    )
+  )
+```
+
+
+```{r comparativo indice}
+# Descargar S&P 500 para mismo período
+sp500 <- getSymbols("^GSPC", src = "yahoo", 
+                    from = "2022-10-31", to = "2025-10-31", 
+                    auto.assign = FALSE)
+sp500_close <- Cl(sp500)
+
+# Normalizar ambas series
+fechas_comunes <- intersect(index(GLTR_close_full), index(sp500_close))
+gltr_alin <- as.numeric(GLTR_close_full[fechas_comunes])
+sp500_alin <- as.numeric(sp500_close[fechas_comunes])
+
+gltr_norm <- gltr_alin / gltr_alin[1] * 100
+sp500_norm <- sp500_alin / sp500_alin[1] * 100
+
+# Crear dataframe comparativo
+comparison_index <- data.frame(
+  fecha = fechas_comunes,
+  GLTR = gltr_norm,
+  SP500 = sp500_norm
+)
+
+# Gráfico comparativo
+index_comparison <- ggplot(comparison_index, aes(x = fecha)) +
+  geom_line(aes(y = GLTR, color = "GLTR"), size = 1.2, alpha = 0.9) +
+  geom_line(aes(y = SP500, color = "S&P 500"), size = 1.2, alpha = 0.9) +
+  geom_ribbon(aes(ymin = pmin(GLTR, SP500), ymax = pmax(GLTR, SP500)), 
+              fill = "grey80", alpha = 0.3) +
+  scale_color_manual(values = c("GLTR" = color_palette[4], "S&P 500" = color_palette[5])) +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  geom_hline(yintercept = 100, linetype = "dashed", color = "grey50", alpha = 0.6) +
+  labs(
+    title = "Comparativo de Desempeño: GLTR vs. S&P 500 (Oct 2022 - Oct 2025)",
+    subtitle = "Ambas series normalizadas a 100 en octubre 2022",
+    x = "Fecha",
+    y = "Retorno Acumulado (%)",
+    color = "Índice",
+    caption = "Beta estimado: ~0.2 | GLTR muestra menor correlación y rol de diversificador de portafolio"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14, color = color_palette[1]),
+    plot.subtitle = element_text(size = 11, color = color_palette[3]),
+    legend.position = "bottom",
+    legend.title = element_text(face = "bold"),
+    panel.grid.major = element_line(color = "grey92"),
+    panel.grid.minor = element_line(color = "grey96")
+  ) +
+  annotate("text", x = as.Date("2023-06-01"), y = 180, 
+           label = "GLTR: +85.3%", color = color_palette[4], fontface = "bold") +
+  annotate("text", x = as.Date("2023-06-01"), y = 145, 
+           label = "S&P 500: +52.7%", color = color_palette[5], fontface = "bold")
+
+print(index_comparison)
+```
