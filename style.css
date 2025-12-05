@@ -822,3 +822,97 @@ div.figure img,
   background: rgba(231, 76, 60, 0.1);
   color: var(--ishares-red);
 }
+
+/* ==========================================================================
+   SISTEMA DE MOSTRAR/OCULTAR CÓDIGO - ESTILOS CRÍTICOS
+   ========================================================================== */
+
+/* Clase para ocultar bloques de código */
+.r-code-block.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Asegurar que los bloques de código sean seleccionables */
+div.sourceCode.r-code-block,
+pre.r-code-block,
+pre[class*="sourceCode"].r-code-block {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  display: block !important;
+  position: relative !important;
+}
+
+/* Cuando el código está visible */
+.r-code-block:not(.hidden) {
+  display: block !important;
+  opacity: 1 !important;
+  animation: codeReveal 0.5s ease-out !important;
+}
+
+/* Animación para mostrar código */
+@keyframes codeReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 2000px;
+  }
+}
+
+#floating-code-btn {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  z-index: 99999 !important;
+  background: linear-gradient(135deg, #001A5C 0%, #0056B3 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px !important;
+  padding: 15px 25px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  box-shadow: 0 6px 20px rgba(0, 26, 92, 0.3) !important;
+  font-family: 'Inter', sans-serif !important;
+  letter-spacing: 0.3px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#floating-code-btn:hover {
+  transform: translateY(-4px) scale(1.05) !important;
+  box-shadow: 0 10px 30px rgba(0, 26, 92, 0.4) !important;
+}
+
+/* Clase para ocultar código - MÁXIMA PRIORIDAD */
+.code-hidden {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Contenedores de código que deben ser visibles cuando se muestran */
+.code-visible {
+  display: block !important;
+  opacity: 1 !important;
+  animation: fadeIn 0.3s ease !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
