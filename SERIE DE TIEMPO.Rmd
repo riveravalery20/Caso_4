@@ -1,6 +1,6 @@
 ---
-title: ""
-subtitle:
+title: "El valor de los metales preciosos a lo largo del tiempo: Analisis temporal univariado"
+subtitle: "Sofia Potosí-Valery Rivera-Melany Enriquez-Santiago Posada"
 output:
   html_document:
     theme: default
@@ -12,81 +12,865 @@ output:
     df_print: paged
     self_contained: true
 ---
-
-<style>
-/* Estilo para el botón */
-#global-code-toggle {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 10000;
-  background: linear-gradient(135deg, #430089 0%, #6b21b6 100%);
-  color: white;
-  border: none;
-  padding: 14px 26px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 15px;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(107,33,168,0.35);
-  transition: all 0.3s ease;
-  letter-spacing: 0.6px;
-  font-family: "Times New Roman", serif;
-}
-
-#global-code-toggle:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(107,33,168,0.45);
-}
-
-/* Estilo para los bloques de código */
-.code-content {
-  transition: all 0.4s ease;
-  overflow: hidden;
-}
-
-.code-content.hidden {
-  max-height: 0;
-  opacity: 0;
-  padding: 0 18px;
-}
-
-.code-content.visible {
-  max-height: 5000px;
-  opacity: 1;
-  padding: 18px;
-}
-</style>
-
-<!-- Botón -->
-<button id="global-code-toggle">👁 Ocultar código</button>
-
+```{html}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const btn = document.getElementById("global-code-toggle");
-  let visible = true;
-
-  function toggleAllCode() {
-    const codeBlocks = document.querySelectorAll(".code-content");
-
-    codeBlocks.forEach(block => {
-      if (visible) {
-        block.classList.remove("visible");
-        block.classList.add("hidden");
-      } else {
-        block.classList.remove("hidden");
-        block.classList.add("visible");
-      }
-    });
-
-    visible = !visible;
-    btn.textContent = visible ? "👁 Ocultar código" : "📄 Ver código";
+// Función mejorada para mostrar/ocultar TODO el código R
+function toggleAllCode() {
+  // Seleccionar TODOS los contenedores de código que R Markdown genera
+  var codeContainers = document.querySelectorAll('pre:not(.r-output), div.sourceCode pre');
+  var button = document.querySelector('.floating-code-btn');
+  
+  if (!button || codeContainers.length === 0) {
+    console.warn('No se encontraron bloques de código o el botón');
+    return;
   }
+  
+  var allHidden = true;
+  
+  // Verificar si algún código está visible
+  codeContainers.forEach(function(container) {
+    if (container.style.display !== 'none') {
+      allHidden = false;
+    }
+  });
+  
+  // Mostrar u ocultar todo el código
+  codeContainers.forEach(function(container) {
+    if (allHidden) {
+      container.style.display = 'block';
+      container.classList.add('code-visible');
+      // Animación suave
+      container.style.opacity = '0';
+      setTimeout(function() {
+        container.style.transition = 'opacity 0.3s ease';
+        container.style.opacity = '1';
+      }, 10);
+    } else {
+      container.style.transition = 'opacity 0.3s ease';
+      container.style.opacity = '0';
+      setTimeout(function() {
+        container.style.display = 'none';
+        container.classList.remove('code-visible');
+      }, 300);
+    }
+  });
+  
+  // Cambiar texto del botón
+  if (allHidden) {
+    button.innerHTML = '📝 Ocultar Todo el Código R';
+  } else {
+    button.innerHTML = '📝 Mostrar Todo el Código R';
+  }
+}
 
-  btn.addEventListener("click", toggleAllCode);
+// Ocultar código al cargar la página - MEJORADO
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var codeContainers = document.querySelectorAll('pre:not(.r-output), div.sourceCode pre');
+    console.log('Bloques de código encontrados:', codeContainers.length);
+    
+    codeContainers.forEach(function(container) {
+      container.style.display = 'none';
+      // Agregar clase para identificación
+      container.classList.add('r-code-block');
+    });
+    
+    // Verificar que el botón existe
+    var button = document.querySelector('.floating-code-btn');
+    if (button) {
+      console.log('Botón de toggle encontrado y funcional');
+    } else {
+      console.error('¡Botón no encontrado!');
+    }
+  }, 500); // Aumentado el delay para asegurar que todo esté cargado
 });
 </script>
 
+```
+
+<style type="text/css">
+/* ========== PALETA DE COLORES ELEGANTE ========== */
+:root {
+  --primary-color: #1a365d;
+  --secondary-color: #2d3748;
+  --accent-color: #2b6cb0;
+  --accent-light: #4299e1;
+  --text-color: #2d3748;
+  --light-bg: #f7fafc;
+  --border-color: #e2e8f0;
+  --shadow-light: rgba(0,0,0,0.06);
+  --sidebar-width: 300px;
+  --cyan-accent: #4FD1C5;
+  --purple-accent: #805AD5;
+}
+
+/* ========== RESET COMPLETO ========== */
+* {
+  box-sizing: border-box !important;
+}
+
+/* ========== TIPOGRAFÍA ELEGANTE ========== */
+html, body {
+  background: #ffffff !important;
+  color: var(--text-color) !important;
+  font-family: "Times New Roman", "Times", serif !important;
+  line-height: 1.8 !important;
+  overflow-x: hidden !important;
+  font-size: 16px !important;
+}
+
+/* ========== ESTRUCTURA PRINCIPAL CON SIDEBAR ========== */
+.main-container {
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: 20px !important;
+  display: flex !important;
+  gap: 30px !important;
+  align-items: flex-start !important;
+  position: relative !important;
+}
+
+/* ========== TOC IZQUIERDO - STICKY Y SCROLLABLE ========== */
+#TOC {
+  background: white !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 30px 0 !important;
+  box-shadow: 0 4px 20px var(--shadow-light) !important;
+  font-family: "Times New Roman", serif !important;
+  width: var(--sidebar-width) !important;
+  min-width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
+  position: sticky !important;
+  top: 20px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  max-height: calc(100vh - 40px) !important;
+  align-self: flex-start !important;
+}
+
+/* Scrollbar personalizado para TOC */
+#TOC::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+#TOC::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 4px !important;
+}
+
+#TOC::-webkit-scrollbar-thumb {
+  background: var(--accent-color) !important;
+  border-radius: 4px !important;
+}
+
+#TOC::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color) !important;
+}
+
+/* Header del TOC */
+#TOC::before {
+  content: "📋 CONTENIDO" !important;
+  display: block !important;
+  font-family: "Times New Roman", serif !important;
+  font-size: 1.2em !important;
+  font-weight: bold !important;
+  color: var(--primary-color) !important;
+  border-bottom: 3px double var(--accent-color) !important;
+  padding: 0 25px 20px 25px !important;
+  margin-bottom: 15px !important;
+  text-align: center !important;
+  position: sticky !important;
+  top: 0 !important;
+  background: white !important;
+  z-index: 10 !important;
+  letter-spacing: 1px !important;
+}
+
+/* Listas del TOC */
+#TOC ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#TOC li {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#TOC a {
+  color: var(--text-color) !important;
+  text-decoration: none !important;
+  font-size: 0.95em !important;
+  display: block !important;
+  padding: 10px 20px !important;
+  border-left: 4px solid transparent !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+}
+
+#TOC a:hover {
+  color: var(--accent-color) !important;
+  background: linear-gradient(90deg, rgba(43, 108, 176, 0.05) 0%, transparent 100%) !important;
+  border-left: 4px solid var(--accent-color) !important;
+  padding-left: 25px !important;
+}
+
+#TOC a.active {
+  color: var(--accent-color) !important;
+  background: linear-gradient(90deg, rgba(43, 108, 176, 0.1) 0%, transparent 100%) !important;
+  border-left: 4px solid var(--accent-color) !important;
+  font-weight: 600 !important;
+  padding-left: 25px !important;
+}
+
+/* Subniveles */
+#TOC ul ul a {
+  font-size: 0.9em !important;
+  color: #666666 !important;
+  padding: 8px 20px 8px 40px !important;
+  border-left: 2px solid var(--border-color) !important;
+}
+
+#TOC ul ul a:hover {
+  border-left: 2px solid var(--accent-light) !important;
+}
+
+/* ========== TOC DERECHO - INDICADOR DE SECCIÓN ACTUAL ========== */
+#right-toc {
+  position: fixed !important;
+  right: 20px !important;
+  top: 20px !important;
+  width: 250px !important;
+  max-height: calc(100vh - 40px) !important;
+  background: white !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 20px !important;
+  box-shadow: 0 4px 20px var(--shadow-light) !important;
+  overflow-y: auto !important;
+  z-index: 999 !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+#right-toc::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+#right-toc::-webkit-scrollbar-thumb {
+  background: var(--accent-color) !important;
+  border-radius: 3px !important;
+}
+
+#right-toc-title {
+  font-size: 0.85em !important;
+  font-weight: bold !important;
+  color: var(--primary-color) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  margin-bottom: 15px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 2px solid var(--accent-color) !important;
+  text-align: center !important;
+}
+
+#right-toc-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+#right-toc-list li {
+  margin: 6px 0 !important;
+}
+
+#right-toc-list a {
+  color: var(--text-color) !important;
+  text-decoration: none !important;
+  font-size: 0.9em !important;
+  display: block !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  border-left: 3px solid transparent !important;
+}
+
+#right-toc-list a:hover {
+  color: var(--accent-color) !important;
+  background: rgba(43, 108, 176, 0.05) !important;
+  border-left: 3px solid var(--accent-color) !important;
+}
+
+#right-toc-list a.active-section {
+  color: white !important;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%) !important;
+  font-weight: 600 !important;
+  border-left: 3px solid var(--primary-color) !important;
+  box-shadow: 0 2px 8px rgba(43, 108, 176, 0.3) !important;
+}
+
+/* ========== CONTENIDO CENTRAL ========== */
+.toc-content {
+  flex: 1 !important;
+  margin: 0 !important;
+  padding: 40px !important;
+  background: white !important;
+  box-shadow: 0 0 30px var(--shadow-light) !important;
+  border-radius: 12px !important;
+  min-width: 0 !important;
+  margin-right: 280px !important;
+}
+
+/* ========== SECCIONES EN CUADROS ELEGANTES ========== */
+.section.level1 {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  padding: 40px !important;
+  margin-bottom: 40px !important;
+  box-shadow: 0 4px 15px var(--shadow-light) !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+}
+
+.section.level1:hover {
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-2px) !important;
+}
+
+.section.level1::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 4px !important;
+  background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-light) 100%) !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+/* ========== TIPOGRAFÍA ELEGANTE ========== */
+h1 {
+  font-family: "Times New Roman", serif !important;
+  color: var(--primary-color) !important;
+  font-size: 2.8em !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  border-bottom: 3px double var(--accent-color) !important;
+  padding-bottom: 25px !important;
+  margin-bottom: 40px !important;
+  letter-spacing: 0.5px !important;
+}
+
+h2 {
+  font-family: "Times New Roman", serif !important;
+  color: var(--primary-color) !important;
+  font-size: 2em !important;
+  font-weight: 700 !important;
+  margin-top: 40px !important;
+  margin-bottom: 25px !important;
+  padding: 15px 20px !important;
+  padding-left: 25px !important;
+  border-left: 5px solid var(--accent-color) !important;
+  background: rgba(43, 108, 176, 0.02) !important;
+  border-radius: 6px !important;
+}
+
+h3 {
+  font-family: "Times New Roman", serif !important;
+  color: var(--secondary-color) !important;
+  font-size: 1.5em !important;
+  font-weight: 600 !important;
+  margin-top: 30px !important;
+  margin-bottom: 18px !important;
+  padding-left: 12px !important;
+  border-left: 4px solid var(--accent-light) !important;
+}
+
+h4 {
+  font-family: "Times New Roman", serif !important;
+  color: var(--text-color) !important;
+  font-size: 1.25em !important;
+  font-weight: 600 !important;
+  margin-top: 25px !important;
+  margin-bottom: 15px !important;
+}
+
+/* ========== PÁRRAFOS Y TEXTO ========== */
+p {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  hyphens: auto !important;
+  margin-bottom: 18px !important;
+  color: var(--text-color) !important;
+  line-height: 1.85 !important;
+}
+
+strong {
+  color: var(--accent-color) !important;
+  font-weight: 600 !important;
+}
+
+em {
+  color: var(--secondary-color) !important;
+  font-style: italic !important;
+}
+
+/* ========== BUTTONS Y CÓDIGO ========== */
+#global-code-toggle {
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  z-index: 10000 !important;
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 14px 28px !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 0.9em !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 15px rgba(43, 108, 176, 0.4) !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+#global-code-toggle:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(43, 108, 176, 0.5) !important;
+}
+
+#global-code-toggle:active {
+  transform: translateY(-1px) !important;
+}
+
+/* ========== CHUNKS DE CÓDIGO ========== */
+.code-chunk {
+  margin: 25px 0 !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background: white !important;
+  box-shadow: 0 2px 8px var(--shadow-light) !important;
+}
+
+.code-header {
+  background: linear-gradient(90deg, rgba(43, 108, 176, 0.08) 0%, rgba(66, 153, 225, 0.05) 100%) !important;
+  color: var(--secondary-color) !important;
+  padding: 12px 20px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  transition: all 0.2s ease !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+.code-header:hover {
+  background: linear-gradient(90deg, rgba(43, 108, 176, 0.12) 0%, rgba(66, 153, 225, 0.08) 100%) !important;
+}
+
+.chunk-title {
+  font-weight: 600 !important;
+  font-size: 0.9em !important;
+  color: var(--primary-color) !important;
+}
+
+.toggle-icon {
+  font-size: 1em !important;
+  transition: transform 0.2s ease !important;
+  color: var(--accent-color) !important;
+  font-weight: bold !important;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(180deg) !important;
+}
+
+.code-content {
+  background: #f5f7fa !important;
+  transition: all 0.3s ease !important;
+  overflow: hidden !important;
+}
+
+.code-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0 !important;
+}
+
+.code-content.expanded {
+  max-height: 5000px !important;
+  opacity: 1 !important;
+}
+
+/* ========== CÓDIGO Y SINTAXIS ========== */
+pre {
+  background: #1a202c !important;
+  border-left: 4px solid var(--accent-color) !important;
+  padding: 18px !important;
+  border-radius: 0 6px 6px 0 !important;
+  font-family: 'Monaco', 'Courier New', monospace !important;
+  color: #e2e8f0 !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  font-size: 0.85em !important;
+}
+
+code {
+  background: rgba(43, 108, 176, 0.08) !important;
+  color: var(--accent-color) !important;
+  padding: 3px 8px !important;
+  font-family: 'Monaco', monospace !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--border-color) !important;
+  font-size: 0.9em !important;
+}
+
+pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  color: #e2e8f0 !important;
+  border: none !important;
+}
+
+/* ========== TABLAS ELEGANTES ========== */
+table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 30px 0 !important;
+  background: white !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 2px 10px var(--shadow-light) !important;
+  font-family: "Times New Roman", serif !important;
+  font-size: 0.95em !important;
+}
+
+thead {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+}
+
+th {
+  color: white !important;
+  padding: 16px 20px !important;
+  text-align: left !important;
+  font-weight: 700 !important;
+  font-size: 0.95em !important;
+  border-bottom: 2px solid var(--accent-color) !important;
+  letter-spacing: 0.3px !important;
+}
+
+td {
+  padding: 14px 20px !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  font-size: 0.95em !important;
+}
+
+tbody tr:hover {
+  background: rgba(43, 108, 176, 0.03) !important;
+  transition: all 0.2s ease !important;
+}
+
+tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* ========== GRÁFICOS ========== */
+.figure {
+  text-align: center !important;
+  margin: 35px 0 !important;
+  padding: 25px !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 10px var(--shadow-light) !important;
+}
+
+.figure figcaption {
+  font-family: "Times New Roman", serif !important;
+  font-style: italic !important;
+  color: var(--secondary-color) !important;
+  margin-top: 15px !important;
+  font-size: 0.95em !important;
+}
+
+/* ========== ALERTS Y CALLOUTS ========== */
+.alert {
+  padding: 18px 22px !important;
+  margin: 25px 0 !important;
+  border-radius: 8px !important;
+  border-left: 5px solid !important;
+  font-size: 0.95em !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+.alert-info {
+  background: rgba(66, 153, 225, 0.08) !important;
+  border-left-color: var(--accent-color) !important;
+  color: var(--text-color) !important;
+}
+
+.alert-warning {
+  background: rgba(237, 137, 54, 0.08) !important;
+  border-left-color: #ED8936 !important;
+  color: var(--text-color) !important;
+}
+
+.alert-success {
+  background: rgba(72, 187, 120, 0.08) !important;
+  border-left-color: #48BB78 !important;
+  color: var(--text-color) !important;
+}
+
+/* ========== BLOCKQUOTES ========== */
+blockquote {
+  border-left: 5px solid var(--accent-color) !important;
+  padding: 16px 22px !important;
+  margin: 25px 0 !important;
+  background: rgba(43, 108, 176, 0.03) !important;
+  border-radius: 0 8px 8px 0 !important;
+  color: var(--secondary-color) !important;
+  font-style: italic !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+/* ========== LISTAS ========== */
+ul, ol {
+  padding-left: 30px !important;
+  margin: 18px 0 !important;
+}
+
+li {
+  margin: 10px 0 !important;
+  color: var(--text-color) !important;
+  line-height: 1.8 !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+li::marker {
+  color: var(--accent-color) !important;
+  font-weight: 600 !important;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1600px) {
+  .toc-content {
+    margin-right: 0 !important;
+  }
+  
+  #right-toc {
+    position: relative !important;
+    width: 100% !important;
+    right: 0 !important;
+    max-height: none !important;
+    margin-top: 30px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-container {
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  
+  #TOC {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+    top: 0 !important;
+  }
+  
+  .toc-content {
+    padding: 30px !important;
+    margin-right: 0 !important;
+  }
+  
+  .section.level1 {
+    padding: 30px !important;
+  }
+}
+
+/* ========== SMOOTH SCROLL ========== */
+html {
+  scroll-behavior: smooth !important;
+}
+
+/* ========== FOOTER ========== */
+.footer {
+  text-align: center !important;
+  padding: 40px !important;
+  margin-top: 50px !important;
+  background: linear-gradient(135deg, var(--light-bg) 0%, #f0f4f8 100%) !important;
+  border-top: 2px solid var(--accent-color) !important;
+  color: var(--secondary-color) !important;
+  border-radius: 12px !important;
+  font-size: 0.95em !important;
+  font-family: "Times New Roman", serif !important;
+}
+
+.footer strong {
+  color: var(--primary-color) !important;
+  font-weight: 700 !important;
+}
+</style>
+
+<!-- Mini TOC Derecho -->
+<div id="right-toc">
+  <div id="right-toc-title">Sección Actual</div>
+  <ul id="right-toc-list"></ul>
+</div>
+
+  // ========== TOC DERECHO - INDICADOR DE SECCIÓN ==========
+  function getCurrentSection() {
+    const sections = document.querySelectorAll('.section.level1');
+    let currentSection = null;
+    let minDistance = Infinity;
+    
+    sections.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      
+      if (rect.top <= 200 && rect.bottom > 0) {
+        const distance = Math.abs(rect.top);
+        if (distance < minDistance) {
+          minDistance = distance;
+          currentSection = section;
+        }
+      }
+    });
+    
+    if (!currentSection && sections.length > 0) {
+      for (let section of sections) {
+        const rect = section.getBoundingClientRect();
+        if (rect.bottom > 0) {
+          currentSection = section;
+          break;
+        }
+      }
+    }
+    
+    return currentSection;
+  }
+  
+  function updateRightToc() {
+    const rightTocList = document.getElementById('right-toc-list');
+    if (!rightTocList) return;
+    
+    const activeSection = getCurrentSection();
+    
+    if (!activeSection) {
+      rightTocList.innerHTML = '<li style="color: var(--secondary-color); font-style: italic; padding: 8px 12px; font-size: 0.9em;">Desplázate para ver contenido</li>';
+      return;
+    }
+    
+    const headings = activeSection.querySelectorAll('h2, h3');
+    rightTocList.innerHTML = '';
+    
+    if (headings.length === 0) {
+      rightTocList.innerHTML = '<li style="color: var(--secondary-color); font-style: italic; padding: 8px 12px; font-size: 0.9em;">Sin subtemas</li>';
+      return;
+    }
+    
+    headings.forEach((heading, index) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      
+      if (!heading.id) {
+        heading.id = 'heading-' + index + '-' + Date.now();
+      }
+      
+      a.href = '#' + heading.id;
+      
+      let textContent = heading.textContent || heading.innerText;
+      textContent = textContent.replace(/^\d+(\.\d+)*\s*/, '').trim();
+      
+      a.textContent = textContent;
+      
+      if (heading.tagName === 'H3') {
+        a.style.paddingLeft = '24px';
+        a.style.fontSize = '0.85em';
+      }
+      
+      li.appendChild(a);
+      rightTocList.appendChild(li);
+      
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetElement = document.getElementById(heading.id);
+        if (targetElement) {
+          const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 100;
+          window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+          setTimeout(() => highlightActiveRightToc(), 500);
+        }
+      });
+    });
+    
+    highlightActiveRightToc();
+  }
+  
+  function highlightActiveRightToc() {
+    const activeSection = getCurrentSection();
+    if (!activeSection) return;
+    
+    const headings = Array.from(activeSection.querySelectorAll('h2, h3'));
+    const rightTocLinks = document.querySelectorAll('#right-toc-list a');
+    
+    if (headings.length === 0 || rightTocLinks.length === 0) return;
+    
+    let activeIndex = -1;
+    let minDistance = Infinity;
+    
+    headings.forEach((heading, index) => {
+      const rect = heading.getBoundingClientRect();
+      const distance = Math.abs(rect.top);
+      
+      if (rect.top <= 150 && distance < minDistance) {
+        minDistance = distance;
+        activeIndex = index;
+      }
+    });
+    
+    rightTocLinks.forEach((link, index) => {
+      if (index === activeIndex) {
+        link.classList.add('active-section');
+      } else {
+        link.classList.remove('active-section');
+      }
+    });
+  }
+  
+  // Event Listeners para scroll
+  let scrollTimeout;
+  let lastScrollTop = 0;
+  
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    if (Math.abs(scrollTop - lastScrollTop) > 10) {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(function() {
+        updateRightToc();
+        highlightActiveRightToc();
+        lastScrollTop = scrollTop;
+      }, 50);
+    }
+  }, { passive: true });
+  
+  setTimeout(function() {
+    updateRightToc();
+    highlightActiveRightToc();
+  }, 600);
+});
+</script>
 
 ```{r setup, include=FALSE, cache=FALSE}
 knitr::opts_chunk$set(
@@ -121,6 +905,7 @@ library(grid)
 library(RColorBrewer)
 library(dplyr)
 library(gt)
+library(xfun)
 ```
 
 ```{r theme-professional}
@@ -462,7 +1247,7 @@ La trayectoria completa de GLTR durante los 15 años de historia desde su creaci
 
 **Rally post-crisis y búsqueda de refugio (2010–2012)**
 GLTR se lanza en octubre de 2010 tras la crisis financiera de 2008–2009, cuando bancos centrales implementan flexibilización cuantitativa (QE) masiva para estabilizar mercados. La Reserva Federal inicia programas de compra de activos sin precedentes (QE1, QE2), el Banco Central Europeo y el Banco de Japón adoptan políticas ultra-expansivas, inyectando miles de millones de dólares en liquidez al sistema financiero.​
-En este contexto de expansión monetaria extrema, surge demanda masiva por metales como cobertura contra inflación futura y depreciación de monedas fiduciarias. Durante 2010–2012, GLTR sube de &#95–100 a ~&#115–120, reflejando el rally del oro de &#1.200 a 1.900+ USD/oz y la plata de &#18 a 48+ USD/oz en sus máximos de abril de 2011. La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y temor inflacionario implican apreciación de metales con pocas correcciones
+En este contexto de expansión monetaria extrema, surge demanda masiva por metales como cobertura contra inflación futura y depreciación de monedas fiduciarias. Durante 2010–2012, GLTR sube de $95–100 a ~$115–120, reflejando el rally del oro de $1.200 a 1.900+ USD/oz y la plata de $18 a 48+ USD/oz en sus máximos de abril de 2011. La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y temor inflacionario implican apreciación de metales con pocas correcciones
 ```{r 2010-2012}
 # Plata 2010–2012 (proxy: SLV)
 silver_10_12 <- getSymbols("SLV", src = "yahoo", auto.assign = FALSE,
@@ -493,7 +1278,7 @@ GLTR cae sostenidamente desde máximos de 2011–2012 a mínimos cercanos a $50�
 
 **Recuperación moderada bajo incertidumbre política (2016–2019)**
 Entre 2016 y 2019, la trayectoria de GLTR es menos volatil pero aún presenta repuntes puntuales asociados a episodios específicos de incertidumbre. El Brexit en junio de 2016, la elección de Donald Trump en noviembre de 2016, y tensiones comerciales crecientes entre Estados Unidos y China a partir de 2018 generan episodios de aversión al riesgo que benefician temporalmente al oro y otros metales refugio.
-Sin embargo, estos repuntes son tácticos más que estructurales. Las subidas de tasas realizadas por la Reserva Federal entre 2015 y 2018, junto con la fortaleza del dólar, limitan que GLTR consolide ganancias sostenidas. El precio del ETF oscila entre &#65–&#85 durante este período, formando un patrón de recuperación lenta pero volátil, donde cada crisis geopolítica genera un pico temporal seguido por corrección cuando la tensión se disipa.
+Sin embargo, estos repuntes son tácticos más que estructurales. Las subidas de tasas realizadas por la Reserva Federal entre 2015 y 2018, junto con la fortaleza del dólar, limitan que GLTR consolide ganancias sostenidas. El precio del ETF oscila entre $65–$85 durante este período, formando un patrón de recuperación lenta pero volátil, donde cada crisis geopolítica genera un pico temporal seguido por corrección cuando la tensión se disipa.
 
 **Pandemia COVID-19 y máximos históricos (2020)**
 El año 2020 es un punto de inflexión crítico. En marzo de 2020, la pandemia desencadena un pánico financiero global sin precedentes en la era moderna. Los mercados accionarios caen más de 30 % en semanas. El VIX (índice de volatilidad) alcanza máximos históricos. Los inversionistas huyen masivamente hacia activos considerados seguros.
@@ -569,14 +1354,14 @@ plot_ly(datos_2020, x = ~Fecha) %>%
     )
   )
 ```
-La serie muestra un colapso inicial agudo a mediados de marzo (cuando el precio cae a &#65–70) debido al pánico de liquidación indiscriminada. Sin embargo, a partir de finales de marzo/principios de abril, comienza un rally acelerado y sostenido, con GLTR alcanzando nuevos máximos de $#105+ hacia finales de año. Este comportamiento es textualmente consistente con la teoría: metales preciosos actúan como refugio en contextos de riesgo sistémico extremo, pero también se benefician de la expansión monetaria ultra-expansiva que caracteriza la respuesta de los bancos centrales.
+La serie muestra un colapso inicial agudo a mediados de marzo (cuando el precio cae a $65–70) debido al pánico de liquidación indiscriminada. Sin embargo, a partir de finales de marzo/principios de abril, comienza un rally acelerado y sostenido, con GLTR alcanzando nuevos máximos de $#105+ hacia finales de año. Este comportamiento es textualmente consistente con la teoría: metales preciosos actúan como refugio en contextos de riesgo sistémico extremo, pero también se benefician de la expansión monetaria ultra-expansiva que caracteriza la respuesta de los bancos centrales.
 
 **Normalización post-pandemia y corrección (2021)**
 En 2021, a medida que avanzan las campañas de vacunación y la actividad económica se recupera, el panorama vuelve a cambiar. Los inversionistas comienzan a rotar capital desde activos defensivos hacia activos cíclicos. Las expectativas de inflación permanecen elevadas, pero ya están incorporadas en los precios. Los bancos centrales comienzan a discutir públicamente la reducción de estímulos ("taper talk").
-El resultado es una corrección en GLTR de aproximadamente –10 % en el año. El oro retrocede desde máximos de &#2.000+ a niveles cercanos a &#1.700–1.800. GLTR refleja esta dinámica con una serie principalmente lateral con tendencia bajista moderada. Este comportamiento no es sorpresa: representa la normalización esperada tras un pico extremo de aversión al riesgo.
+El resultado es una corrección en GLTR de aproximadamente –10 % en el año. El oro retrocede desde máximos de $2.000+ a niveles cercanos a $1.700–1.800. GLTR refleja esta dinámica con una serie principalmente lateral con tendencia bajista moderada. Este comportamiento no es sorpresa: representa la normalización esperada tras un pico extremo de aversión al riesgo.
 
 **Guerra Rusia-Ucrania, inflación histórica y volatilidad sin precedentes (2022)**
-El 24 de febrero de 2022, Rusia invade Ucrania, desencadenando la mayor crisis geopolítica en Europa en 30 años. El shock de oferta en energía (petróleo sube de &#80 a &#120+ por barril, gas natural europeo se multiplica por 5) y alimentos (trigo, maíz, aceites vegetales) dispara inflación global a máximos de 40+ años: inflación estadounidense alcanza 9.1% en junio de 2022, inflación europea supera 10%.​
+El 24 de febrero de 2022, Rusia invade Ucrania, desencadenando la mayor crisis geopolítica en Europa en 30 años. El shock de oferta en energía (petróleo sube de $80 a $120+ por barril, gas natural europeo se multiplica por 5) y alimentos (trigo, maíz, aceites vegetales) dispara inflación global a máximos de 40+ años: inflación estadounidense alcanza 9.1% en junio de 2022, inflación europea supera 10%.​
 Simultáneamente, la Reserva Federal realiza subidas de tasas históricas bajo Jerome Powell: de prácticamente 0% en marzo de 2022 a más de 4% hacia finales de año, velocidad más rápida desde los años 1980s bajo Paul Volcker. El Banco Central Europeo, Banco de Inglaterra y otros bancos centrales siguen decisiones de endurecimiento similares, marcando el fin definitivo de la era de dinero barato iniciada en 2008.​
 GLTR experimenta choque de fuerzas contradictorias: riesgo geopolítico extremo e inflación acelerada favorecen oro como cobertura, pero tasas de interés reales muy altas (superiores a 2% en términos reales hacia finales de 2022) encarecen dramáticamente su costo de oportunidad. El resultado es volatilidad extrema con GLTR oscilando entre $70–95, cerrando prácticamente plano (~0% anual) sin dirección clara.
 ```{r Oro 2022}
@@ -600,7 +1385,7 @@ g_oro_2022 <- ggplot(gold_2022_df, aes(x = fecha, y = precio)) +
 g_oro_2022_int <- ggplotly(g_oro_2022)
 g_oro_2022_int
 ```
-La Figura 5 presenta la evolución del precio del oro durante 2022 (proxy GLD), donde se observa un repunte brusco tras la invasión de Ucrania en febrero-marzo, alcanzando niveles cercanos a &#190 por acción de GLD (equivalente a ~&#1.950/oz de oro spot), seguido de una corrección sostenida a medida que se intensifica el ciclo de subidas de tasas durante el segundo semestre. Este patrón respalda la idea de un año dominado por fuerzas contrapuestas: el oro reacciona inicialmente como activo refugio ante el choque geopolítico, pero pierde tracción cuando el endurecimiento monetario eleva de forma significativa las tasas reales, haciendo atractivos activos remunerados (bonos, depósitos) frente a oro que no genera rendimiento.
+La Figura 5 presenta la evolución del precio del oro durante 2022 (proxy GLD), donde se observa un repunte brusco tras la invasión de Ucrania en febrero-marzo, alcanzando niveles cercanos a $190 por acción de GLD (equivalente a ~$1.950/oz de oro spot), seguido de una corrección sostenida a medida que se intensifica el ciclo de subidas de tasas durante el segundo semestre. Este patrón respalda la idea de un año dominado por fuerzas contrapuestas: el oro reacciona inicialmente como activo refugio ante el choque geopolítico, pero pierde tracción cuando el endurecimiento monetario eleva de forma significativa las tasas reales, haciendo atractivos activos remunerados (bonos, depósitos) frente a oro que no genera rendimiento.
 
 **Crisis bancaria regional y reactivación de demanda refugio (marzo 2023)**
 En marzo de 2023, la quiebra de Silicon Valley Bank (SVB) y otros bancos regionales (Signature Bank, First Republic) desencadena pánico bancario por riesgo de liquidez, no por insolvencia sistémica como en 2008. Los inversionistas reaccionan inmediatamente con demanda masiva por oro como refugio, que dispara por encima de 2.000 USD/oz en días. GLTR experimenta pico abrupto de 5–8%.​
@@ -863,6 +1648,7 @@ La serie captura transición crítica desde crisis táctica en 2023 hasta rally 
 
 **Síntesis: Estructura de la serie y factores determinantes.**
 
+
 La trayectoria de 15 años (2010–2025) se sintetiza de la siguiente manera: 
 
 ```{r T de sintesis histórica}
@@ -958,6 +1744,7 @@ GLTR no es estacionaria porque está impulsada por ciclos macroeconómicos, deci
 
 **Tabla indicadores estadisticos**
 
+
 La Tabla 2 presenta un resumen numérico de los estadísticos descriptivos fundamentales del ETF GLTR durante el período de análisis comprendido entre octubre de 2022 y octubre de 2025.
 ```{T de estadisticas descriptivas}
 # Calcular estadísticas básicas
@@ -1046,10 +1833,11 @@ tabla_estadisticas
 
 ```
 
-El precio promedio fue de &#107.28 USD con una mediana de &#101.79 USD. La diferencia de &#5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas. La desviación estándar de &#22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
-El análisis de cuartiles revela una perspectiva más matizada: con Q1 en &#88.58 USD y Q3 en &#119.92 USD, el rango intercuartílico de &#31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de &#109.79 USD. Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.
+El precio promedio fue de $107.28 USD con una mediana de $101.79 USD. La diferencia de $5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas. La desviación estándar de $22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
+El análisis de cuartiles revela una perspectiva más matizada: con Q1 en $88.58 USD y Q3 en $119.92 USD, el rango intercuartílico de $31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de $109.79 USD. Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.
 
 **Distribución de Precios por Año: Análisis del Boxplot Interactivo**
+
 
 La visualización mediante boxplots interactivos muestra el comportamiento de la serie temporal por año calendario, exponiendo la evolución de la tendencia central, dispersión y valores extremos a lo largo del período de entrenamiento. Este análisis comparativo revela heterogeneidades temporales en la variabilidad de precios, distinguiendo años de estabilidad relativa frente a períodos de volatilidad extrema—información esencial para comprender los cambios estructurales de la serie y anticipar la especificación del modelo de pronóstico.
 ```{r boxplot por años}
@@ -1306,15 +2094,16 @@ fig <- plot_ly() %>%
 # Mostrar el gráfico interactivo
 fig
 ```
- El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de &#86.62 USD y un rango intercuartílico de apenas &#1.73 USD. La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo. El rango total fue de &#10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana. La media (&#85.88) y la mediana (&#86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos. 
+ El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de $86.62 USD y un rango intercuartílico de apenas $1.73 USD. La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo. El rango total fue de $10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana. La media ($85.88) y la mediana ($86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos. 
 
-Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de &#88.86 USD, representando un aumento del 2.6% respecto a 2022. El rango intercuartílico aumentó a &#4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central. El rango total se amplió a &#14.09 USD, con máximos alcanzando &#95.57. La media (&#88.85) nuevamente coincide prácticamente con la mediana ($88.86), manteniendo la simetría distribucional. Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.
+Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de $88.86 USD, representando un aumento del 2.6% respecto a 2022. El rango intercuartílico aumentó a $4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central. El rango total se amplió a $14.09 USD, con máximos alcanzando $95.57. La media ($88.85) nuevamente coincide prácticamente con la mediana ($88.86), manteniendo la simetría distribucional. Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.
 
-El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de &#104.56 USD, equivalente a un incremento del 17.7% respecto a 2023. El rango intercuartílico creció sustancialmente a &#12.78 USD, representando casi el triple del observado en 2023. La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales. El rango total fue de &#36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana. La media (&#103.62) nuevamente se alinea con la mediana (&#104.56), manteniendo simetría.
-El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de &#138.65 USD, generando un aumento del 32.6% respecto a 2024. El rango intercuartílico alcanzó &#27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022. La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central. El rango total fue de &#77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período. La media (&#141.72) se mantiene ligeramente superior a la mediana ($138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio.
-La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática. Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = &#1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = &#27.41). 
+El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de $104.56 USD, equivalente a un incremento del 17.7% respecto a 2023. El rango intercuartílico creció sustancialmente a $12.78 USD, representando casi el triple del observado en 2023. La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales. El rango total fue de $36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana. La media ($103.62) nuevamente se alinea con la mediana ($104.56), manteniendo simetría.
+El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de $138.65 USD, generando un aumento del 32.6% respecto a 2024. El rango intercuartílico alcanzó $27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022. La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central. El rango total fue de $77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período. La media ($141.72) se mantiene ligeramente superior a la mediana ($138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio.
+La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática. Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = $1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = $27.41). 
 
 **Gráfico de tendencias**
+
 
 La visualización de la serie temporal superpuesta con su componente de tendencia separa el comportamiento del precio en dos dimensiones: los precios diarios y la dirección subyacente de largo plazo.
 ```{r Tendencia}
@@ -1493,9 +2282,11 @@ fig_original_tendencia <- plot_ly(descomp_df) %>%
 fig_original_tendencia
 
 ```
-La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025). La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente &#88 USD y alcanzando alrededor de &#160 USD. La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.
+La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025). La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente $88 USD y alcanzando alrededor de $160 USD. La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.
 
 **Heatmap de estacionalidad y rendimiento**
+
+
 El heat map visualiza los rendimientos porcentuales mensuales del ETF GLTR, permitiendo identificar patrones recurrentes estacionales.
 ```{r Heatmap de estacionalidad y rendimiento}
 # Asegurarse de que la columna Fecha es de tipo Date
@@ -1631,7 +2422,7 @@ El heat map revela una ausencia de patrones estacionales consistentes y pronunci
 En 2022, se observa una ligera preponderancia de rendimientos negativos (tonos rosados) en febrero-marzo y mayo-junio, mientras que octubre destaca como mes de rendimiento positivo robusto. 
 En 2023, los rendimientos mensuales son mayormente débiles o negativos (predominio de tonos pálidos y rosados), con excepción de marzo y julio que muestran un leve matiz azul.
 En 2024 y 2025, los patrones son aún más irregulares, con meses específicos como octubre de 2022 y octubre de 2024 mostrando rendimientos excepcionales (azul intenso), pero sin que octubre se consolide como mes sistemáticamente favorable en todos los años.
-El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de &#91.92 USD. En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de &#149.39 USD. Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.
+El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de $91.92 USD. En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de $149.39 USD. Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.
 
 **Bandas de volatilidad**
 
@@ -1735,10 +2526,11 @@ fig_bandas
 
 
 ```
-La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo. Durante 2023, las bandas son extremadamente estrechas (±&#4-6 USD), reflejando volatilidad baja. A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±&#10-12 USD para mediados de año. En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente &#38 USD—el pico de volatilidad del período.
-Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio. En períodos donde el precio se estanca (2023 con precios cercanos a &#85-95 USD), las bandas permanecen estrechas. Conforme el precio asciende hacia &#100-120 USD en 2024 y luego hacia &#140-190 USD en 2025, las bandas se expanden paralelamente. Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.
+La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo. Durante 2023, las bandas son extremadamente estrechas (±$4-6 USD), reflejando volatilidad baja. A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±$10-12 USD para mediados de año. En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente $38 USD—el pico de volatilidad del período.
+Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio. En períodos donde el precio se estanca (2023 con precios cercanos a $85-95 USD), las bandas permanecen estrechas. Conforme el precio asciende hacia $100-120 USD en 2024 y luego hacia $140-190 USD en 2025, las bandas se expanden paralelamente. Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.
 
 **Volatilidad comparada en rangos de tiempo**
+
 
 La visualización de volatilidad en múltiples ventanas temporales (5 días, 20 días, 60 días y anual) permite caracterizar la estructura multiescalar de la variabilidad del ETF GLTR, identificando cómo los shocks y la incertidumbre operan en distintos horizontes temporales.
 ```{r Volatilidad}
@@ -2426,7 +3218,7 @@ Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(1, 1, 1))
 Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(2, 1, 4))
 Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
 ```
-```{r modelos-t}
+```{r modelost}
 # Crear el dataframe
 datos_modelos <- data.frame(
   `Etiqueta del Modelo` = c(
@@ -2521,7 +3313,7 @@ tabla_modelos
 ```
 
 
-# Estimación y comparación de modelos
+## Estimación y comparación de modelos
 Estos modelos serán comparados en la siguiente sección usando criterios de información $(AIC, AICc, BIC)$ y métricas de precisión.
 ```{r t-modelos}
 tabla_modelos_GLTR <- data.frame(
@@ -2569,7 +3361,7 @@ La tabla compara las métricas de precisión para los cinco modelos los cuales p
 
 En consecuencia, el auto.arima  no solo es el más parsimonioso dentro de su complejidad, sino también el que captura mejor la estructura de la serie. Por ello se selecciona como el modelo principal para los diagnósticos de residuos para confirmar su validez final.
 
-# Selección del Modelo
+## Selección del Modelo
 
 Para evaluar si el modelo ARIMA seleccionado cumple con los supuestos fundamentales, se analizan los gráficos de diagnóstico de residuos. 
 
@@ -2991,23 +3783,19 @@ kable(tabla_metricas_finales,
 
 # Conclusiones
 
-**Hallazgos Principales**
+Los pronósticos generados por el modelo ARIMA(2,1,2) con término de drift no solo tienen relevancia técnica, sino que también ofrecen una lectura estructurada de la dinámica de precios en series financieras. El componente autorregresivo de orden 2 refleja que los precios actuales dependen de los dos valores previos, capturando la inercia y memoria de corto plazo típica de los mercados, mientras que el componente de media móvil de orden 2 modela cómo los shocks idiosincráticos se propagan y se van disipando en unos pocos períodos en lugar de persistir indefinidamente. El término de drift incorpora la tendencia positiva observada en el tramo 2024‑2025, permitiendo que las trayectorias de pronóstico proyecten una apreciación gradual bajo el supuesto de que el entorno macroeconómico y de política monetaria permanece relativamente estable.​
 
-El análisis ARIMA realizado permite caracterizar la serie temporal mediante la identificación de su estructura de autocorrelación, estacionariedad y componentes de tendencia y estacionalidad. Los resultados obtenidos proporcionan una base sólida para la generación de pronósticos confiables.
+Los intervalos de confianza crecientes a medida que aumenta el horizonte de pronóstico cuantifican rigurosamente la acumulación de incertidumbre: las proyecciones de muy corto plazo (por ejemplo, a 1 día) tienden a mostrar errores relativos bajos cuando el ajuste in‑sample es adecuado, mientras que los pronósticos a varios días o semanas amplían sustancialmente la banda de probabilidad alrededor de la trayectoria central. Esta estructura permite que los tomadores de decisiones adapten su nivel de exposición según el horizonte de su estrategia, utilizando las predicciones ARIMA como herramienta operativa para gestión táctica de posiciones y evaluación de riesgos, especialmente en ventanas de corto plazo.​
+
+Aun así, el análisis pone de relieve varias limitaciones que apuntan a líneas claras de trabajo futuro. En primer lugar, los modelos ARIMA se emplean de forma predominante para horizontes cortos (días o, a lo sumo, pocas semanas), ya que su capacidad predictiva se deteriora cuando se extiende el horizonte por la acumulación de errores y por su naturaleza puramente univariante y lineal. La incorporación de información macroeconómica y financiera relevante mediante extensiones como ARIMAX o sistemas VAR permitiría abordar pronósticos de horizonte medio‑largo, integrando explícitamente variables como tasas de interés de bancos centrales, inflación o indicadores de riesgo.
+​
+En segundo lugar, el modelo ARIMA estándar supone parámetros constantes en el tiempo y, por tanto, tiene dificultades para capturar cambios de régimen abruptos asociados a crisis financieras, shocks geopolíticos o giros inesperados en la política monetaria. Para representar transiciones entre fases como “mercado alcista”, “lateral” o “bajista”, o entre regímenes de baja y alta volatilidad, resulta natural considerar extensiones con cambio de régimen, como modelos ARIMA con conmutación de Markov o marcos híbridos ARIMA–HMM que permiten que la dinámica y la volatilidad dependan del estado latente del mercado.​
+
+En tercer lugar, el ETF GLTR representa una canasta física de cuatro metales preciosos (oro, plata, platino y paladio), donde oro y plata concentran la mayor parte del peso y combinan roles distintos como activo refugio y como insumos industriales. Modelar únicamente la serie agregada implica superponer dinámicas parciales que pueden ser divergentes, por lo que estimar modelos ARIMA específicos para cada metal, o emplear sistemas de ecuaciones que recogen interdependencias entre ellos, permitiría descomponer mejor las contribuciones individuales a la evolución del valor del fondo.
+​
+La aplicación sistemática de un ARIMA(2,1,2) con drift a GLTR muestra que los modelos lineales de series temporales pueden capturar de forma razonable la dependencia temporal y la tendencia observada en los precios de metales preciosos durante fases de transición macroeconómica, proporcionando pronósticos útiles y cuantificados en términos de incertidumbre para la toma de decisiones de inversión y gestión de riesgos en el corto plazo. En contextos de creciente incertidumbre global, disponer de metodologías econométricas robustas para anticipar movimientos en mercados de materias primas contribuye a extraer señales tempranas sobre presiones inflacionarias, cambios en la percepción de riesgo geopolítico y expectativas de política monetaria, complementando otros marcos más estructurales en el análisis de estabilidad financiera.
 
 
-**Implicaciones y Recomendaciones**
-
-Los pronósticos obtenidos pueden utilizarse para:
-
-- Planificación estratégica a corto y mediano plazo
-- Asignación eficiente de recursos
-- Identificación de desviaciones significativas
-- Apoyo en la toma de decisiones basada en evidencia
-- Los pronósticos pierden precisión en horizontes muy lejanos
-- Cambios estructurales no capturados afectarían la predicción
-- La calidad de los datos es fundamental para la confiabilidad
-- Validación con datos nuevos es recomendada
 
 
 # Referencias Bibliográficas
@@ -3017,44 +3805,45 @@ Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2016). Time serie
 Brockwell, P. J., & Davis, R. A. (2016). Introduction to time series and forecasting (3rd ed.). Springer.
 
 DataCamp. (2024). Time series analysis in Python.
-[Texto visible](https://www.datacamp.com/tutorial/time-series-analysis-python)
+<https://www.datacamp.com/tutorial/time-series-analysis-python>
 
 finance.yahoo.com. (2025). abrdn Physical Precious Metals Basket Shares ETF (GLTR) – Performance. 
-[Texto visible](https://finance.yahoo.com/quote/GLTR/performance/
-gainesvillecoins.com) (2025).
+<https://finance.yahoo.com/quote/GLTR/performance/>
+
+<gainesvillecoins.com> (2025)
 
 Gold $3269, platinum surges 47%: Bullion brief July 2025. 
-[Texto visible](https://gainesvillecoins.com/blog/gold-3269-platinum-surges-47-bullion-brief-july-2025)
+<https://gainesvillecoins.com/blog/gold-3269-platinum-surges-47-bullion-brief-july-2025>
 goldavenue.com. (2025). Gold price forecast 2025: Will precious metals prices go up. 
-[Texto visible](https://www.goldavenue.com/gold-price-forecast-2025)
+<https://www.goldavenue.com/gold-price-forecast-2025>
 
 Hyndman, R. J., & Athanasopoulos, G. (2021). Forecasting: Principles and practice (3rd ed.). OTexts. 
-[Texto visible](https://otexts.com/fpp3/)
+<https://otexts.com/fpp3/>
 
 NumXL. (2024). Box-Jenkins methodology. 
-[Texto visible](https://www.numxl.com/support/docs/reference_manual/arima/box-jenkins-methodology)
+<https://www.numxl.com/support/docs/reference_manual/arima/box-jenkins-methodology>
 
 repec.org. (n.d.). Geopolitical shocks and commodity market dynamics – NBER Working Papers. 
-[Texto visible](https://repec.org/)
+<https://repec.org/>
 
 sciencedirect.com. (2024). Precious metals and currency markets during the Russia-Ukraine war. 
-[Texto visible](https://www.sciencedirect.com/science/article/pii/S1544612324000085)
+<https://www.sciencedirect.com/science/article/pii/S1544612324000085>
 
 seekingalpha.com. (2025). Precious metals in 2025: GLTR for a diversified approach.
-[Texto visible](https://seekingalpha.com/article/4747357-precious-metals-in-2025-gltr-for-a-diversified-approach)
+<https://seekingalpha.com/article/4747357-precious-metals-in-2025-gltr-for-a-diversified-approach>
 
 Shumway, R. H., & Stoffer, D. S. (2017). Time series analysis and its applications: With R examples (4th ed.). Springer.
 stockanalysis.com. (2025). abrdn Physical Precious Metals Basket Shares ETF (GLTR). 
-[Texto visible](https://stockanalysis.com/etf/gltr/)
+<https://stockanalysis.com/etf/gltr/>
 
 tradingview.com. (2025). Análisis ETF GLTR – TradingView. 
-[Texto visible](https://es.tradingview.com/symbols/BMV-GLTR/analysis/)
+<https://es.tradingview.com/symbols/BMV-GLTR/analysis/>
  
 Wikipedia. (2014). Ljung-Box test. 
-[Texto visible](https://en.wikipedia.org/wiki/Ljung%E2%80%93Box_test)
+<https://en.wikipedia.org/wiki/Ljung%E2%80%93Box_test>
 
 worldbank.org. (2022). Commodity markets outlook, April 2022. 
-[Texto visible](https://www.worldbank.org/en/research/commodity-markets)
+<https://www.worldbank.org/en/research/commodity-markets>
 
 
 
