@@ -111,6 +111,14 @@ library(knitr)
 library(kableExtra)
 library(plotly)
 library(lubridate)
+library(quantmod)
+library(fpp2)
+library(scales)
+library(viridis)
+library(patchwork)
+library(grid)
+library(RColorBrewer)
+library(dplyr)
 ```
 
 ```{r theme-professional}
@@ -139,7 +147,19 @@ theme_set(theme_professional())
 
 # Introducción
 
-Entender los determinantes de una serie temporal constituye uno de los elementos centrales para la predicción y la toma de decisiones estratégicas basada en evidencia cuantitativa. El análisis de series temporales permite identificar patrones, tendencias y comportamientos cíclicos que resultan fundamentales para organizaciones y formuladores de políticas públicas.
+Los mercados de metales preciosos constituyen componentes esenciales de la economía global cuya dinámica responde a múltiples factores interconectados: ciclos económicos, expectativas inflacionarias, volatilidad de sistemas financieros, demanda sectorial (manufactura, electrónica, automoción, joyería) y restricciones de oferta minera amplificadas por tensiones geopolíticas.
+El ETF GLTR (abrdn Physical Precious Metals Basket Shares) proporciona exposición diversificada a cuatro metales preciosos: oro, plata, platino y paladio, cuya correlación con ciclos macroeconómicos varía según el metal y el contexto. Esta composición lo posiciona como indicador agregado sensible de la salud de mercados de commodities y proxy de demanda por activos refugio durante episodios de inestabilidad financiera o depreciación de monedas.
+## Introducción
+
+El análisis de series temporales es indispensable para decodificar esta complejidad. Permite:
+
+1. Identificar tendencias estructurales de mediano y largo plazo subyacentes a fluctuaciones de corto plazo.
+2. Detectar y cuantificar patrones estacionales y componentes cíclicos.
+3. Reconocer puntos de quiebre que señalan cambios en condiciones de equilibrio de mercado.
+4. Medir la evolución de la volatilidad para calibración de riesgo.
+5. Generar pronósticos probabilísticos que orienten decisiones de inversión y gestión de exposiciones en contextos de incertidumbre persistente.
+Este tipo de análisis trasciende el interés puramente financiero. Para inversores, la precisión predictiva sobre GLTR mejora estrategias de diversificación y cobertura de riesgos sistémicos. Para gestores de riesgos en instituciones financieras, estos pronósticos alimentan modelos de pérdidas potenciales, pruebas de estrés y cálculos de requerimientos de capital. Para autoridades monetarias y bancos centrales, la dinámica de metales preciosos proporciona señales tempranas sobre presiones inflacionarias, credibilidad de políticas monetarias y cambios en expectativas de inversores globales. En síntesis, la capacidad de anticipar cambios en mercados de materias primas es crítica para la estabilidad financiera y prevención de crisis en contextos de creciente incertidumbre global.
+
 
 ## Relevancia del Análisis
 
@@ -198,73 +218,1249 @@ $$Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cd
 - Fundamentado en teoría estadística sólida
 </div>
 
-# Descripción de Datos
+# Descripción
 
 ## Carga y Preparación
 
 ```{r data-preparation}
-# Crear datos simulados de ejemplo
-set.seed(123)
-n <- 120  # 10 años de datos mensuales
-tendencia <- seq(100, 200, length.out = n)
-estacionalidad <- 10 * sin(2 * pi * (1:n) / 12)
-ruido <- rnorm(n, 0, 5)
-serie_ts <- ts(tendencia + estacionalidad + ruido, 
-               start = c(2014, 1), 
-               frequency = 12)
 
-# Crear data frame para visualización
-df_datos <- data.frame(
-  fecha = as.numeric(time(serie_ts)),
-  valor = as.numeric(serie_ts)
+AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
+                         from = "2022-10-31")
+
+names(AccionesEX)
+GLTR <- AccionesEX$GLTR.Close
+
+# Preparar dataframe para análisis descriptivo
+GLTR_df <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(GLTR),
+  Año = year(index(GLTR)),
+  Mes = month(index(GLTR), label = TRUE, abbr = FALSE),
+  Dia_Semana = wday(index(GLTR), label = TRUE, abbr = FALSE)
 )
 ```
 
 ## Visualización Inicial
+✓ **Visualización inicial de la serie de niveles**
+<p> La serie de datos es acerca de la acción de los metales preciosos en la bolsa de valores desde octubre de 2010 hasta el 2015
 
 ```{r visualization-initial}
-ggplot(df_datos, aes(x = fecha, y = valor)) +
-  geom_line(color = "#2b6cb0", size = 1.1, alpha = 0.8) +
-  geom_point(color = "#2b6cb0", size = 1.5, alpha = 0.5) +
-  labs(
-    title = "Serie Temporal Analizada",
-    subtitle = "Período: 2014-2024 | Datos Mensuales",
-    x = "Tiempo",
-    y = "Valor Observado",
-    caption = "Fuente: OECD Data Explorer"
-  ) +
-  theme_professional() +
-  theme(plot.title = element_text(size = 16, face = "bold"))
+# Gráfico interactivo
+plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
+        line = list(color = "#1E3A8A", width = 2),
+        hoverinfo = "text",
+        text = ~paste("Fecha:", Fecha, "<br>Precio: $", round(Precio, 2))) %>%
+  layout(
+    title = "<b>ETF GLTR - Serie Histórica (2010-2025)</b>",
+    xaxis = list(title = "Fecha", rangeslider = list(visible = TRUE)),
+    yaxis = list(title = "Precio (USD)", tickformat = "$,.2f"),
+    hovermode = "x unified"
+  )
 ```
 
-## Estadísticas Descriptivas
-
-```{r descriptive-stats}
-estadisticas <- data.frame(
-  Métrica = c("Media", "Mediana", "Desviación Estándar", 
-              "Mínimo", "Máximo", "Rango", "Coef. Variación"),
+## Descripción de la serie
+<div class="alert alert-success">
+###Ficha técnica 
+<p>
+El abrdn Physical Precious Metals Basket Shares ETF (GLTR) es un fondo cotizado en bolsa que busca replicar el comportamiento conjunto de una canasta de metales preciosos físicos, integrada principalmente por oro, plata, platino y paladio. Fue lanzado en octubre de 2010, en un contexto posterior a la crisis financiera global de 2008–2009, cuando se intensificó el interés de los inversionistas por activos refugio y vehículos que ofrecieran exposición directa a metales sin necesidad de almacenar lingotes de forma individual.
+GLTR está estructurado como un grantor trust respaldado por lingotes físicos, custodiados en bóvedas certificadas en centros financieros como Londres y Zúrich. Esta configuración evita riesgos asociados a derivados y contratos de futuros, vinculando el valor del fondo directamente a los precios spot de los metales subyacentes. El activo bajo gestión asciende a aproximadamente 1.850 millones de USD, validando su relevancia y liquidez en los mercados institucionales y de retail.
+<p>
+```{r ficha técnica-stats}
+# Crear tabla comparativa estilo profesional
+ficha_tecnica <- data.frame(
+  Característica = c(
+    "Nombre del ETF",
+    "Símbolo/Ticker",
+    "Tipo de activo",
+    "Activos subyacentes",
+    "Composición actual",
+    "Activos bajo gestión (AUM)",
+    "Expense Ratio",
+    "Beta (vs. S&P 500)",
+    "Rango 52 semanas",
+    "Precio actual (aprox)",
+    "Rendimiento 2024",
+    "Rendimiento YTD 2025",
+    "Volumen promedio diario",
+    "Bolsa de cotización",
+    "Fecha de lanzamiento"
+  ),
   Valor = c(
-    round(mean(serie_ts), 2),
-    round(median(serie_ts), 2),
-    round(sd(serie_ts), 2),
-    round(min(serie_ts), 2),
-    round(max(serie_ts), 2),
-    round(diff(range(serie_ts)), 2),
-    round((sd(serie_ts) / mean(serie_ts)) * 100, 2)
+    "Aberdeen Standard Physical Precious Metals Basket Shares ETF",
+    "GLTR",
+    "ETF de metales preciosos físicos",
+    "Oro, plata, paladio, platino físicos",
+    "Oro: 62%, Plata: 31%, Paladio: 4%, Platino: 3%",
+    "$1,850 millones USD",
+    "0.60%",
+    "0.21",
+    "$109.20 - $171.85",
+    "$168.50",
+    "+20.3%",
+    "+38.5% (hasta octubre)",
+    "150,000 acciones",
+    "NYSE Arca",
+    "Octubre 2010"
+  ),
+  Nota = c(
+    "Nombre completo del instrumento",
+    "Ticker de negociación principal",
+    "Clasificación del producto",
+    "Metales físicos almacenados en bóvedas",
+    "Distribución basada en valores de mercado actuales",
+    "Ha crecido 35% en los últimos 12 meses",
+    "Competitivo dentro del sector de ETFs de metales",
+    "Baja correlación con el mercado accionario",
+    "Mínimo histórico: $109.20 (Oct 2024)",
+    "Precio de cierre más reciente disponible",
+    "Impulsado por rally de metales preciosos",
+    "Fuerte desempeño por demanda de activos refugio",
+    "Alta liquidez para entrada/salida",
+    "Principal exchange para ETFs en EE.UU.",
+    "Más de 15 años en el mercado"
   )
 )
 
-kable(estadisticas, 
-      caption = "Tabla 1: Estadísticas Descriptivas de la Serie Temporal",
-      col.names = c("Métrica", "Valor"),
-      align = c("l", "r")) %>%
+# Formatear la tabla profesional
+ficha_tecnica %>%
+  kable(align = "lcl", 
+        caption = "Tabla 1. FICHA TÉCNICA DEL ETF GLTR - METALES PRECIOSOS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE,
+                font_size = 12) %>%
+  row_spec(0, background = "#1E3A8A", color = "white", bold = TRUE) %>%
+  column_spec(1, bold = TRUE, width = "25%") %>%
+  column_spec(2, width = "35%") %>%
+  column_spec(3, width = "40%", 
+              color = "#666666") %>%
+  # Resaltar valores importantes
+  column_spec(2,
+              color = ifelse(
+                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  # Verde para rendimientos positivos
+                ifelse(
+                  grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    # Azul para valores monetarios
+                  "black"
+                )
+              ),
+              bold = ifelse(
+                grepl("\\+[0-9]|^\\$", ficha_tecnica$Valor),
+                TRUE,
+                FALSE
+              ))
+```
+###Distribución de la canasta
+```{r dona interactiva}
+# Datos de composición del ETF
+composition_data <- data.frame(
+  Metal = c("Oro Físico", "Plata Física", "Paladio Físico", "Platino Físico"),
+  Porcentaje = c(61.77, 30.72, 4.26, 3.26),
+  Valor_Mercado = c("1B", "702M", "97M", "74M")
+)
+
+# Añadir etiquetas detalladas
+composition_data <- composition_data %>%
+  mutate(
+    Etiqueta = paste0(
+      "<b>", Metal, "</b><br>",
+      Porcentaje, "%<br>",
+      "(", Valor_Mercado, ")"
+    ),
+    # Colores metálicos realistas
+    Color = c("#FFD700", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
+    # Texto para hover
+    HoverText = paste0(
+      "<b>", Metal, "</b><br>",
+      "Composición: <b>", Porcentaje, "%</b><br>",
+      "Valor de mercado: <b>", Valor_Mercado, "</b><br>",
+      "Aproximado en cartera:<br>",
+      case_when(
+        Metal == "Oro Físico" ~ "60-65%",
+        Metal == "Plata Física" ~ "25-30%",
+        Metal == "Paladio Físico" ~ "3-5%",
+        Metal == "Platino Físico" ~ "3-5%"
+      )
+    )
+  )
+
+# Crear donut chart interactivo
+donut_interactive <- plot_ly(
+  composition_data,
+  labels = ~Metal,
+  values = ~Porcentaje,
+  type = 'pie',
+  hole = 0.5,  # Esto crea el efecto donut
+  textposition = 'outside',
+  textinfo = 'label+percent',
+  hoverinfo = 'text',
+  text = ~HoverText,
+  marker = list(
+    colors = ~Color,
+    line = list(color = '#FFFFFF', width = 2)
+  ),
+  # Añadir texto en el centro
+  domain = list(x = c(0, 1), y = c(0, 1))
+) %>%
+  layout(
+    title = list(
+      text = "<b>Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares</b>",
+      font = list(
+        size = 20,
+        color = "#1E3A8A",
+        family = "Arial, sans-serif"
+      ),
+      x = 0.5,
+      y = 0.95
+    ),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "v",
+      x = 1.05,
+      y = 0.5,
+      font = list(size = 12),
+      title = list(
+        text = "<b>Metales</b>",
+        font = list(size = 14)
+      )
+    ),
+    # Añadir anotación en el centro del donut
+    annotations = list(
+      list(
+        text = "<b>Total AUM</b><br>~$1.9B",
+        x = 0.5,
+        y = 0.5,
+        font = list(
+          size = 16,
+          color = "#1E3A8A",
+          family = "Arial, sans-serif"
+        ),
+        showarrow = FALSE
+      )
+    ),
+    paper_bgcolor = "#F8F9FA",
+    plot_bgcolor = "#F8F9FA",
+    margin = list(t = 100, b = 80, l = 20, r = 150)
+  )
+
+# Mostrar donut chart
+donut_interactive
+```
+<p>La composición refleja que GLTR está dominado por oro y plata (>92 % en conjunto), mientras que platino y paladio proporcionan exposición industrial complementaria. Esta ponderación es deliberada: oro y plata funcionan como depósitos de valor refugio, mientras que platino y paladio están ligados a demanda industrial. De este modo, GLTR combina protección contra riesgos macroeconómicos con exposición a fundamentales de demanda física de metales preciosos.
+
+###Tabla de sintesis histórica
+```{r Tabla de sintesis histórica}
+
+# Crear tabla de síntesis histórica
+sintesis_historica <- data.frame(
+  Período = c(
+    "2010–2012",
+    "2013–2015", 
+    "2016–2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024–2025"
+  ),
+  Comportamiento = c(
+    "Rally alcista",
+    "Corrección",
+    "Laterización volátil",
+    "Rally extremo",
+    "Corrección",
+    "Volatilidad extrema",
+    "Recuperación táctica",
+    "Rally estructural"
+  ),
+  Factores_clave = c(
+    "Estímulos post-2008, temor inflación, búsqueda refugio",
+    "Tapering Fed, fortaleza dólar, normalización monetaria",
+    "Incertidumbre política (Brexit, Trump, guerra comercial), tasas moderadas",
+    "Pandemia COVID, pánico financiero, QE infinito, máximos oro",
+    "Recuperación económica, rotación a cíclicos, normalización de tasas",
+    "Invasión Ucrania (alcista) vs. endurecimiento Fed (bajista) → plano",
+    "Crisis bancaria puntual, demanda refugio momentánea, luego normalización",
+    "Deuda pública ↑, tasas reales esperadas ↓, incertidumbre geopolítica, máximos históricos"
+  )
+)
+
+# Crear tabla profesional
+sintesis_historica %>%
+  kable(
+    align = "lll",
+    col.names = c("PERÍODO", "COMPORTAMIENTO", "FACTORES CLAVE"),
+    caption = "<center><h3 style='color: #1E3A8A;'>Tabla 2. SÍNTESIS HISTÓRICA - TRAYECTORIA DEL ETF GLTR (2010-2025)</h3></center>",
+    escape = FALSE
+  ) %>%
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed"),
     full_width = FALSE,
-    position = "center"
+    position = "center",
+    font_size = 13,
+    fixed_thead = TRUE
   ) %>%
-  row_spec(0, background = "#1a365d", color = "white", bold = TRUE)
+  row_spec(
+    0,
+    background = "#957fef",
+    color = "white",
+    bold = TRUE,
+    align = "center",
+    extra_css = "border-bottom: 2px solid #FFFFFF;"
+  ) %>%
+  column_spec(
+    1,
+    bold = TRUE,
+    width = "15%",
+    background = "#F8FAFC",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    2,
+    width = "20%",
+    background = "#FFFFFF",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    3,
+    width = "65%",
+    background = "#FFFFFF"
+  ) %>%
+  # Añadir notas al pie
+  footnote(
+    general = "Fuente: Análisis histórico basado en datos de Yahoo Finance, Bloomberg y Aberdeen Standard Investments",
+    general_title = "Nota:",
+    footnote_as_chunk = TRUE,
+    title_format = c("italic", "bold")
+  )
 ```
+
+
+
+
+##Estadisticas descriptivas
+<div class="alert alert-success">
+###Estadisticas descriptivas de la serie
+La Tabla 2 presenta un resumen numérico de los estadísticos descriptivos fundamentales del ETF GLTR durante el período de análisis comprendido entre octubre de 2022 y octubre de 2025.
+```{Tabla de estadisticas descriptivas}
+# Calcular estadísticas básicas
+estadisticas_basicas <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  summarise(
+    Media = mean(Precio),
+    Mediana = median(Precio),
+    Desviacion = sd(Precio),
+    Minimo = min(Precio),
+    Maximo = max(Precio),
+    Q1 = quantile(Precio, 0.25),
+    Q3 = quantile(Precio, 0.75)
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+# Crear el data frame directamente
+estadisticas_df <- data.frame(
+  Estadistica = c("Media", "Mediana", "Desviación Estándar", 
+                  "Mínimo", "Máximo", "Primer Cuartil (Q1)", 
+                  "Tercer Cuartil (Q3)"),
+  Valor = c(
+    estadisticas_basicas$Media,
+    estadisticas_basicas$Mediana,
+    estadisticas_basicas$Desviacion,
+    estadisticas_basicas$Minimo,
+    estadisticas_basicas$Maximo,
+    estadisticas_basicas$Q1,
+    estadisticas_basicas$Q3
+  )
+)
+
+# Crear tabla con GT - versión simplificada
+tabla_estadisticas <- estadisticas_df %>%
+  gt() %>%
+  tab_header(
+    title = "Tabla 1. Estadísticas Descriptivas del ETF GLTR",
+    subtitle = "Período: Octubre 2022 - Octubre 2025"
+  ) %>%
+  fmt_currency(
+    columns = Valor,
+    currency = "USD",
+    decimals = 2
+  ) %>%
+  cols_label(
+    Estadistica = "Estadística",
+    Valor = "Valor (USD)"
+  ) %>%
+  # Estilo para encabezado de columnas
+  tab_style(
+    style = list(
+      cell_fill(color = "#957fef"),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  # Estilo para filas alternas
+  tab_style(
+    style = cell_fill(color = "#f8f9fa"),
+    locations = cells_body(rows = seq(1, nrow(estadisticas_df), 2))
+  ) %>%
+  # Bordes
+  tab_style(
+    style = cell_borders(
+      sides = c("top", "bottom"),
+      color = "#dee2e6",
+      weight = px(1)
+    ),
+    locations = cells_body()
+  ) %>%
+  # Fuente de nota
+  tab_source_note(
+    source_note = "Fuente: Datos históricos del ETF GLTR"
+  ) %>%
+  # Opciones básicas de tabla
+  tab_options(
+    table.font.names = "Arial",
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(14),
+    table_body.hlines.color = "transparent",
+    source_notes.font.size = px(12)
+  )
+
+# Mostrar la tabla
+tabla_estadisticas
+
+```
+<p>
+El precio promedio fue de &#107.28 USD con una mediana de &#101.79 USD. La diferencia de &#5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas. La desviación estándar de &#22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
+El análisis de cuartiles revela una perspectiva más matizada: con Q1 en &#88.58 USD y Q3 en &#119.92 USD, el rango intercuartílico de &#31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de &#109.79 USD. Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.
+
+###Distribución de Precios por Año: Análisis del Boxplot Interactivo
+
+<p>La visualización mediante boxplots interactivos muestra el comportamiento de la serie temporal por año calendario, exponiendo la evolución de la tendencia central, dispersión y valores extremos a lo largo del período de entrenamiento. Este análisis comparativo revela heterogeneidades temporales en la variabilidad de precios, distinguiendo años de estabilidad relativa frente a períodos de volatilidad extrema—información esencial para comprender los cambios estructurales de la serie y anticipar la especificación del modelo de pronóstico.<p>
+```{r boxplot por años}
+
+# Asegurarnos de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Extraer el año para el análisis
+GLTR_df <- GLTR_df %>%
+  mutate(Año = as.factor(format(Fecha, "%Y"))) %>%
+  filter(Año %in% c("2022", "2023", "2024", "2025"))
+
+# Crear dataframes separados para cada año
+df_2022 <- GLTR_df %>% filter(Año == "2022")
+df_2023 <- GLTR_df %>% filter(Año == "2023")
+df_2024 <- GLTR_df %>% filter(Año == "2024")
+df_2025 <- GLTR_df %>% filter(Año == "2025")
+
+# Definir colores elegantes para cada año
+colors <- c(
+  "2022" = "#efd9ce",   
+  "2023" = "#dec0f1",    
+  "2024" = "#b79ced",    
+  "2025" = "#957fef",    
+  "Todos" = "#6C757D"    # Gris para "Todos"
+)
+
+# Crear el gráfico base con todos los años
+fig <- plot_ly() %>%
+  # Trazo para 2022
+  add_boxplot(
+    data = df_2022,
+    y = ~Precio,
+    name = "2022",
+    marker = list(
+      color = colors["2022"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2022"], width = 2),
+    fillcolor = 'rgba(46, 134, 171, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2023
+  add_boxplot(
+    data = df_2023,
+    y = ~Precio,
+    name = "2023",
+    marker = list(
+      color = colors["2023"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2023"], width = 2),
+    fillcolor = 'rgba(162, 59, 114, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2024
+  add_boxplot(
+    data = df_2024,
+    y = ~Precio,
+    name = "2024",
+    marker = list(
+      color = colors["2024"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2024"], width = 2),
+    fillcolor = 'rgba(241, 143, 1, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2025
+  add_boxplot(
+    data = df_2025,
+    y = ~Precio,
+    name = "2025",
+    marker = list(
+      color = colors["2025"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2025"], width = 2),
+    fillcolor = 'rgba(115, 171, 132, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 14,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      )
+    ),
+    hovermode = "x unified",
+    # Definir los botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.8)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar TODOS los años
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE, TRUE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (Todos los Años)</b>",
+                   xaxis = list(title = "<b>Año</b>"))
+            ),
+            label = "Todos los Años"
+          ),
+          # Botón para mostrar solo 2022
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2022)</b>",
+                   xaxis = list(title = "<b>2022</b>"))
+            ),
+            label = "2022"
+          ),
+          # Botón para mostrar solo 2023
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2023)</b>",
+                   xaxis = list(title = "<b>2023</b>"))
+            ),
+            label = "2023"
+          ),
+          # Botón para mostrar solo 2024
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, TRUE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2024)</b>",
+                   xaxis = list(title = "<b>2024</b>"))
+            ),
+            label = "2024"
+          ),
+          # Botón para mostrar solo 2025
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, FALSE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2025)</b>",
+                   xaxis = list(title = "<b>2025</b>"))
+            ),
+            label = "2025"
+          )
+        )
+      )
+    )
+  ) %>%
+  # Añadir información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>Haz clic en los botones para ver la distribución de precios por año</i>",
+    x = 0.5,
+    y = -0.2,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig
+```
+<p> El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de &#86.62 USD y un rango intercuartílico de apenas &#1.73 USD. La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo. El rango total fue de &#10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana. La media (&#85.88) y la mediana (&#86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos. 
+
+Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de &#88.86 USD, representando un aumento del 2.6% respecto a 2022. El rango intercuartílico aumentó a &#4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central. El rango total se amplió a &#14.09 USD, con máximos alcanzando &#95.57. La media (&#88.85) nuevamente coincide prácticamente con la mediana ($88.86), manteniendo la simetría distribucional. Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.
+
+El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de &#104.56 USD, equivalente a un incremento del 17.7% respecto a 2023. El rango intercuartílico creció sustancialmente a &#12.78 USD, representando casi el triple del observado en 2023. La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales. El rango total fue de &#36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana. La media (&#103.62) nuevamente se alinea con la mediana (&#104.56), manteniendo simetría.
+El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de &#138.65 USD, generando un aumento del 32.6% respecto a 2024. El rango intercuartílico alcanzó &#27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022. La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central. El rango total fue de &#77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período. La media (&#141.72) se mantiene ligeramente superior a la mediana ($138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio.
+La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática. Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = &#1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = &#27.41). 
+
+###Gráfico de tendencias
+
+<p>La visualización de la serie temporal superpuesta con su componente de tendencia separa el comportamiento del precio en dos dimensiones: los precios diarios y la dirección subyacente de largo plazo.<p>
+```{r Tendencia}
+# Convertir a serie temporal para descomposición
+serie_ts <- ts(GLTR_df$Precio, 
+               start = c(2022, 10), 
+               frequency = 365)
+
+# Descomposición STL (Seasonal and Trend decomposition using Loess)
+descomposicion <- stl(serie_ts, s.window = "periodic")
+
+# Crear dataframe para plotly
+descomp_df <- data.frame(
+  Fecha = GLTR_df$Fecha,
+  Original = GLTR_df$Precio,
+  Tendencia = as.numeric(descomposicion$time.series[, "trend"])
+)
+
+# Gráfico interactivo de solo Original + Tendencia
+fig_original_tendencia <- plot_ly(descomp_df) %>%
+  # Serie original
+  add_trace(x = ~Fecha, y = ~Original, type = 'scatter', mode = 'lines',
+            name = 'Serie Original', 
+            line = list(color = 'rgba(46, 134, 171, 0.4)', width = 1),
+            hovertemplate = '<b>Original</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Tendencia
+  add_trace(x = ~Fecha, y = ~Tendencia, type = 'scatter', mode = 'lines',
+            name = 'Tendencia', 
+            line = list(color = '#7161ef', width = 3),
+            hovertemplate = '<b>Tendencia</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Fecha</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 12,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5,
+      rangeslider = list(visible = FALSE)  # Range slider desactivado
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    hovermode = "x unified",
+    # Botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.9)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar AMBAS series
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE)),
+              list(title = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>")
+            ),
+            label = "Mostrar Ambas"
+          ),
+          # Botón para mostrar solo la SERIE ORIGINAL
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE)),
+              list(title = "<b>Serie Temporal Original del ETF GLTR</b>")
+            ),
+            label = "Solo Original"
+          ),
+          # Botón para mostrar solo la TENDENCIA
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE)),
+              list(title = "<b>Tendencia de la Serie Temporal del ETF GLTR</b>")
+            ),
+            label = "Solo Tendencia"
+          )
+        )
+      )
+    ),
+    # Leyenda
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      ),
+      bgcolor = "rgba(255, 255, 255, 0.8)",
+      bordercolor = "#dee2e6",
+      borderwidth = 1
+    )
+  ) %>%
+  # Información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>La línea azul clara muestra los precios originales diarios. La línea roja muestra la tendencia suavizada extraída de la serie.</i>",
+    x = 0.5,
+    y = -0.25,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig_original_tendencia
+
+```
+<p>La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025). La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente &#88 USD y alcanzando alrededor de &#160 USD. La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.<p>
+
+###Heatmap de estacionalidad y rendimiento
+<p>El heat map visualiza los rendimientos porcentuales mensuales del ETF GLTR, permitiendo identificar patrones recurrentes estacionales.<p>
+```{r Heatmap de estacionalidad y rendimiento}
+# Asegurarse de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Preparar datos para heatmap mensual
+heatmap_df <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  mutate(
+    Año = format(Fecha, "%Y"),
+    Mes_num = as.numeric(format(Fecha, "%m")),
+    Mes = factor(
+      Mes_num,
+      levels = 1:12,
+      labels = c("Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                 "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+    )
+  ) %>%
+  group_by(Año, Mes, Mes_num) %>%
+  summarise(
+    Precio_Inicial = first(Precio, order_by = Fecha),
+    Precio_Final = last(Precio, order_by = Fecha),
+    Precio_Promedio = mean(Precio, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    Rendimiento = ifelse(Precio_Inicial > 0, 
+                         (Precio_Final - Precio_Inicial) / Precio_Inicial * 100,
+                         0)
+  ) %>%
+  arrange(Año, Mes_num)
+
+# Gráfico de heatmap con escala ajustada a -15% a 15%
+fig_estacionalidad_heatmap <- plot_ly(
+  data = heatmap_df,
+  x = ~Mes,
+  y = ~Año,
+  z = ~Rendimiento,
+  type = 'heatmap',
+  colorscale = list(
+    c(0, 'rgb(229, 57, 53)'),      
+    c(0.5, 'rgb(244, 244, 244)'),  
+    c(1, 'rgb(46, 134, 171)')      
+  ),
+  zmin = -15,  
+  zmax = 15,   
+  colorbar = list(
+    title = "Rendimiento (%)",
+    titleside = "right",
+    tickformat = ".1f",
+    len = 0.8,
+    tickvals = seq(-15, 15, by = 5)  # Marcas cada 5%
+  ),
+  hovertemplate = paste(
+    '<b>Año</b>: %{y}<br>',
+    '<b>Mes</b>: %{x}<br>',
+    '<b>Rendimiento</b>: %{z:.2f}%<br>',
+    '<b>Precio inicial</b>: $%{text:.2f}<br>',
+    '<extra></extra>'
+  ),
+  text = ~Precio_Inicial
+) %>%
+  layout(
+    title = list(
+      text = "<b>Heatmap de Estacionalidad Mensual - Rendimientos por Mes</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Mes</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickangle = 0,
+      showgrid = FALSE
+    ),
+    yaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      autorange = "reversed",
+      showgrid = FALSE,
+      type = "category"
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    annotations = list(
+      list(
+        x = 0.5,
+        y = -0.15,
+        text = "<i>Cada celda muestra el rendimiento porcentual mensual. Escala: -15% a +15%. Rojo = rendimiento negativo, Azul = rendimiento positivo.</i>",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "center",
+        font = list(
+          family = "Arial, sans-serif",
+          size = 12,
+          color = "#6c757d"
+        )
+      )
+    )
+  )
+
+# Mostrar el heatmap
+fig_estacionalidad_heatmap
+
+```
+<p> El heat map revela una ausencia de patrones estacionales consistentes y pronunciados en los rendimientos mensuales del ETF GLTR. A diferencia de muchos activos financieros que exhiben "efectos enero" o depresiones estacionales definidas, los rendimientos mensuales de este ETF no muestran una estructura claramente repetible año tras año. 
+En 2022, se observa una ligera preponderancia de rendimientos negativos (tonos rosados) en febrero-marzo y mayo-junio, mientras que octubre destaca como mes de rendimiento positivo robusto. 
+En 2023, los rendimientos mensuales son mayormente débiles o negativos (predominio de tonos pálidos y rosados), con excepción de marzo y julio que muestran un leve matiz azul.
+En 2024 y 2025, los patrones son aún más irregulares, con meses específicos como octubre de 2022 y octubre de 2024 mostrando rendimientos excepcionales (azul intenso), pero sin que octubre se consolide como mes sistemáticamente favorable en todos los años.
+El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de &#91.92 USD. En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de &#149.39 USD. Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.<p>
+
+###Bandas de volatilidad
+
+<p>Las bandas visualizan la evolución dinámica de la volatilidad, superponiendo el precio de cierre diario, la media  y las bandas que se expanden o contraen según la desviación estándar.<p>
+```{r Bandas de volatilidad}
+
+# Calcular medias móviles y bandas de volatilidad
+volatilidad_df <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Media_Movil_20 = SMA(Precio, n = 20),
+    Desviacion_20 = runSD(Precio, n = 20),
+    Banda_Superior = Media_Movil_20 + (2 * Desviacion_20),
+    Banda_Inferior = Media_Movil_20 - (2 * Desviacion_20),
+    Ancho_Banda = Banda_Superior - Banda_Inferior
+  )
+
+# Gráfico elegante de bandas de volatilidad
+fig_bandas <- plot_ly(volatilidad_df, x = ~Fecha) %>%
+  # Área entre bandas (volatilidad) - SOLO MUESTRA ANCHO
+  add_ribbons(
+    ymin = ~Banda_Inferior,
+    ymax = ~Banda_Superior,
+    name = 'Banda de Volatilidad',
+    fillcolor = 'rgba(46, 134, 171, 0.15)',
+    line = list(color = 'transparent'),
+    hovertemplate = 'Ancho: $%{customdata:.2f}<extra></extra>',
+    customdata = ~Ancho_Banda  # Solo muestra el ancho de banda
+  ) %>%
+  # Línea de precio
+  add_trace(
+    y = ~Precio, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Precio GLTR',
+    line = list(color = '#2c3e50', width = 1.5),
+    hovertemplate = 'Precio: $%{y:.2f}<extra></extra>'
+  ) %>%
+  # Media móvil
+  add_trace(
+    y = ~Media_Movil_20, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Media Móvil 20 días',
+    line = list(color = '#FF6F61', width = 2, dash = 'dash'),
+    hovertemplate = 'Media 20d: $%{y:.2f}<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Bandas de Volatilidad del ETF GLTR</b><br><sub>Las bandas se expanden en periodos de alta volatilidad y se contraen en calma</sub>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      rangeslider = list(visible = FALSE),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Precio (USD)",
+      tickformat = "$.2f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, TRUE)),
+            label = "Mostrar Todo"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, FALSE)),
+            label = "Ocultar Media"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, TRUE)),
+            label = "Ocultar Precio"
+          )
+        )
+      )
+    )
+  )
+
+fig_bandas
+
+
+```
+<p>La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo. Durante 2023, las bandas son extremadamente estrechas (±&#4-6 USD), reflejando volatilidad baja. A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±&#10-12 USD para mediados de año. En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente &#38 USD—el pico de volatilidad del período.
+Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio. En períodos donde el precio se estanca (2023 con precios cercanos a &#85-95 USD), las bandas permanecen estrechas. Conforme el precio asciende hacia &#100-120 USD en 2024 y luego hacia &#140-190 USD en 2025, las bandas se expanden paralelamente. Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.<p>
+
+###Volatilidad comparada en rangos de tiempo
+
+<p>La visualización de volatilidad en múltiples ventanas temporales (5 días, 20 días, 60 días y anual) permite caracterizar la estructura multiescalar de la variabilidad del ETF GLTR, identificando cómo los shocks y la incertidumbre operan en distintos horizontes temporales.<p>
+```{r Volatilidad}
+# Calcular volatilidad en diferentes ventanas temporales
+comparador_volatilidad <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Rendimiento = (Precio / lag(Precio) - 1) * 100
+  ) %>%
+  filter(!is.na(Rendimiento)) %>%
+  mutate(
+    Vol_5d = rollapply(Rendimiento, width = 5, FUN = sd, fill = NA, align = "right"),
+    Vol_20d = rollapply(Rendimiento, width = 20, FUN = sd, fill = NA, align = "right"),
+    Vol_60d = rollapply(Rendimiento, width = 60, FUN = sd, fill = NA, align = "right"),
+    Vol_252d = rollapply(Rendimiento, width = 252, FUN = sd, fill = NA, align = "right")
+  )
+
+# Gráfico comparativo elegante
+fig_comparativo <- plot_ly(comparador_volatilidad, x = ~Fecha) %>%
+  # Volatilidad a 5 días (corto plazo)
+  add_trace(
+    y = ~Vol_5d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 5 días',
+    line = list(color = '#9fa0ff', width = 1.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 5d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 20 días
+  add_trace(
+    y = ~Vol_20d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 20 días',
+    line = list(color = '#2E86AB', width = 2),
+    visible = TRUE,
+    hovertemplate = 'Vol 20d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 60 días
+  add_trace(
+    y = ~Vol_60d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 60 días',
+    line = list(color = '#ada7ff', width = 2.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 60d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 252 días (anualizada)
+  add_trace(
+    y = ~Vol_252d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol Anual',
+    line = list(color = '#757bc8', width = 3),
+    visible = TRUE,
+    hovertemplate = 'Vol Anual: %{y:.2f}%<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Comparativo de Volatilidad en Diferentes Ventanas Temporales</b>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Volatilidad (% desviación estándar)",
+      tickformat = ".1f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        showactive = TRUE,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", rep(TRUE, 4)),
+            label = "Mostrar Todas"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, FALSE, FALSE)),
+            label = "Solo 5 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, TRUE, FALSE, FALSE)),
+            label = "Solo 20 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, TRUE, FALSE)),
+            label = "Solo 60 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, FALSE, TRUE)),
+            label = "Solo Anual"
+          )
+        )
+      )
+    )
+  )
+
+# Mostrar el gráfico
+fig_comparativo
+```
+<p>La volatilidad de Corto Plazo exhibe fluctuaciones erráticas y de alta amplitud, oscilando entre aproximadamente 0.5% y 4.0%. Esta serie es notoriamente ruidosa, con múltiples picos transitorios que reflejan shocks diarios rápidamente absorbidos por el mercado.
+
+La volatilidad de Mediano Plazo presenta un patrón mucho más suave que la de 5 días, oscilando típicamente entre 0.8% y 2.0%. La línea azul filtra el ruido diario y captura la variabilidad subyacente de corto-mediano plazo, con picos menos frecuentes pero más persistentes.
+
+La volatilidad de Largo Plazo muestra la trayectoria más suave y persistente, fluctuando entre aproximadamente 0.8% y 1.5%. Las oscilaciones en esta ventana son lentas y deliberadas, reflejando cambios en el ambiente macroeconómico de mediano plazo.
+
+La volatilidad Anual proporciona la perspectiva más agregada, con una evolución particularmente estable, comenzando cercana a 1.0% en 2023 y terminando cercana a 1.5-1.8% en 2025.
+
+El análisis descriptivo ha caracterizado la serie temporal del ETF GLTR a través de sus estadísticas fundamentales, distribución temporal, tendencia, estacionalidad y dinámica de volatilidad en múltiples horizontes. Esta exploración integral proporciona la base empírica necesaria para proceder con la especificación y estimación del modelo ARIMA.<p>
+
+
+
+
+
+
+
+
 
 ## Descomposición STL
 
