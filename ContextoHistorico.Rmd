@@ -248,6 +248,30 @@ plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
     hovermode = "x unified"
   )
 ```
+```{r 2010-2012}
+# Plata 2010–2012 (proxy: SLV)
+silver_10_12 <- getSymbols("SLV", src = "yahoo", auto.assign = FALSE,
+                           from = "2010-01-01", to = "2012-12-31")
+silver_10_12_close <- Cl(silver_10_12)
+
+silver_10_12_df <- data.frame(
+  fecha  = index(silver_10_12_close),
+  precio = as.numeric(silver_10_12_close)
+)
+
+g_plata_10_12 <- ggplot(silver_10_12_df, aes(x = fecha, y = precio)) +
+  geom_line(color = "gray40", linewidth = 0.8) +
+  labs(title = "Precio de la plata 2010–2012 (proxy: SLV)",
+       subtitle = "Rally post-crisis y máximos asociados a QE e inflación esperada",
+       x = "Fecha", y = "Precio de cierre (USD)") +
+  theme_minimal()
+
+g_plata_10_12_int <- ggplotly(g_plata_10_12)
+g_plata_10_12_int
+
+```
+
+
 
 ```{r 2020}
 library(plotly)
@@ -320,6 +344,33 @@ plot_ly(datos_2020, x = ~Fecha) %>%
     )
   )
 ```
+```{r oro 2022}
+library(quantmod)
+library(ggplot2)
+library(plotly)
+
+# Oro 2022 (proxy: GLD)
+gold_2022 <- getSymbols("GLD", src = "yahoo", auto.assign = FALSE,
+                        from = "2022-01-01", to = "2022-12-31")
+gold_2022_close <- Cl(gold_2022)
+
+gold_2022_df <- data.frame(
+  fecha  = index(gold_2022_close),
+  precio = as.numeric(gold_2022_close)
+)
+
+g_oro_2022 <- ggplot(gold_2022_df, aes(x = fecha, y = precio)) +
+  geom_line(color = "goldenrod", linewidth = 0.8) +
+  labs(title = "Precio del oro en 2022 (proxy: GLD)",
+       subtitle = "Volatilidad por guerra en Ucrania e incremento de tasas",
+       x = "Fecha", y = "Precio de cierre (USD)") +
+  theme_minimal()
+
+g_oro_2022_int <- ggplotly(g_oro_2022)
+g_oro_2022_int
+```
+
+
 
 ```{r 2023vs2024}
 library(plotly)
