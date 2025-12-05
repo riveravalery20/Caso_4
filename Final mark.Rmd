@@ -505,21 +505,19 @@ get_stock_data <- function(symbol, start_date = "2020-01-01", end_date = Sys.Dat
 
 :::: sidebar
 ::: sidebar-header
-<img src="logo-ishares.png" alt="iShares by BlackRock" class="logo-ishares"/>
+<img src="ORO.jpeg" alt="GLTR" class="GLTR"/>
 
 <h1>Análisis Financiero</h1>
 
-<h2>iShares ETF Analysis</h2>
+<h2>GLTR ETF </h2>
 :::
 
 <ul class="sidebar-nav">
 <li><a href="#introduccion" class="active">[📈]{.icon} Introducción</a></li>
-<li><a href="#datos">[📊]{.icon} Datos de Mercado</a></li>
+<li><a href="#datos">[📊]{.icon} Descripción de la fuente de datos</a></li>
 <li><a href="#metodologia">[🔧]{.icon} Metodología</a></li>
-<li><a href="#analisis-tecnico">[📉]{.icon} Análisis Técnico</a></li>
-<li><a href="#analisis-fundamental">[💹]{.icon} Análisis Fundamental</a></li>
-<li><a href="#riesgos">[⚠️]{.icon} Evaluación de Riesgos</a></li>
-<li><a href="#recomendaciones">[💡]{.icon} Recomendaciones</a></li>
+<li><a href="#descripcionserie">[📉]{.icon} Descripción de la serie temporal</a></li>
+<li><a href="#modelo">[💹]{.icon} Resultados del Modelo ARIMA</a></li>
 <li><a href="#bibliografia">[📚]{.icon} Bibliografía</a></li>
 </ul>
 ::::
@@ -530,9 +528,9 @@ get_stock_data <- function(symbol, start_date = "2020-01-01", end_date = Sys.Dat
 <!-- ENCABEZADO -->
 
 ::: main-header
-<h1>Segmentación de Países mediante Indicadores de Mortalidad</h1>
+<h1>ANALISIS CON MODELO ARIMA</h1>
 
-<h2>**Análisis de técnicas de Aprendizaje No Supervisado - Banco Mundial**</h2>
+<h2>**MODELO ARIMA**</h2>
 
 <h3>Universidad del Valle - Facultad de Ingeniería</h3>
 
@@ -544,7 +542,7 @@ get_stock_data <- function(symbol, start_date = "2020-01-01", end_date = Sys.Dat
 ::: {#resumen .content-card}
 <h2>Resumen</h2>
 
-<p>*Este estudio aplica técnicas de aprendizaje no supervisado para identificar patrones naturales de agrupación entre países basándose en 22 indicadores de mortalidad del Banco Mundial correspondientes al año 2019. Se empleó Análisis de Componentes Principales (ACP) para reducir la dimensionalidad del conjunto de datos, seguido de clusterización jerárquica mediante el método de Ward para identificar segmentos de países con perfiles de mortalidad similares. Los indicadores analizados incluyen expectativa de vida por sexo, mortalidad por enfermedades crónicas, mortalidad por causas externas (accidentes de tránsito, envenenamientos, suicidios), mortalidad infantil y neonatal desagregada por sexo, y supervivencia hasta los 65 años. Los resultados permitieron identificar grupos de países con características de mortalidad homogéneas internamente pero diferenciadas entre sí, proporcionando información para la formulación de políticas de salud pública basadas en evidencia.*</p>
+<p></p>
 :::
 
 <!-- INTRODUCCIÓN -->
@@ -552,72 +550,143 @@ get_stock_data <- function(symbol, start_date = "2020-01-01", end_date = Sys.Dat
 ::: {#introduccion .content-card}
 <h2>Introducción</h2>
 
-<p>La mortalidad constituye uno de los indicadores fundamentales para evaluar el estado de salud de las poblaciones y la efectividad de los sistemas sanitarios a nivel global. Los patrones de mortalidad reflejan diferencias significativas entre naciones, resultado de factores como acceso a servicios de salud, nivel de desarrollo económico, infraestructura sanitaria, calidad de la atención materno-infantil y magnitud de determinantes sociales. Estas variaciones no son únicamente atribuibles a regiones geográficas o niveles de ingresos, sino que responden a dinámicas epidemiológicas complejas que estructuran la carga de enfermedad de formas distintas en cada contexto nacional.</p>
+<p>Los mercados de metales preciosos constituyen componentes esenciales de la economía global cuya dinámica responde a múltiples factores interconectados: ciclos económicos, expectativas inflacionarias, volatilidad de sistemas financieros, demanda sectorial diversificada (manufactura, electrónica, automoción, joyería) y restricciones de oferta minera amplificadas por tensiones geopolíticas. La interacción simultánea de estos elementos genera comportamientos complejos que trascienden la simple oferta y demanda, demandando enfoques analíticos rigurosos para su comprensión.</p>
 
-<p>Actualmente, la clasificación de países para fines de política sanitaria se realiza mediante categorías predefinidas basadas en criterios geográficos o económicos. Sin embargo, estas clasificaciones convencionales no necesariamente capturan las similitudes reales en los perfiles epidemiológicos entre naciones. Existe una desalineación entre las agrupaciones administrativas que utilizamos para organizar datos internacionales y la realidad de los patrones de mortalidad que los países efectivamente experimentan. Esto implica que una segmentación basada empíricamente en los propios datos de mortalidad podría revelar qué países enfrentan desafíos sanitarios comparables, independientemente de sus características tradicionales, facilitando intercambio de experiencias y estrategias relevantes entre contextos similares.</p>
+<p>El ETF GLTR (abrdn Physical Precious Metals Basket Shares) proporciona exposición diversificada a cuatro metales preciosos—oro, plata, platino y paladio—cuya correlación con ciclos macroeconómicos varía según el metal específico y el contexto económico prevaleciente. Esta composición equilibrada lo posiciona como indicador agregado particularmente sensible de la salud de mercados de commodities globales, funcionando simultáneamente como proxy de demanda por activos refugio durante episodios de inestabilidad financiera severa o depreciación acelerada de monedas fiduciarias. Su estructura respaldada por depósito físico de metales en bóvedas certificadas elimina riesgos de contraparte, vinculando directamente el valor del fondo a precios spot de metales subyacentes.</p>
 
-<p>Las técnicas de aprendizaje no supervisado permiten identificar estas estructuras naturales sin imponer categorías predeterminadas. El Análisis de Componentes Principales sintetiza múltiples indicadores correlacionados en dimensiones fundamentales que explican la variabilidad en mortalidad entre países. La clusterización jerárquica subsecuente agrupa naciones según similitud en estas dimensiones, produciendo segmentaciones coherentes que reflejan realidades epidemiológicas.</p>
+<p>El análisis de series temporales resulta indispensable para decodificar esta complejidad multidimensional de mercados de metales preciosos. Permite identificar tendencias estructurales de mediano y largo plazo que subyacen a fluctuaciones de corto plazo, detectar y cuantificar patrones estacionales y componentes cíclicos recurrentes, reconocer puntos de quiebre que señalan cambios significativos en condiciones de equilibrio de mercado, medir la evolución dinámica de volatilidad para calibración precisa de riesgo, y generar pronósticos probabilísticos fundamentados que orienten decisiones de inversión y gestión de exposiciones en contextos de incertidumbre persistente.</p>
 
-<p>El objetivo de este estudio es aplicar estas técnicas para segmentar 182 países según 22 indicadores de mortalidad del año 2019, identificando grupos de naciones con perfiles epidemiológicos similares. Se espera que los clusters resultantes revelen patrones de mortalidad que trascienden categorías convencionales, faciliten la caracterización de inequidades de género, y proporcionen una base empírica para el diseño de políticas de salud pública diferenciadas según contextos epidemiológicos reales.</p>
+<p>Este tipo de análisis trasciende significativamente el interés puramente financiero, poseyendo implicaciones para múltiples stakeholders con responsabilidades estratégicas distintas. Para inversores institucionales y de retail, la precisión predictiva sobre GLTR mejora sustancialmente estrategias de diversificación de portafolios y cobertura de riesgos sistémicos. Para gestores de riesgos en instituciones financieras, estos pronósticos alimentan directamente modelos de pérdidas potenciales, pruebas de estrés bajo escenarios adversos, y cálculos de requerimientos de capital regulatorio. Para autoridades monetarias y bancos centrales, la dinámica observable de metales preciosos proporciona señales tempranas sobre presiones inflacionarias emergentes, credibilidad de políticas monetarias implementadas, y cambios en expectativas de inversores globales respecto a estabilidad macroeconómica. En síntesis, la capacidad de anticipar cambios en mercados de materias primas resulta crítica para preservar estabilidad financiera sistémica y prevenir crisis financieras en contextos de creciente incertidumbre global.</p>
 :::
 
 <!-- DESCRIPCION DE LA FUENTE DE DATOS -->
 
-::: {#descripcionf .content-card}
+::: {#datos .content-card}
 <h2>Descripción de la fuente de Datos</h2>
 
 <p>
+**Base de datos:** Precios históricos del ETF GLTR (abrdn Physical Precious Metals Basket Shares) 
 
-**Base de datos:** World Development Indicators (WDI) - Banco Mundial
+**Unidad de análisis:** Sesión diaria de negociación; variable base: precio de cierre (GLTR.Close).
 
-**Unidad de análisis:** País
+**Período:** 2022-2025
 
-**Período:** 2019
-
-**Acceso:** <https://databank.worldbank.org/source/world-development-indicators>
-
+**Acceso:** <https://finance.yahoo.com/quote/GLTR/history>
 </p>
-
-<p>Los datos utilizados en esta investigación provienen de la base World Development Indicators del Banco Mundial, una de las compilaciones más exhaustivas de indicadores de desarrollo compilados a partir de fuentes internacionales estandarizadas. Esta base integra información de organismos especializados reconocidos mundialmente, incluyendo la Organización Mundial de la Salud (OMS), UNICEF y agencias especializadas de las Naciones Unidas, garantizando comparabilidad metodológica entre países y confiabilidad en la medición de indicadores. El año 2019 fue seleccionado como period
-
-<!-- ... resto del contenido ... -->
-
-<!-- FOOTER -->
-
-::: footer
-<p>Universidad del Valle - Facultad de Ingeniería</p>
-
-<p>Gestión de Datos - Profesor: Orlando Joaqui Barandica</p>
-
-<p>Fecha: `r format(Sys.Date(), "%d/%m/%Y")`</p>
 :::
-::::::::::::::
-::::::::::::::::::
 
-<!-- BOTÓN FLOTANTE ELEGANTE -->
+<!-- METODOLOGÍA -->
 
-<button class="floating-code-btn" onclick="toggleAllCode()">
+::: {#metodologia .content-card}
+<h2>2. Metodología</h2>
 
-📝 Mostrar Todo el Código
+<p>GLTR (abrdn Physical Precious Metals Basket Shares ETF) fue seleccionado como instrumento de análisis por ser un fondo que proporciona exposición diversificada a cuatro metales preciosos: oro (65%), plata (27%), platino (4%) y paladio (4%).
+Esta composición permite capturar dinámicas agregadas de mercados de materias primas globales.
+Adicionalmente, GLTR respalda sus participaciones con depósito físico de metales en bóvedas certificadas, elimina riesgos de contraparte, y ofrece datos diarios públicamente disponibles con alta liquidez, características esenciales para análisis de series temporales robustas.​</p>
 
-</button>
+<p>La ventana octubre 2022 – octubre 2025 captura la transición desde endurecimiento monetario máximo (tasas a 4.0% para combatir inflación de 40 años tras invasión de Rusia a Ucrania) hacia relajación monetaria con rally estructural de metales preciosos.
+2022: GLTR oscila sin dirección clara (\$70-95) bajo presiones contrapuestas de inflación extrema versus tasas reales elevadas.
+2023: Crisis bancaria (SVB, marzo) genera demanda puntual de refugio, pero se resuelve rápidamente.
+Año cierra plano (+2%).
+2024-2025: Rally sostenido impulsado por expectativas de recortes de tasas, deuda pública máxima, riesgos geopolíticos y sanciones a Rusia.
+GLTR sube 40% en diez meses; desempeño anual: 2024 (+21%), 2025 (+69%).
+Aproximadamente 750-760 observaciones diarias proporciona robustez estadística para ARIMA.
+El período captura cambio de régimen claro, validando la serie para pronóstico.</p>
 
+<h3>2.1 Concepto de Serie de Tiempo</h3>
 
-```{r setup, include=FALSE, cache=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  warning = FALSE,
-  message = FALSE,
-  fig.align = "center",
-  fig.width = 8,
-  fig.height = 6,
-  out.width = "100%"
-)
+<p>Una serie de tiempo se define como una colección ordenada de observaciones de una misma variable registradas en instantes discretos y equiespaciados.
+Desde el punto de vista probabilístico, puede interpretarse como una realización de un proceso estocástico ${Yt}t∈Z$, donde cada $Yt$ es una variable aleatoria indexada por el tiempo.
+A diferencia de los datos independientes e idénticamente distribuidos, en las series temporales las observaciones sucesivas suelen presentar dependencia, de modo que la distribución conjunta de $(Y_t, Y_t−_1,…,Y_t−_k)$ no puede factorizarse como producto de distribuciones marginales independientes.
+La teoría clásica considera que una serie observada puede descomponerse en componentes deterministas y estocásticos.
+En un esquema aditivo, se escribe: $Yt=Tt+St+Ct+It$ donde $Tt$ representa la tendencia de largo plazo, asociada a cambios sistemáticos en el nivel medio de la serie; St recoge la estacionalidad, esto es, patrones que se repiten con periodicidad fija (mensual, trimestral, anual); Ct refleja el componente cíclico, vinculado a oscilaciones de medio y largo plazo sin periodo exactamente constante, a menudo relacionadas con ciclos económicos; e It es el componente irregular, que agrupa las fluctuaciones aleatorias no explicadas por los anteriores.
+Un concepto central en la modelización es la estacionariedad.
+Una serie estacionaria en sentido débil presenta media constante $E(Yt)=μ$, varianza finita y constante $Var(Yt)=σ^2$ y una función de autocovarianza $γk=Cov(Y_t,Y_t−_k)$ que depende solo del desfase k, no del instante calendario.
+Esta propiedad permite aplicar la teoría de procesos lineales y garantiza estabilidad de la estructura de dependencia en el tiempo.
+En la práctica, muchas series financieras en niveles, como los precios de activos, no son estacionarias y requieren transformaciones (por ejemplo, diferencias o rendimientos logarítmicos) para aproximarse a procesos estacionarios antes de ser modeladas.</p>
 
+<h4>2.1.1 Componentes Fundamentales</h4>
 
-```
+<p>$$Y_t = T_t + S_t + C_t + I_t$$</p>
 
-```{r libraries, warning=FALSE,message=FALSE}
+<p>Donde cada componente representa:</p>
+<ul>
+<li>$Y_t$: Valor observado en el tiempo $t$</li>
+<li>$T_t$: Componente de tendencia (movimiento de largo plazo)</li>
+<li>$S_t$: Componente estacional (patrones regulares)</li>
+<li>$C_t$: Componente cíclico (fluctuaciones periódicas)</li>
+<li>$I_t$: Componente irregular o ruido</li>
+</ul>
+
+<h3>2.2 Modelo ARIMA</h3>
+
+<p>Dentro de los modelos lineales para series temporales, la familia ARIMA (AutoRegressive Integrated Moving Average) constituye una de las herramientas más utilizadas para describir y pronosticar procesos que pueden hacerse estacionarios mediante diferenciación.
+La idea fundamental es representar la serie transformada como combinación de un componente autorregresivo y uno de medias móviles, permitiendo capturar tanto la influencia de valores pasados como el efecto persistente de perturbaciones aleatorias.
+En su forma general, un modelo ARIMA(p,d,q) para una serie {Yt} se expresa mediante la acción conjunta de tres operadores: el operador de rezago B, definido por BYt=Yt−1; el operador de diferencia (1−B)\^d , aplicado d veces para eliminar tendencias estocásticas; y dos polinomios en B que describen la parte autorregresiva y de medias móviles.
+La estructura autorregresiva de orden p se recoge en la ecuación (1): yt=c+ϕ1yt−1+ϕ2yt−2+…+ϕpyt−p+εt (1)</p>
+
+<p>donde c es una constante, ϕi son los coeficientes autorregresivos y εt es un término de error, usualmente modelado como ruido blanco con media cero y varianza constante.
+La parte integrada del modelo se vincula al número de diferencias necesarias para lograr estacionariedad.
+La primera y segunda diferencias ilustran los casos d=1 y d=2: $$y′t=yt−y_t−_1  \ (2)$$ $$yt′′=(yt−y_t−_1)−(y_t−_1−y_t−_2)=yt−2yt−1+yt−2   \  (3)$$ Por su parte, el componente de medias móviles de orden q se representa en la ecuación (4): $$yt=c+εt+θ1εt−1+θ2εt−2+…+θqεt−q\ (4)$$ donde $θj$ son los coeficientes de medias móviles.
+La combinación de las partes AR y MA para una serie ya estacionaria da lugar al modelo ARMA(p,q), cuya forma general se sintetiza en (5): $$yt=c+ϕ1yt−1+ϕ2yt−2+⋯+ϕpyt−p+εt+θ1εt−1+θ2εt−2+⋯+θqεt−q   \   (5)$$ Cuando el modelo se aplica sobre la serie diferenciada $d$ veces, se obtiene un ARIMA(p,d,q).
+Así, por ejemplo, un ARIMA(3,1,0) indica un proceso autorregresivo de orden 3 sobre la primera diferencia de la serie, sin componente de medias móviles.
+La importancia de los modelos ARIMA en predicción radica en que proporcionan un marco probabilístico capaz de representar de forma explícita las autocorrelaciones presentes en los datos.
+Al combinar la memoria de la serie (a través de la parte autorregresiva) con la influencia de shocks pasados (a través de la parte de medias móviles), permiten construir pronósticos condicionados a la información disponible en el tiempo t y obtener expresiones para la varianza del error de predicción.
+Esto posibilita no solo generar valores esperados futuros, sino también intervalos de confianza que cuantifican la incertidumbre inherente al proceso.
+En contextos financieros, donde variables como precios, tipos de cambio o índices muestran dependencia temporal y, con frecuencia, no estacionariedad, los modelos ARIMA se han consolidado como herramientas estándar para el pronóstico de corto y mediano plazo.</p>
+
+<h4>2.2.1 Estructura ARIMA(p, d, q)</h4>
+
+<p>El modelo se compone de tres elementos:</p>
+
+<p><strong>1. AR(p) - Autorregresivo:</strong> $$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \epsilon_t$$</p>
+
+<p><strong>2. I(d) - Integrado:</strong> Número de diferencias necesarias para conseguir estacionariedad</p>
+
+<p><strong>3. MA(q) - Media Móvil:</strong> $$Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cdots + \theta_q \epsilon_{t-q}$$</p>
+
+<h3>2.3 Metodología de Box–Jenkins</h3>
+
+<p>La implementación práctica de modelos ARIMA se estructura habitualmente mediante la metodología de Box–Jenkins, que organiza el proceso de modelización en cuatro etapas principales: identificación, estimación, diagnóstico y predicción.
+Este enfoque proporciona un marco iterativo que permite seleccionar, ajustar y validar el modelo más adecuado para una serie dada.</p>
+
+<h4>2.3.1 Identificación del modelo</h4>
+
+<p>La etapa de identificación tiene como objetivo determinar si la serie requiere diferenciación para alcanzar estacionariedad y proponer valores iniciales para los órdenes $p$ y $q$.
+En primer lugar, se evalúa la presencia de raíz unitaria mediante pruebas como la de Dickey–Fuller aumentada, cuya hipótesis nula plantea que la serie es no estacionaria.
+Si esta hipótesis no puede rechazarse, se procede a diferenciar la serie, aplicando una o más diferencias hasta que los estadísticos sugieran estacionariedad en la serie transformada.
+Una vez alcanzada una aproximación razonable a la estacionariedad, se analizan la función de autocorrelación (ACF) y la función de autocorrelación parcial (PACF).
+Patrones de decaimiento gradual o cortes abruptos en estas funciones proporcionan información sobre la posible estructura autorregresiva o de medias móviles subyacente.
+Por ejemplo, un corte claro en la PACF con ACF que decae de forma suave suele asociarse a un modelo AR, mientras que el patrón inverso sugiere la presencia de un modelo MA.</p>
+
+<h4>2.3.2 Estimación de parámetros</h4>
+
+<p>Definida una especificación preliminar ARIMA(p,d,q), la segunda etapa consiste en estimar sus parámetros.
+Este ajuste se realiza habitualmente mediante el método de máxima verosimilitud, que busca los valores de $ϕi, θj$ y de la varianza del término de error que maximizan la probabilidad de observar la muestra disponible, bajo el supuesto de que los errores $εt$ son aproximadamente independientes y con distribución normal.
+Los algoritmos numéricos empleados resuelven un problema de optimización non lineal y proporcionan estimadores puntuales junto con errores estándar que permiten evaluar la significancia estadística de los coeficientes.</p>
+
+<h4>2.3.3 Diagnóstico y validación del modelo</h4>
+
+<p>En la tercera etapa se analiza si el modelo ajustado describe adecuadamente la dinámica de la serie.
+Para que un modelo ARIMA sea considerado adecuado, los residuos estimados $εt=yt−yt$ deben comportarse como ruido blanco: no presentar autocorrelación significativa, tener media aproximadamente nula y varianza constante.
+Estas condiciones se verifican mediante la inspección gráfica de los residuos, el análisis de su ACF residual y pruebas de hipótesis como la de Ljung–Box, que contrasta de manera conjunta la ausencia de autocorrelación hasta un cierto número de rezagos.
+Además, se comparan especificaciones alternativas utilizando criterios de información como el AIC o el BIC, que equilibran la calidad del ajuste con la complejidad del modelo penalizando el exceso de parámetros.
+Un modelo con residuos no blancos o con criterios de información claramente peores que otro candidato se considera inadecuado y suele descartarse o reformularse, regresando a la fase de identificación.</p>
+
+<h4>2.3.4 Predicción o pronóstico</h4>
+
+<p>Una vez que el modelo ha superado los controles de diagnóstico, se utiliza para generar pronósticos a diferentes horizontes.
+Los modelos ARIMA permiten obtener, para cada horizonte $h$, un valor pronosticado $y^t+h∣t$ y la varianza asociada al error de predicción, lo que facilita la construcción de intervalos de confianza que reflejan la incertidumbre creciente a medida que aumenta el horizonte temporal.
+Estos pronósticos pueden evaluarse ex post mediante medidas como el error cuadrático medio (RMSE) o el error absoluto medio (MAE), comparando valores pronosticados con realizaciones observadas en una ventana de validación.
+En el caso del ETF GLTR, la aplicación de la metodología Box–Jenkins permite ajustar un modelo ARIMA coherente con la estructura de dependencia temporal identificada en la serie de precios y utilizarlo como herramienta para el pronóstico de corto plazo, aportando una base cuantitativa sólida para el análisis prospectivo y la gestión del riesgo financiero.</p>
+:::
+
+<!-- DESCRIPCION DE LA SERIE TEMPORAL -->
+
+::: {#descripcionserie .content-card}
+<h2>4. Descripción de la serie temporal</h2>
+
+```{r libraries}
 library(tidyverse)
 library(forecast)
 library(tseries)
@@ -638,174 +707,8 @@ library(dplyr)
 library(gt)
 ```
 
-```{r theme-professional, warning=FALSE}
-# Tema personalizado elegante
-theme_professional <- function() {
-  theme_minimal() +
-  theme(
-    plot.background = element_rect(fill = "white", color = NA),
-    panel.background = element_rect(fill = "#f8f9fa", color = NA),
-    panel.grid.major = element_line(color = "#e2e8f0", size = 0.4),
-    panel.grid.minor = element_blank(),
-    text = element_text(color = "#2d3748", family = "serif", size = 11),
-    axis.text = element_text(color = "#4a5568", size = 10),
-    axis.title = element_text(color = "#1a365d", face = "bold", size = 12),
-    plot.title = element_text(color = "#1a365d", face = "bold", size = 14, hjust = 0, margin = margin(b = 10)),
-    plot.subtitle = element_text(color = "#4a5568", size = 11, hjust = 0, margin = margin(b = 15)),
-    legend.background = element_rect(fill = "white", color = NA),
-    legend.text = element_text(color = "#4a5568", size = 10),
-    legend.title = element_text(color = "#1a365d", face = "bold", size = 10),
-    legend.position = "bottom"
-  )
-}
 
-theme_set(theme_professional())
-```
-
-::: abstract
-
-# Introducción
-
-Los mercados de metales preciosos constituyen componentes esenciales de la economía global cuya dinámica responde a múltiples factores interconectados: ciclos económicos, expectativas inflacionarias, volatilidad de sistemas financieros, demanda sectorial diversificada (manufactura, electrónica, automoción, joyería) y restricciones de oferta minera amplificadas por tensiones geopolíticas.
-La interacción simultánea de estos elementos genera comportamientos complejos que trascienden la simple oferta y demanda, demandando enfoques analíticos rigurosos para su comprensión.
-El ETF GLTR (abrdn Physical Precious Metals Basket Shares) proporciona exposición diversificada a cuatro metales preciosos—oro, plata, platino y paladio—cuya correlación con ciclos macroeconómicos varía según el metal específico y el contexto económico prevaleciente.
-Esta composición equilibrada lo posiciona como indicador agregado particularmente sensible de la salud de mercados de commodities globales, funcionando simultáneamente como proxy de demanda por activos refugio durante episodios de inestabilidad financiera severa o depreciación acelerada de monedas fiduciarias.
-Su estructura respaldada por depósito físico de metales en bóvedas certificadas elimina riesgos de contraparte, vinculando directamente el valor del fondo a precios spot de metales subyacentes.
-El análisis de series temporales resulta indispensable para decodificar esta complejidad multidimensional de mercados de metales preciosos.
-Permite identificar tendencias estructurales de mediano y largo plazo que subyacen a fluctuaciones de corto plazo, detectar y cuantificar patrones estacionales y componentes cíclicos recurrentes, reconocer puntos de quiebre que señalan cambios significativos en condiciones de equilibrio de mercado, medir la evolución dinámica de volatilidad para calibración precisa de riesgo, y generar pronósticos probabilísticos fundamentados que orienten decisiones de inversión y gestión de exposiciones en contextos de incertidumbre persistente.
-Este tipo de análisis trasciende significativamente el interés puramente financiero, poseyendo implicaciones para múltiples stakeholders con responsabilidades estratégicas distintas.
-Para inversores institucionales y de retail, la precisión predictiva sobre GLTR mejora sustancialmente estrategias de diversificación de portafolios y cobertura de riesgos sistémicos.
-Para gestores de riesgos en instituciones financieras, estos pronósticos alimentan directamente modelos de pérdidas potenciales, pruebas de estrés bajo escenarios adversos, y cálculos de requerimientos de capital regulatorio.
-Para autoridades monetarias y bancos centrales, la dinámica observable de metales preciosos proporciona señales tempranas sobre presiones inflacionarias emergentes, credibilidad de políticas monetarias implementadas, y cambios en expectativas de inversores globales respecto a estabilidad macroeconómica.
-En síntesis, la capacidad de anticipar cambios en mercados de materias primas resulta crítica para preservar estabilidad financiera sistémica y prevenir crisis financieras en contextos de creciente incertidumbre global.
-:::
-
-:::
-
-
-## Relevancia del Análisis
-
-::: {.alert .alert-info}
-📊 **Importancia del Análisis ARIMA**
-
-El modelo ARIMA es ampliamente reconocido como una herramienta estadística robusta para analizar y pronosticar series temporales en contextos donde prevalecen patrones de autocorrelación e integración.
-:::
-
-# Metodología
-
-GLTR (abrdn Physical Precious Metals Basket Shares ETF) fue seleccionado como instrumento de análisis por ser un fondo que proporciona exposición diversificada a cuatro metales preciosos: oro (65%), plata (27%), platino (4%) y paladio (4%).
-Esta composición permite capturar dinámicas agregadas de mercados de materias primas globales.
-Adicionalmente, GLTR respalda sus participaciones con depósito físico de metales en bóvedas certificadas, elimina riesgos de contraparte, y ofrece datos diarios públicamente disponibles con alta liquidez, características esenciales para análisis de series temporales robustas.​
-
-La ventana octubre 2022 – octubre 2025 captura la transición desde endurecimiento monetario máximo (tasas a 4.0% para combatir inflación de 40 años tras invasión de Rusia a Ucrania) hacia relajación monetaria con rally estructural de metales preciosos.
-2022: GLTR oscila sin dirección clara (\$70-95) bajo presiones contrapuestas de inflación extrema versus tasas reales elevadas.
-2023: Crisis bancaria (SVB, marzo) genera demanda puntual de refugio, pero se resuelve rápidamente.
-Año cierra plano (+2%).
-2024-2025: Rally sostenido impulsado por expectativas de recortes de tasas, deuda pública máxima, riesgos geopolíticos y sanciones a Rusia.
-GLTR sube 40% en diez meses; desempeño anual: 2024 (+21%), 2025 (+69%).
-Aproximadamente 750-760 observaciones diarias proporciona robustez estadística para ARIMA.
-El período captura cambio de régimen claro, validando la serie para pronóstico.
-
-## Concepto de Serie de Tiempo
-
-Una serie de tiempo se define como una colección ordenada de observaciones de una misma variable registradas en instantes discretos y equiespaciados.
-Desde el punto de vista probabilístico, puede interpretarse como una realización de un proceso estocástico ${Yt}t∈Z$, donde cada $Yt$ es una variable aleatoria indexada por el tiempo.
-A diferencia de los datos independientes e idénticamente distribuidos, en las series temporales las observaciones sucesivas suelen presentar dependencia, de modo que la distribución conjunta de $(Y_t, Y_t−_1,…,Y_t−_k)$ no puede factorizarse como producto de distribuciones marginales independientes.
-La teoría clásica considera que una serie observada puede descomponerse en componentes deterministas y estocásticos.
-En un esquema aditivo, se escribe: $Yt=Tt+St+Ct+It$ donde $Tt$ representa la tendencia de largo plazo, asociada a cambios sistemáticos en el nivel medio de la serie; St recoge la estacionalidad, esto es, patrones que se repiten con periodicidad fija (mensual, trimestral, anual); Ct refleja el componente cíclico, vinculado a oscilaciones de medio y largo plazo sin periodo exactamente constante, a menudo relacionadas con ciclos económicos; e It es el componente irregular, que agrupa las fluctuaciones aleatorias no explicadas por los anteriores.
-Un concepto central en la modelización es la estacionariedad.
-Una serie estacionaria en sentido débil presenta media constante $E(Yt)=μ$, varianza finita y constante $Var(Yt)=σ^2$ y una función de autocovarianza $γk=Cov(Y_t,Y_t−_k)$ que depende solo del desfase k, no del instante calendario.
-Esta propiedad permite aplicar la teoría de procesos lineales y garantiza estabilidad de la estructura de dependencia en el tiempo.
-En la práctica, muchas series financieras en niveles, como los precios de activos, no son estacionarias y requieren transformaciones (por ejemplo, diferencias o rendimientos logarítmicos) para aproximarse a procesos estacionarios antes de ser modeladas.
-
-### Componentes Fundamentales
-
-$$Y_t = T_t + S_t + C_t + I_t$$
-
-Donde cada componente representa:
-
--   $Y_t$: Valor observado en el tiempo $t$
--   $T_t$: Componente de tendencia (movimiento de largo plazo)
--   $S_t$: Componente estacional (patrones regulares)
--   $C_t$: Componente cíclico (fluctuaciones periódicas)
--   $I_t$: Componente irregular o ruido
-
-## Modelo ARIMA
-
-Dentro de los modelos lineales para series temporales, la familia ARIMA (AutoRegressive Integrated Moving Average) constituye una de las herramientas más utilizadas para describir y pronosticar procesos que pueden hacerse estacionarios mediante diferenciación.
-La idea fundamental es representar la serie transformada como combinación de un componente autorregresivo y uno de medias móviles, permitiendo capturar tanto la influencia de valores pasados como el efecto persistente de perturbaciones aleatorias.
-En su forma general, un modelo ARIMA(p,d,q) para una serie {Yt} se expresa mediante la acción conjunta de tres operadores: el operador de rezago B, definido por BYt=Yt−1; el operador de diferencia (1−B)\^d , aplicado d veces para eliminar tendencias estocásticas; y dos polinomios en B que describen la parte autorregresiva y de medias móviles.
-La estructura autorregresiva de orden p se recoge en la ecuación (1): yt=c+ϕ1yt−1+ϕ2yt−2+…+ϕpyt−p+εt (1)
-
-donde c es una constante, ϕi son los coeficientes autorregresivos y εt es un término de error, usualmente modelado como ruido blanco con media cero y varianza constante.
-La parte integrada del modelo se vincula al número de diferencias necesarias para lograr estacionariedad.
-La primera y segunda diferencias ilustran los casos d=1 y d=2: $$y′t=yt−y_t−_1  \ (2)$$ $$yt′′=(yt−y_t−_1)−(y_t−_1−y_t−_2)=yt−2yt−1+yt−2   \  (3)$$ Por su parte, el componente de medias móviles de orden q se representa en la ecuación (4): $$yt=c+εt+θ1εt−1+θ2εt−2+…+θqεt−q\ (4)$$ donde $θj$ son los coeficientes de medias móviles.
-La combinación de las partes AR y MA para una serie ya estacionaria da lugar al modelo ARMA(p,q), cuya forma general se sintetiza en (5): $$yt=c+ϕ1yt−1+ϕ2yt−2+⋯+ϕpyt−p+εt+θ1εt−1+θ2εt−2+⋯+θqεt−q   \   (5)$$ Cuando el modelo se aplica sobre la serie diferenciada $d$ veces, se obtiene un ARIMA(p,d,q).
-Así, por ejemplo, un ARIMA(3,1,0) indica un proceso autorregresivo de orden 3 sobre la primera diferencia de la serie, sin componente de medias móviles.
-La importancia de los modelos ARIMA en predicción radica en que proporcionan un marco probabilístico capaz de representar de forma explícita las autocorrelaciones presentes en los datos.
-Al combinar la memoria de la serie (a través de la parte autorregresiva) con la influencia de shocks pasados (a través de la parte de medias móviles), permiten construir pronósticos condicionados a la información disponible en el tiempo t y obtener expresiones para la varianza del error de predicción.
-Esto posibilita no solo generar valores esperados futuros, sino también intervalos de confianza que cuantifican la incertidumbre inherente al proceso.
-En contextos financieros, donde variables como precios, tipos de cambio o índices muestran dependencia temporal y, con frecuencia, no estacionariedad, los modelos ARIMA se han consolidado como herramientas estándar para el pronóstico de corto y mediano plazo.
-
-### Estructura ARIMA(p, d, q)
-
-El modelo se compone de tres elementos:
-
-**1. AR(p) - Autorregresivo:** $$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \epsilon_t$$
-
-**2. I(d) - Integrado:** Número de diferencias necesarias para conseguir estacionariedad
-
-**3. MA(q) - Media Móvil:** $$Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cdots + \theta_q \epsilon_{t-q}$$ \## Metodología de Box–Jenkins.
-La implementación práctica de modelos ARIMA se estructura habitualmente mediante la metodología de Box–Jenkins, que organiza el proceso de modelización en cuatro etapas principales: identificación, estimación, diagnóstico y predicción.
-Este enfoque proporciona un marco iterativo que permite seleccionar, ajustar y validar el modelo más adecuado para una serie dada.
-
-### Identificación del modelo
-
-La etapa de identificación tiene como objetivo determinar si la serie requiere diferenciación para alcanzar estacionariedad y proponer valores iniciales para los órdenes $p$ y $q$.
-En primer lugar, se evalúa la presencia de raíz unitaria mediante pruebas como la de Dickey–Fuller aumentada, cuya hipótesis nula plantea que la serie es no estacionaria.
-Si esta hipótesis no puede rechazarse, se procede a diferenciar la serie, aplicando una o más diferencias hasta que los estadísticos sugieran estacionariedad en la serie transformada.
-Una vez alcanzada una aproximación razonable a la estacionariedad, se analizan la función de autocorrelación (ACF) y la función de autocorrelación parcial (PACF).
-Patrones de decaimiento gradual o cortes abruptos en estas funciones proporcionan información sobre la posible estructura autorregresiva o de medias móviles subyacente.
-Por ejemplo, un corte claro en la PACF con ACF que decae de forma suave suele asociarse a un modelo AR, mientras que el patrón inverso sugiere la presencia de un modelo MA.
-
-### Estimación de parámetros
-
-Definida una especificación preliminar ARIMA(p,d,q), la segunda etapa consiste en estimar sus parámetros.
-Este ajuste se realiza habitualmente mediante el método de máxima verosimilitud, que busca los valores de $ϕi, θj$ y de la varianza del término de error que maximizan la probabilidad de observar la muestra disponible, bajo el supuesto de que los errores $εt$ son aproximadamente independientes y con distribución normal.
-Los algoritmos numéricos empleados resuelven un problema de optimización no lineal y proporcionan estimadores puntuales junto con errores estándar que permiten evaluar la significancia estadística de los coeficientes.
-
-### Diagnóstico y validación del modelo
-
-En la tercera etapa se analiza si el modelo ajustado describe adecuadamente la dinámica de la serie.
-Para que un modelo ARIMA sea considerado adecuado, los residuos estimados $εt=yt−yt$ deben comportarse como ruido blanco: no presentar autocorrelación significativa, tener media aproximadamente nula y varianza constante.
-Estas condiciones se verifican mediante la inspección gráfica de los residuos, el análisis de su ACF residual y pruebas de hipótesis como la de Ljung–Box, que contrasta de manera conjunta la ausencia de autocorrelación hasta un cierto número de rezagos.
-Además, se comparan especificaciones alternativas utilizando criterios de información como el AIC o el BIC, que equilibran la calidad del ajuste con la complejidad del modelo penalizando el exceso de parámetros.
-Un modelo con residuos no blancos o con criterios de información claramente peores que otro candidato se considera inadecuado y suele descartarse o reformularse, regresando a la fase de identificación.
-
-### Predicción o pronóstico
-
-Una vez que el modelo ha superado los controles de diagnóstico, se utiliza para generar pronósticos a diferentes horizontes.
-Los modelos ARIMA permiten obtener, para cada horizonte $h$, un valor pronosticado $y^t+h∣t$ y la varianza asociada al error de predicción, lo que facilita la construcción de intervalos de confianza que reflejan la incertidumbre creciente a medida que aumenta el horizonte temporal.
-Estos pronósticos pueden evaluarse ex post mediante medidas como el error cuadrático medio (RMSE) o el error absoluto medio (MAE), comparando valores pronosticados con realizaciones observadas en una ventana de validación.
-En el caso del ETF GLTR, la aplicación de la metodología Box–Jenkins permite ajustar un modelo ARIMA coherente con la estructura de dependencia temporal identificada en la serie de precios y utilizarlo como herramienta para el pronóstico de corto plazo, aportando una base cuantitativa sólida para el análisis prospectivo y la gestión del riesgo financiero.
-
-### Ventajas Metodológicas
-
-::: {.alert .alert-success}
-✓ **Características del Modelo ARIMA:**
-
--   Captura patrones complejos de autocorrelación
--   Flexible para diferentes estructuras de datos
--   Ampliamente validado en literatura académica
--   Genera pronósticos confiables a corto-mediano plazo
--   Fundamentado en teoría estadística sólida
-:::
-
-# Descripción
-
---- Carga y Preparación----
-
-```{r data-preparation, include=FALSE}
+```{r data-preparation}
 
 AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
                          from = "2022-10-31")
@@ -823,21 +726,11 @@ GLTR_df <- data.frame(
 )
 ```
 
-## Descripción de la serie
+<p>El abrdn Physical Precious Metals Basket Shares ETF (GLTR) es un fondo cotizado en bolsa que busca replicar el comportamiento conjunto de una canasta de metales preciosos físicos, integrada principalmente por oro, plata, platino y paladio. Fue lanzado en octubre de 2010, en un contexto posterior a la crisis financiera global de 2008–2009, cuando se intensificó el interés de los inversionistas por activos refugio y vehículos que ofrecieran exposición directa a metales sin necesidad de almacenar lingotes de forma individual.</p>
 
-###Ficha técnica
+<p>GLTR está estructurado como un grantor trust respaldado por lingotes físicos, custodiados en bóvedas certificadas en centros financieros como Londres y Zúrich. Esta configuración evita riesgos asociados a derivados y contratos de futuros, vinculando el valor del fondo directamente a los precios spot de los metales subyacentes. El activo bajo gestión asciende a aproximadamente 1.850 millones de USD, validando su relevancia y liquidez en los mercados institucionales y de retail.</p>
 
-<p>
-
-El abrdn Physical Precious Metals Basket Shares ETF (GLTR) es un fondo cotizado en bolsa que busca replicar el comportamiento conjunto de una canasta de metales preciosos físicos, integrada principalmente por oro, plata, platino y paladio.
-Fue lanzado en octubre de 2010, en un contexto posterior a la crisis financiera global de 2008–2009, cuando se intensificó el interés de los inversionistas por activos refugio y vehículos que ofrecieran exposición directa a metales sin necesidad de almacenar lingotes de forma individual.
-GLTR está estructurado como un grantor trust respaldado por lingotes físicos, custodiados en bóvedas certificadas en centros financieros como Londres y Zúrich.
-Esta configuración evita riesgos asociados a derivados y contratos de futuros, vinculando el valor del fondo directamente a los precios spot de los metales subyacentes.
-El activo bajo gestión asciende a aproximadamente 1.850 millones de USD, validando su relevancia y liquidez en los mercados institucionales y de retail.
-
-<p>
-
-```{r ficha técnica-stats, include=FALSE}
+```{r ficha técnica-stats}
 # Crear tabla comparativa estilo profesional
 ficha_tecnica <- data.frame(
   Característica = c(
@@ -921,7 +814,6 @@ ficha_tecnica %>%
               ))
 ```
 
-###Distribución de la canasta
 
 ```{r dona interactiva}
 # Datos de composición del ETF
@@ -1019,17 +911,11 @@ donut_interactive <- plot_ly(
 donut_interactive
 ```
 
-<p>
+<p>La composición refleja que GLTR está dominado por oro y plata (>92 % en conjunto), mientras que platino y paladio proporcionan exposición industrial complementaria. Esta ponderación es deliberada: oro y plata funcionan como depósitos de valor refugio, mientras que platino y paladio están ligados a demanda industrial. De este modo, GLTR combina protección contra riesgos macroeconómicos con exposición a fundamentales de demanda física de metales preciosos.</p>
 
-La composición refleja que GLTR está dominado por oro y plata (\>92 % en conjunto), mientras que platino y paladio proporcionan exposición industrial complementaria.
-Esta ponderación es deliberada: oro y plata funcionan como depósitos de valor refugio, mientras que platino y paladio están ligados a demanda industrial.
-De este modo, GLTR combina protección contra riesgos macroeconómicos con exposición a fundamentales de demanda física de metales preciosos.
+<h3>4.1 Contexto histórico</h3>
 
-## Contexto histórico.
-
-El análisis de series de tiempo requiere entender el contexto económico que determina el comportamiento.
-Como ETF de metales físicos, GLTR refleja ciclos macroeconómicos, decisiones de bancos centrales y eventos geopolíticos.
-Desde su lanzamiento en 2010, ha experimentado múltiples regímenes: expansiones monetarias post-crisis, normalización, shocks geopolíticos, crisis financieras y el actual rally de máximos históricos.
+<p>El análisis de series de tiempo requiere entender el contexto económico que determina el comportamiento. Como ETF de metales físicos, GLTR refleja ciclos macroeconómicos, decisiones de bancos centrales y eventos geopolíticos. Desde su lanzamiento en 2010, ha experimentado múltiples regímenes: expansiones monetarias post-crisis, normalización, shocks geopolíticos, crisis financieras y el actual rally de máximos históricos.</p>
 
 ```{r Serie de niveles}
 # Descargar datos
@@ -1054,15 +940,11 @@ plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
   )
 ```
 
-La trayectoria completa de GLTR durante los 15 años de historia desde su creación muestra cinco fases claramente diferenciadas.
-La ventana de análisis (2022–2025) captura la transición crítica desde volatilidad indeterminada hacia rally sólido, justificando ARIMA para modelar cambios de régimen.
+<h4>4.1.1 Rally post-crisis y búsqueda de refugio (2010–2012)</h4>
 
-### Rally post-crisis y búsqueda de refugio (2010–2012)
+<p>GLTR se lanza en octubre de 2010 tras la crisis financiera de 2008–2009, cuando bancos centrales implementan flexibilización cuantitativa (QE) masiva para estabilizar mercados. La Reserva Federal inicia programas de compra de activos sin precedentes (QE1, QE2), el Banco Central Europeo y el Banco de Japón adoptan políticas ultra-expansivas, inyectando miles de millones de dólares en liquidez al sistema financiero.
 
-GLTR se lanza en octubre de 2010 tras la crisis financiera de 2008–2009, cuando bancos centrales implementan flexibilización cuantitativa (QE) masiva para estabilizar mercados.
-La Reserva Federal inicia programas de compra de activos sin precedentes (QE1, QE2), el Banco Central Europeo y el Banco de Japón adoptan políticas ultra-expansivas, inyectando miles de millones de dólares en liquidez al sistema financiero.​ En este contexto de expansión monetaria extrema, surge demanda masiva por metales como cobertura contra inflación futura y depreciación de monedas fiduciarias.
-Durante 2010–2012, GLTR sube de &#95–100 a \~&#115–120, reflejando el rally del oro de &#1.200 a 1.900+ USD/oz y la plata de &#18 a 48+ USD/oz en sus máximos de abril de 2011.
-La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y temor inflacionario implican apreciación de metales con pocas correcciones
+En este contexto de expansión monetaria extrema, surge demanda masiva por metales como cobertura contra inflación futura y depreciación de monedas fiduciarias. Durante 2010–2012, GLTR sube de &#95–100 a \~&#115–120, reflejando el rally del oro de &#1.200 a 1.900+ USD/oz y la plata de &#18 a 48+ USD/oz en sus máximos de abril de 2011. La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y temor inflacionario implican apreciación de metales con pocas correcciones</p>
 
 ```{r 2010-2012}
 # Plata 2010–2012 (proxy: SLV)
@@ -1087,38 +969,19 @@ g_plata_10_12_int
 
 ```
 
-La Figura 3 muestra el comportamiento de la plata entre 2010 y 2012 (proxy SLV), con un rally acelerado hasta máximos históricos en 2011 (\~\$48/oz) y una posterior corrección moderada hacia finales de 2011 e inicios de 2012.
-Esta dinámica es consistente con el contexto de expansión monetaria extrema y temor inflacionario posterior a la crisis de 2008–2009, en el que los metales preciosos se revalorizaron de forma pronunciada como depósitos de valor refugio.
-La volatilidad observada en 2011 refleja especulación intensiva y ajustes de portafolio conforme aumentaban preocupaciones sobre sostenibilidad de precios.
+<p>La Figura 3 muestra el comportamiento de la plata entre 2010 y 2012 (proxy SLV), con un rally acelerado hasta máximos históricos en 2011 (\~\$48/oz) y una posterior corrección moderada hacia finales de 2011 e inicios de 2012. Esta dinámica es consistente con el contexto de expansión monetaria extrema y temor inflacionario posterior a la crisis de 2008–2009, en el que los metales preciosos se revalorizaron de forma pronunciada como depósitos de valor refugio. La volatilidad observada en 2011 refleja especulación intensiva y ajustes de portafolio conforme aumentaban preocupaciones sobre sostenibilidad de precios.</p>
 
-### Corrección y consolidación durante normalización monetaria (2013–2015)
+<h4>4.1.2 Corrección y consolidación durante normalización monetaria (2013–2015)</h4>
 
-En 2013, la Reserva Federal anuncia el "tapering" (reducción gradual) de compras de activos y la economía estadounidense muestra recuperación más sólida, aumentando expectativas de subidas futuras en tasas de interés.
-Con tasas reales esperadas más altas, el costo de oportunidad de mantener oro aumenta.
-Además, el dólar estadounidense se fortalece, encareciendo commodities para inversionistas internacionales y presionando precios a la baja.​ GLTR cae sostenidamente desde máximos de 2011–2012 a mínimos cercanos a \$50–60 hacia mediados de 2015.
-Este período de corrección es completamente explicable por los fundamentales: normalización monetaria y fortalecimiento del dólar.
+<p>En 2013, la Reserva Federal anuncia el "tapering" (reducción gradual) de compras de activos y la economía estadounidense muestra recuperación más sólida, aumentando expectativas de subidas futuras en tasas de interés. Con tasas reales esperadas más altas, el costo de oportunidad de mantener oro aumenta. Además, el dólar estadounidense se fortalece, encareciendo commodities para inversionistas internacionales y presionando precios a la baja. GLTR cae sostenidamente desde máximos de 2011–2012 a mínimos cercanos a \$50–60 hacia mediados de 2015. Este período de corrección es completamente explicable por los fundamentales: normalización monetaria y fortalecimiento del dólar.</p>
 
-### Recuperación moderada bajo incertidumbre política (2016–2019)
+<h4>4.1.3 Recuperación moderada bajo incertidumbre política (2016–2019)</h4>
 
-Entre 2016 y 2019, la trayectoria de GLTR es menos volatil pero aún presenta repuntes puntuales asociados a episodios específicos de incertidumbre.
-El Brexit en junio de 2016, la elección de Donald Trump en noviembre de 2016, y tensiones comerciales crecientes entre Estados Unidos y China a partir de 2018 generan episodios de aversión al riesgo que benefician temporalmente al oro y otros metales refugio.
-Sin embargo, estos repuntes son tácticos más que estructurales.
-Las subidas de tasas realizadas por la Reserva Federal entre 2015 y 2018, junto con la fortaleza del dólar, limitan que GLTR consolide ganancias sostenidas.
-El precio del ETF oscila entre &#65–&#85 durante este período, formando un patrón de recuperación lenta pero volátil, donde cada crisis geopolítica genera un pico temporal seguido por corrección cuando la tensión se disipa.
+<p>Entre 2016 y 2019, la trayectoria de GLTR es menos volatil pero aún presenta repuntes puntuales asociados a episodios específicos de incertidumbre. El Brexit en junio de 2016, la elección de Donald Trump en noviembre de 2016, y tensiones comerciales crecientes entre Estados Unidos y China a partir de 2018 generan episodios de aversión al riesgo que benefician temporalmente al oro y otros metales refugio. Sin embargo, estos repuntes son tácticos más que estructurales. Las subidas de tasas realizadas por la Reserva Federal entre 2015 y 2018, junto con la fortaleza del dólar, limitan que GLTR consolide ganancias sostenidas. El precio del ETF oscila entre &#65–&#85 durante este período, formando un patrón de recuperación lenta pero volátil, donde cada crisis geopolítica genera un pico temporal seguido por corrección cuando la tensión se disipa.</p>
 
-### Pandemia COVID-19 y máximos históricos (2020)
+<h4>4.1.4 Pandemia COVID-19 y máximos históricos (2020)</h4>
 
-El año 2020 es un punto de inflexión crítico.
-En marzo de 2020, la pandemia desencadena un pánico financiero global sin precedentes en la era moderna.
-Los mercados accionarios caen más de 30 % en semanas.
-El VIX (índice de volatilidad) alcanza máximos históricos.
-Los inversionistas huyen masivamente hacia activos considerados seguros.
-En respuesta, y con una velocidad extraordinaria, los bancos centrales lanzan programas de estímulo sin paralelo histórico: La Reserva Federal reduce tasas a cero y relanza compra de activos ("QE infinito").
-El Banco Central Europeo amplía su programa de compra de bonos.
-Los gobiernos implementan paquetes fiscales masivos de miles de billones de dólares.
-En este contexto extremo, el oro se comporta de forma excepcional.
-Alcanza máximos históricos por encima de 2.000 USD/oz hacia agosto de 2020.
-GLTR refleja este movimiento con un rally espectacular de \~30–40 % anual.
+<p>El año 2020 es un punto de inflexión crítico. En marzo de 2020, la pandemia desencadena un pánico financiero global sin precedentes en la era moderna. Los mercados accionarios caen más de 30 % en semanas. El VIX (índice de volatilidad) alcanza máximos históricos. Los inversionistas huyen masivamente hacia activos considerados seguros. En respuesta, y con una velocidad extraordinaria, los bancos centrales lanzan programas de estímulo sin paralelo histórico: La Reserva Federal reduce tasas a cero y relanza compra de activos ("QE infinito"). El Banco Central Europeo amplía su programa de compra de bonos. Los gobiernos implementan paquetes fiscales masivos de miles de billones de dólares. En este contexto extremo, el oro se comporta de forma excepcional. Alcanza máximos históricos por encima de 2.000 USD/oz hacia agosto de 2020. GLTR refleja este movimiento con un rally espectacular de \~30–40 % anual.</p>
 
 ```{r 2020}
 # Descargar datos si no los tienes
@@ -1188,25 +1051,19 @@ plot_ly(datos_2020, x = ~Fecha) %>%
   )
 ```
 
-La serie muestra un colapso inicial agudo a mediados de marzo (cuando el precio cae a &#65–70) debido al pánico de liquidación indiscriminada.
-Sin embargo, a partir de finales de marzo/principios de abril, comienza un rally acelerado y sostenido, con GLTR alcanzando nuevos máximos de \$#105+ hacia finales de año.
-Este comportamiento es textualmente consistente con la teoría: metales preciosos actúan como refugio en contextos de riesgo sistémico extremo, pero también se benefician de la expansión monetaria ultra-expansiva que caracteriza la respuesta de los bancos centrales.
+<p>La serie muestra un colapso inicial agudo a mediados de marzo (cuando el precio cae a &#65–70) debido al pánico de liquidación indiscriminada. Sin embargo, a partir de finales de marzo/principios de abril, comienza un rally acelerado y sostenido, con GLTR alcanzando nuevos máximos de \$#105+ hacia finales de año. Este comportamiento es textualmente consistente con la teoría: metales preciosos actúan como refugio en contextos de riesgo sistémico extremo, pero también se benefician de la expansión monetaria ultra-expansiva que caracteriza la respuesta de los bancos centrales.</p>
 
-### Normalización post-pandemia y corrección (2021)
+<h4>4.1.5 Normalización post-pandemia y corrección (2021)</h4>
 
-En 2021, a medida que avanzan las campañas de vacunación y la actividad económica se recupera, el panorama vuelve a cambiar.
-Los inversionistas comienzan a rotar capital desde activos defensivos hacia activos cíclicos.
-Las expectativas de inflación permanecen elevadas, pero ya están incorporadas en los precios.
-Los bancos centrales comienzan a discutir públicamente la reducción de estímulos ("taper talk").
-El resultado es una corrección en GLTR de aproximadamente –10 % en el año.
-El oro retrocede desde máximos de &#2.000+ a niveles cercanos a &#1.700–1.800.
-GLTR refleja esta dinámica con una serie principalmente lateral con tendencia bajista moderada.
-Este comportamiento no es sorpresa: representa la normalización esperada tras un pico extremo de aversión al riesgo.
+<p>En 2021, a medida que avanzan las campañas de vacunación y la actividad económica se recupera, el panorama vuelve a cambiar. Los inversionistas comienzan a rotar capital desde activos defensivos hacia activos cíclicos. Las expectativas de inflación permanecen elevadas, pero ya están incorporadas en los precios. Los bancos centrales comienzan a discutir públicamente la reducción de estímulos ("taper talk"). El resultado es una corrección en GLTR de aproximadamente –10 % en el año. El oro retrocede desde máximos de &#2.000+ a niveles cercanos a &#1.700–1.800. GLTR refleja esta dinámica con una serie principalmente lateral con tendencia bajista moderada. Este comportamiento no es sorpresa: representa la normalización esperada tras un pico extremo de aversión al riesgo.</p>
 
-###Guerra Rusia-Ucrania, inflación histórica y volatilidad sin precedentes (2022) El 24 de febrero de 2022, Rusia invade Ucrania, desencadenando la mayor crisis geopolítica en Europa en 30 años.
-El shock de oferta en energía (petróleo sube de &#80 a &#120+ por barril, gas natural europeo se multiplica por 5) y alimentos (trigo, maíz, aceites vegetales) dispara inflación global a máximos de 40+ años: inflación estadounidense alcanza 9.1% en junio de 2022, inflación europea supera 10%.​ Simultáneamente, la Reserva Federal realiza subidas de tasas históricas bajo Jerome Powell: de prácticamente 0% en marzo de 2022 a más de 4% hacia finales de año, velocidad más rápida desde los años 1980s bajo Paul Volcker.
-El Banco Central Europeo, Banco de Inglaterra y otros bancos centrales siguen decisiones de endurecimiento similares, marcando el fin definitivo de la era de dinero barato iniciada en 2008.​ GLTR experimenta choque de fuerzas contradictorias: riesgo geopolítico extremo e inflación acelerada favorecen oro como cobertura, pero tasas de interés reales muy altas (superiores a 2% en términos reales hacia finales de 2022) encarecen dramáticamente su costo de oportunidad.
-El resultado es volatilidad extrema con GLTR oscilando entre \$70–95, cerrando prácticamente plano (\~0% anual) sin dirección clara.
+<h4>4.1.6 Guerra Rusia-Ucrania, inflación histórica y volatilidad sin precedentes (2022)</h4>
+
+<p>El 24 de febrero de 2022, Rusia invade Ucrania, desencadenando la mayor crisis geopolítica en Europa en 30 años. El shock de oferta en energía (petróleo sube de &#80 a &#120+ por barril, gas natural europeo se multiplica por 5) y alimentos (trigo, maíz, aceites vegetales) dispara inflación global a máximos de 40+ años: inflación estadounidense alcanza 9.1% en junio de 2022, inflación europea supera 10%.
+
+Simultáneamente, la Reserva Federal realiza subidas de tasas históricas bajo Jerome Powell: de prácticamente 0% en marzo de 2022 a más de 4% hacia finales de año, velocidad más rápida desde los años 1980s bajo Paul Volcker. El Banco Central Europeo, Banco de Inglaterra y otros bancos centrales siguen decisiones de endurecimiento similares, marcando el fin definitivo de la era de dinero barato iniciada en 2008.
+
+GLTR experimenta choque de fuerzas contradictorias: riesgo geopolítico extremo e inflación acelerada favorecen oro como cobertura, pero tasas de interés reales muy altas (superiores a 2% en términos reales hacia finales de 2022) encarecen dramáticamente su costo de oportunidad. El resultado es volatilidad extrema con GLTR oscilando entre \$70–95, cerrando prácticamente plano (\~0% anual) sin dirección clara.</p>
 
 ```{r Oro 2022}
 # Oro 2022 (proxy: GLD)
@@ -1230,16 +1087,13 @@ g_oro_2022_int <- ggplotly(g_oro_2022)
 g_oro_2022_int
 ```
 
-La Figura 5 presenta la evolución del precio del oro durante 2022 (proxy GLD), donde se observa un repunte brusco tras la invasión de Ucrania en febrero-marzo, alcanzando niveles cercanos a &#190 por acción de GLD (equivalente a \~&#1.950/oz de oro spot), seguido de una corrección sostenida a medida que se intensifica el ciclo de subidas de tasas durante el segundo semestre.
-Este patrón respalda la idea de un año dominado por fuerzas contrapuestas: el oro reacciona inicialmente como activo refugio ante el choque geopolítico, pero pierde tracción cuando el endurecimiento monetario eleva de forma significativa las tasas reales, haciendo atractivos activos remunerados (bonos, depósitos) frente a oro que no genera rendimiento.
+<p>La Figura 5 presenta la evolución del precio del oro durante 2022 (proxy GLD), donde se observa un repunte brusco tras la invasión de Ucrania en febrero-marzo, alcanzando niveles cercanos a &#190 por acción de GLD (equivalente a \~&#1.950/oz de oro spot), seguido de una corrección sostenida a medida que se intensifica el ciclo de subidas de tasas durante el segundo semestre. Este patrón respalda la idea de un año dominado por fuerzas contrapuestas: el oro reacciona inicialmente como activo refugio ante el choque geopolítico, pero pierde tracción cuando el endurecimiento monetario eleva de forma significativa las tasas reales, haciendo atractivos activos remunerados (bonos, depósitos) frente a oro que no genera rendimiento.</p>
 
-### Crisis bancaria regional y reactivación de demanda refugio (marzo 2023)
+<h4>4.1.7 Crisis bancaria regional y reactivación de demanda refugio (marzo 2023)</h4>
 
-En marzo de 2023, la quiebra de Silicon Valley Bank (SVB) y otros bancos regionales (Signature Bank, First Republic) desencadena pánico bancario por riesgo de liquidez, no por insolvencia sistémica como en 2008.
-Los inversionistas reaccionan inmediatamente con demanda masiva por oro como refugio, que dispara por encima de 2.000 USD/oz en días.
-GLTR experimenta pico abrupto de 5–8%.​ Sin embargo, este es un evento táctico, no estructural.
-Respuesta rápida de autoridades (garantías de depósitos, líneas de crédito de emergencia) alivia tensiones y GLTR retrocede gradualmente, cerrando 2023 con rentabilidad ligeramente positiva de +2%.
-El patrón es típico de shocks puntuales que generan picos temporales pero no tendencias sostenidas.
+<p>En marzo de 2023, la quiebra de Silicon Valley Bank (SVB) y otros bancos regionales (Signature Bank, First Republic) desencadena pánico bancario por riesgo de liquidez, no por insolvencia sistémica como en 2008. Los inversionistas reaccionan inmediatamente con demanda masiva por oro como refugio, que dispara por encima de 2.000 USD/oz en días. GLTR experimenta pico abrupto de 5–8%.
+
+Sin embargo, este es un evento táctico, no estructural. Respuesta rápida de autoridades (garantías de depósitos, líneas de crédito de emergencia) alivia tensiones y GLTR retrocede gradualmente, cerrando 2023 con rentabilidad ligeramente positiva de +2%. El patrón es típico de shocks puntuales que generan picos temporales pero no tendencias sostenidas.</p>
 
 ```{r 2023 vs 2024}
 # Descargar datos para 2023 y 2024
@@ -1335,15 +1189,13 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
   )
 ```
 
-La Figura 4 contrasta ambos períodos: la crisis bancaria (febrero–mayo 2023) muestra trayectoria errática con cambios frecuentes, mientras el rally 2024 (junio–octubre) exhibe pendiente alcista prácticamente lineal sin correcciones, evidenciando la diferencia entre evento táctico y fundamentales sólidos sostenidos
+<p>La Figura 4 contrasta ambos períodos: la crisis bancaria (febrero–mayo 2023) muestra trayectoria errática con cambios frecuentes, mientras el rally 2024 (junio–octubre) exhibe pendiente alcista prácticamente lineal sin correcciones, evidenciando la diferencia entre evento táctico y fundamentales sólidos sostenidos</p>
 
-### Rally estructural y máximos históricos (2024–2025)
+<h4>4.1.8 Rally estructural y máximos históricos (2024–2025)</h4>
 
-A partir de enero de 2024, confluyen cuatro factores estructurales que generan rally robusto: la deuda pública en máximos históricos favorece oro como cobertura inflacionaria, los bancos centrales señalizan futuras reducciones de tasas reduciendo costo de oportunidad del oro, la guerra Ucrania y tensiones comerciales EE.UU.-China sustentan demanda de refugio, y las sanciones a Rusia presionan suministro de paladio.​ El resultado es una apreciación pronunciada: GLTR sube de \$100 a \$140 en diez meses (ganancia de +40%), oro alcanza máximos de 2.500+ USD/oz, y plata alcanza máximos no vistos en década aproximadamente \$30–32/oz.
-La aceleración es concluyente en términos anuales: 2023 cierra plano con +2.1%, 2024 muestra rally de +21.2%, y 2025 hasta octubre registra +68.7%, confirmando intensificación de factores fundamentales.
+<p>A partir de enero de 2024, confluyen cuatro factores estructurales que generan rally robusto: la deuda pública en máximos históricos favorece oro como cobertura inflacionaria, los bancos centrales señalizan futuras reducciones de tasas reduciendo costo de oportunidad del oro, la guerra Ucrania y tensiones comerciales EE.UU.-China sustentan demanda de refugio, y las sanciones a Rusia presionan suministro de paladio.
 
-Figura 5.
-Desempeño comparativo por año (2023–2025)
+El resultado es una apreciación pronunciada: GLTR sube de \$100 a \$140 en diez meses (ganancia de +40%), oro alcanza máximos de 2.500+ USD/oz, y plata alcanza máximos no vistos en década aproximadamente \$30–32/oz. La aceleración es concluyente en términos anuales: 2023 cierra plano con +2.1%, 2024 muestra rally de +21.2%, y 2025 hasta octubre registra +68.7%, confirmando intensificación de factores fundamentales.</p>
 
 ```{r Desempeño por año}
 # Descargar datos desde 2023
@@ -1499,11 +1351,11 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
   )
 ```
 
-La serie captura transición crítica desde crisis táctica en 2023 hasta rally estructural en 2024–2025, evidenciando no estacionariedad que justifica ARIMA para capturar cambios de régimen y realizar pronósticos condicionales al entorno macroeconómico actual.
+<p>La serie captura transición crítica desde crisis táctica en 2023 hasta rally estructural en 2024–2025, evidenciando no estacionariedad que justifica ARIMA para capturar cambios de régimen y realizar pronósticos condicionales al entorno macroeconómico actual.</p>
 
-### Síntesis: Estructura de la serie y factores determinantes.
+<h4>4.1.9 Síntesis: Estructura de la serie y factores determinantes</h4>
 
-La trayectoria de 15 años (2010–2025) se sintetiza de la siguiente manera:
+<p>La trayectoria de 15 años (2010–2025) se sintetiza de la siguiente manera:</p>
 
 ```{r T de sintesis histórica}
 
@@ -1591,16 +1443,19 @@ sintesis_historica %>%
   )
 ```
 
-GLTR no es estacionaria porque está impulsada por ciclos macroeconómicos, decisiones de bancos centrales y cambios en percepción de riesgo global—todos no estacionarios.
-La ventana 2022–2025 captura transición clara desde volatilidad extrema (2022) a rally sólido (2024–2025), validando aplicabilidad de ARIMA para capturar cambios de régimen y realizar pronósticos condicionales.​
+<p>GLTR no es estacionaria porque está impulsada por ciclos macroeconómicos, decisiones de bancos centrales y cambios en percepción de riesgo global—todos no estacionarios. La ventana 2022–2025 captura transición clara desde volatilidad extrema (2022) a rally sólido (2024–2025), validando aplicabilidad de ARIMA para capturar cambios de régimen y realizar pronósticos condicionales.</p>
 
-# Estadisticas descriptivas
 
-### Tabla indicadores estadisticos
+<h3>4.2 Estadísticas descriptivas</h3>
 
-La Tabla 2 presenta un resumen numérico de los estadísticos descriptivos fundamentales del ETF GLTR durante el período de análisis comprendido entre octubre de 2022 y octubre de 2025.
+<h4>4.2.1 Tabla indicadores estadísticos</h4>
 
-```{Tabla de estadisticas descriptivas}
+<p>La Tabla 2 presenta un resumen numérico de los estadísticos descriptivos fundamentales del ETF GLTR durante el período de análisis comprendido entre octubre de 2022 y octubre de 2025.</p>
+
+```{r estadisticas basicas, include=FALSE}
+library(gt)
+library(dplyr)
+
 # Calcular estadísticas básicas
 estadisticas_basicas <- GLTR_df %>%
   filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
@@ -1650,7 +1505,7 @@ tabla_estadisticas <- estadisticas_df %>%
   # Estilo para encabezado de columnas
   tab_style(
     style = list(
-      cell_fill(color = "#957fef"),
+      cell_fill(color = "#2E86AB"),
       cell_text(color = "white", weight = "bold")
     ),
     locations = cells_column_labels()
@@ -1684,21 +1539,19 @@ tabla_estadisticas <- estadisticas_df %>%
 
 # Mostrar la tabla
 tabla_estadisticas
-
 ```
 
-El precio promedio fue de &#107.28 USD con una mediana de &#101.79 USD.
-La diferencia de &#5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas.
-La desviación estándar de &#22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
-El análisis de cuartiles revela una perspectiva más matizada: con Q1 en &#88.58 USD y Q3 en &#119.92 USD, el rango intercuartílico de &#31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de &#109.79 USD.
-Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.
+<p>El precio promedio fue de &#107.28 USD con una mediana de &#101.79 USD. La diferencia de &#5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas. La desviación estándar de &#22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
 
-### Distribución de Precios por Año: Análisis del Boxplot Interactivo
+El análisis de cuartiles revela una perspectiva más matizada: con Q1 en &#88.58 USD y Q3 en &#119.92 USD, el rango intercuartílico de &#31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de &#109.79 USD. Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.</p>
 
-La visualización mediante boxplots interactivos muestra el comportamiento de la serie temporal por año calendario, exponiendo la evolución de la tendencia central, dispersión y valores extremos a lo largo del período de entrenamiento.
-Este análisis comparativo revela heterogeneidades temporales en la variabilidad de precios, distinguiendo años de estabilidad relativa frente a períodos de volatilidad extrema—información esencial para comprender los cambios estructurales de la serie y anticipar la especificación del modelo de pronóstico.
+<h4>4.2.2 Distribución de Precios por Año: Análisis del Boxplot Interactivo</h4>
 
-```{r boxplot por años}
+<p>La visualización mediante boxplots interactivos muestra el comportamiento de la serie temporal por año calendario, exponiendo la evolución de la tendencia central, dispersión y valores extremos a lo largo del período de entrenamiento. Este análisis comparativo revela heterogeneidades temporales en la variabilidad de precios, distinguiendo años de estabilidad relativa frente a períodos de volatilidad extrema—información esencial para comprender los cambios estructurales de la serie y anticipar la especificación del modelo de pronóstico.</p>
+
+```{r boxplot por años , include=FALSE}
+library(plotly)
+library(dplyr)
 
 # Asegurarnos de que la columna Fecha es de tipo Date
 GLTR_df <- GLTR_df %>%
@@ -1717,10 +1570,10 @@ df_2025 <- GLTR_df %>% filter(Año == "2025")
 
 # Definir colores elegantes para cada año
 colors <- c(
-  "2022" = "#efd9ce",   
-  "2023" = "#dec0f1",    
-  "2024" = "#b79ced",    
-  "2025" = "#957fef",    
+  "2022" = "#2E86AB",    # Azul profesional
+  "2023" = "#A23B72",    # Púrpura elegante
+  "2024" = "#F18F01",    # Naranja cálido
+  "2025" = "#73AB84",    # Verde natural
   "Todos" = "#6C757D"    # Gris para "Todos"
 )
 
@@ -1951,35 +1804,20 @@ fig <- plot_ly() %>%
 
 # Mostrar el gráfico interactivo
 fig
+
 ```
 
-El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de &#86.62 USD y un rango intercuartílico de apenas &#1.73 USD.
-La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo.
-El rango total fue de &#10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana.
-La media (&#85.88) y la mediana (&#86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos.
+<p>El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de &#86.62 USD y un rango intercuartílico de apenas &#1.73 USD. La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo. El rango total fue de &#10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana. La media (&#85.88) y la mediana (&#86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos.</p>
 
-Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de &#88.86 USD, representando un aumento del 2.6% respecto a 2022.
-El rango intercuartílico aumentó a &#4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central.
-El rango total se amplió a &#14.09 USD, con máximos alcanzando &#95.57.
-La media (&#88.85) nuevamente coincide prácticamente con la mediana (\$88.86), manteniendo la simetría distribucional.
-Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.
+<p>Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de &#88.86 USD, representando un aumento del 2.6% respecto a 2022. El rango intercuartílico aumentó a &#4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central. El rango total se amplió a &#14.09 USD, con máximos alcanzando &#95.57. La media (&#88.85) nuevamente coincide prácticamente con la mediana (\$88.86), manteniendo la simetría distribucional. Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.</p>
 
-El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de &#104.56 USD, equivalente a un incremento del 17.7% respecto a 2023.
-El rango intercuartílico creció sustancialmente a &#12.78 USD, representando casi el triple del observado en 2023.
-La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales.
-El rango total fue de &#36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana.
-La media (&#103.62) nuevamente se alinea con la mediana (&#104.56), manteniendo simetría.
-El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de &#138.65 USD, generando un aumento del 32.6% respecto a 2024.
-El rango intercuartílico alcanzó &#27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022.
-La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central.
-El rango total fue de &#77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período.
-La media (&#141.72) se mantiene ligeramente superior a la mediana (\$138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio.
-La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática.
-Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = &#1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = &#27.41).
+<p>El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de &#104.56 USD, equivalente a un incremento del 17.7% respecto a 2023. El rango intercuartílico creció sustancialmente a &#12.78 USD, representando casi el triple del observado en 2023. La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales. El rango total fue de &#36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana. La media (&#103.62) nuevamente se alinea con la mediana (&#104.56), manteniendo simetría.</p>
 
-### Gráfico de tendencias
+<p>El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de &#138.65 USD, generando un aumento del 32.6% respecto a 2024. El rango intercuartílico alcanzó &#27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022. La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central. El rango total fue de &#77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período. La media (&#141.72) se mantiene ligeramente superior a la mediana (\$138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio. La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática. Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = &#1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = &#27.41).</p>
 
-La visualización de la serie temporal superpuesta con su componente de tendencia separa el comportamiento del precio en dos dimensiones: los precios diarios y la dirección subyacente de largo plazo.
+<h4>4.2.3 Gráfico de tendencias</h4>
+
+<p>La visualización de la serie temporal superpuesta con su componente de tendencia separa el comportamiento del precio en dos dimensiones: los precios diarios y la dirección subyacente de largo plazo.</p>
 
 ```{r Tendencia}
 # Convertir a serie temporal para descomposición
@@ -2158,13 +1996,11 @@ fig_original_tendencia
 
 ```
 
-La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025).
-La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente &#88 USD y alcanzando alrededor de &#160 USD.
-La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.
+<p>La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025). La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente &#88 USD y alcanzando alrededor de &#160 USD. La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.</p>
 
-### Heatmap de estacionalidad y rendimiento
+<h4>4.2.4 Heatmap de estacionalidad y rendimiento</h4>
 
-El heat map visualiza los rendimientos porcentuales mensuales del ETF GLTR, permitiendo identificar patrones recurrentes estacionales.
+<p>El heat map visualiza los rendimientos porcentuales mensuales del ETF GLTR, permitiendo identificar patrones recurrentes estacionales.</p>
 
 ```{r Heatmap de estacionalidad y rendimiento}
 # Asegurarse de que la columna Fecha es de tipo Date
@@ -2297,17 +2133,15 @@ fig_estacionalidad_heatmap
 
 ```
 
-El heat map revela una ausencia de patrones estacionales consistentes y pronunciados en los rendimientos mensuales del ETF GLTR. A diferencia de muchos activos financieros que exhiben "efectos enero" o depresiones estacionales definidas, los rendimientos mensuales de este ETF no muestran una estructura claramente repetible año tras año.
-En 2022, se observa una ligera preponderancia de rendimientos negativos (tonos rosados) en febrero-marzo y mayo-junio, mientras que octubre destaca como mes de rendimiento positivo robusto.
-En 2023, los rendimientos mensuales son mayormente débiles o negativos (predominio de tonos pálidos y rosados), con excepción de marzo y julio que muestran un leve matiz azul.
-En 2024 y 2025, los patrones son aún más irregulares, con meses específicos como octubre de 2022 y octubre de 2024 mostrando rendimientos excepcionales (azul intenso), pero sin que octubre se consolide como mes sistemáticamente favorable en todos los años.
-El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de &#91.92 USD.
-En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de &#149.39 USD.
-Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.
+<p>El heat map revela una ausencia de patrones estacionales consistentes y pronunciados en los rendimientos mensuales del ETF GLTR. A diferencia de muchos activos financieros que exhiben "efectos enero" o depresiones estacionales definidas, los rendimientos mensuales de este ETF no muestran una estructura claramente repetible año tras año.
 
-### Bandas de volatilidad
+En 2022, se observa una ligera preponderancia de rendimientos negativos (tonos rosados) en febrero-marzo y mayo-junio, mientras que octubre destaca como mes de rendimiento positivo robusto. En 2023, los rendimientos mensuales son mayormente débiles o negativos (predominio de tonos pálidos y rosados), con excepción de marzo y julio que muestran un leve matiz azul. En 2024 y 2025, los patrones son aún más irregulares, con meses específicos como octubre de 2022 y octubre de 2024 mostrando rendimientos excepcionales (azul intenso), pero sin que octubre se consolide como mes sistemáticamente favorable en todos los años.
 
-Las bandas visualizan la evolución dinámica de la volatilidad, superponiendo el precio de cierre diario, la media y las bandas que se expanden o contraen según la desviación estándar.
+El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de &#91.92 USD. En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de &#149.39 USD. Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.</p>
+
+<h4>4.2.5 Bandas de volatilidad</h4>
+
+<p>Las bandas visualizan la evolución dinámica de la volatilidad, superponiendo el precio de cierre diario, la media y las bandas que se expanden o contraen según la desviación estándar.</p>
 
 ```{r Bandas de volatilidad}
 
@@ -2405,22 +2239,15 @@ fig_bandas <- plot_ly(volatilidad_df, x = ~Fecha) %>%
   )
 
 fig_bandas
-
-
 ```
 
-La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo.
-Durante 2023, las bandas son extremadamente estrechas (±&#4-6 USD), reflejando volatilidad baja.
-A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±&#10-12 USD para mediados de año.
-En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente &#38 USD—el pico de volatilidad del período.
-Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio.
-En períodos donde el precio se estanca (2023 con precios cercanos a &#85-95 USD), las bandas permanecen estrechas.
-Conforme el precio asciende hacia &#100-120 USD en 2024 y luego hacia &#140-190 USD en 2025, las bandas se expanden paralelamente.
-Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.
+<p>La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo. Durante 2023, las bandas son extremadamente estrechas (±&#4-6 USD), reflejando volatilidad baja. A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±&#10-12 USD para mediados de año. En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente &#38 USD—el pico de volatilidad del período.
 
-### Volatilidad comparada en rangos de tiempo
+Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio. En períodos donde el precio se estanca (2023 con precios cercanos a &#85-95 USD), las bandas permanecen estrechas. Conforme el precio asciende hacia &#100-120 USD en 2024 y luego hacia &#140-190 USD en 2025, las bandas se expanden paralelamente. Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.</p>
 
-La visualización de volatilidad en múltiples ventanas temporales (5 días, 20 días, 60 días y anual) permite caracterizar la estructura multiescalar de la variabilidad del ETF GLTR, identificando cómo los shocks y la incertidumbre operan en distintos horizontes temporales.
+<h4>4.2.6 Volatilidad comparada en rangos de tiempo</h4>
+
+<p>La visualización de volatilidad en múltiples ventanas temporales (5 días, 20 días, 60 días y anual) permite caracterizar la estructura multiescalar de la variabilidad del ETF GLTR, identificando cómo los shocks y la incertidumbre operan en distintos horizontes temporales.</p>
 
 ```{r Volatilidad}
 # Calcular volatilidad en diferentes ventanas temporales
@@ -2545,22 +2372,21 @@ fig_comparativo <- plot_ly(comparador_volatilidad, x = ~Fecha) %>%
 fig_comparativo
 ```
 
-La volatilidad de Corto Plazo exhibe fluctuaciones erráticas y de alta amplitud, oscilando entre aproximadamente 0.5% y 4.0%.
-Esta serie es notoriamente ruidosa, con múltiples picos transitorios que reflejan shocks diarios rápidamente absorbidos por el mercado.
+<p>La volatilidad de Corto Plazo exhibe fluctuaciones erráticas y de alta amplitud, oscilando entre aproximadamente 0.5% y 4.0%. Esta serie es notoriamente ruidosa, con múltiples picos transitorios que reflejan shocks diarios rápidamente absorbidos por el mercado.</p>
 
-La volatilidad de Mediano Plazo presenta un patrón mucho más suave que la de 5 días, oscilando típicamente entre 0.8% y 2.0%.
-La línea azul filtra el ruido diario y captura la variabilidad subyacente de corto-mediano plazo, con picos menos frecuentes pero más persistentes.
+<p>La volatilidad de Mediano Plazo presenta un patrón mucho más suave que la de 5 días, oscilando típicamente entre 0.8% y 2.0%. La línea azul filtra el ruido diario y captura la variabilidad subyacente de corto-mediano plazo, con picos menos frecuentes pero más persistentes.</p>
 
-La volatilidad de Largo Plazo muestra la trayectoria más suave y persistente, fluctuando entre aproximadamente 0.8% y 1.5%.
-Las oscilaciones en esta ventana son lentas y deliberadas, reflejando cambios en el ambiente macroeconómico de mediano plazo.
+<p>La volatilidad de Largo Plazo muestra la trayectoria más suave y persistente, fluctuando entre aproximadamente 0.8% y 1.5%. Las oscilaciones en esta ventana son lentas y deliberadas, reflejando cambios en el ambiente macroeconómico de mediano plazo.</p>
 
-La volatilidad Anual proporciona la perspectiva más agregada, con una evolución particularmente estable, comenzando cercana a 1.0% en 2023 y terminando cercana a 1.5-1.8% en 2025.
+<p>La volatilidad Anual proporciona la perspectiva más agregada, con una evolución particularmente estable, comenzando cercana a 1.0% en 2023 y terminando cercana a 1.5-1.8% en 2025.</p>
 
-El análisis descriptivo ha caracterizado la serie temporal del ETF GLTR a través de sus estadísticas fundamentales, distribución temporal, tendencia, estacionalidad y dinámica de volatilidad en múltiples horizontes.
-Esta exploración integral proporciona la base empírica necesaria para proceder con la especificación y estimación del modelo ARIMA.
+<p>El análisis descriptivo ha caracterizado la serie temporal del ETF GLTR a través de sus estadísticas fundamentales, distribución temporal, tendencia, estacionalidad y dinámica de volatilidad en múltiples horizontes. Esta exploración integral proporciona la base empírica necesaria para proceder con la especificación y estimación del modelo ARIMA.</p>
+:::
 
-# Análisis ARIMA
+<!-- RESULTADOS DEL MODELO ARIMA -->
+::: {#modelo .content-card}
 
+<h2>5. Resultados del Modelo ARIMA</h2>
 ```{r datos}
 # Configuración de fechas - CAMBIAR SOLO AQUÍ
 fecha_inicio_entrenamiento <- "2022-10-31"
@@ -2590,7 +2416,6 @@ df_test_GLTR <- data.frame(
 df_completo_GLTR <- bind_rows(df_train_GLTR, df_test_GLTR)
 fecha_corte_GLTR <- as.Date("2025-11-01")
 ```
-
 ```{r paleta}
 gltr_pal <- list(
   primary = "#2C3E50",
@@ -2604,9 +2429,9 @@ gltr_pal <- list(
 )
 ```
 
-## Visualización de la Partición
+<h3>Visualización de la Partición</h3>
 
-La serie temporal de precios de cierre diarios de (GLTR) fue dividida en dos conjuntos mutuamente excluyentes siguiendo el enfoque de validación cronológica la partición en entrenamiento y prueba permiten que el modelo se ajuste solo con información pasada y se evalúe con datos futuros.
+<p>La serie temporal de precios de cierre diarios de (GLTR) fue dividida en dos conjuntos mutuamente excluyentes siguiendo el enfoque de validación cronológica la partición en entrenamiento y prueba permiten que el modelo se ajuste solo con información pasada y se evalúe con datos futuros.</p>
 
 ```{r grafico-particion, fig.height=7}
 ggplot(df_completo_GLTR, aes(x = Fecha, y = Precio)) +
@@ -2666,16 +2491,15 @@ ggplot(df_completo_GLTR, aes(x = Fecha, y = Precio)) +
   )
 ```
 
-La Figura muestra la serie de precios de cierre diarios de GLTR entre el 31/10/2022 y el 21/11/2025 (aproximadamente 3 años).
-La zona sombreada en gris corresponde al conjunto de entrenamiento, compuesto por 754 observaciones continuas.
-A partir de la línea discontinua roja definimos nuestro conjunto de prueba, formado por las 15 observaciones más recientes, que se reservan exclusivamente para evaluar el desempeño predictivo del modelo.
-El amplio historial de entrenamiento permite capturar la clara tendencia creciente y los patrones de variabilidad de la serie, mientras que la ventana de prueba, situada en el tramo de mayor volatilidad reciente, ofrece un escenario exigente para evaluar la precisión fuera de muestra del modelo ARIMA que se seleccionará.
+<p>La Figura muestra la serie de precios de cierre diarios de GLTR entre el 31/10/2022 y el 21/11/2025 (aproximadamente 3 años). La zona sombreada en gris corresponde al conjunto de entrenamiento, compuesto por 754 observaciones continuas. A partir de la línea discontinua roja definimos nuestro conjunto de prueba, formado por las 15 observaciones más recientes, que se reservan exclusivamente para evaluar el desempeño predictivo del modelo.</p>
 
-## Analisis de estacionariedad
+<p>El amplio historial de entrenamiento permite capturar la clara tendencia creciente y los patrones de variabilidad de la serie, mientras que la ventana de prueba, situada en el tramo de mayor volatilidad reciente, ofrece un escenario exigente para evaluar la precisión fuera de muestra del modelo ARIMA que se seleccionará.</p>
 
-### Serie original- ACF
+<h3>5.1 Análisis de estacionariedad</h3>
 
-La Figura muestra la función de autocorrelación (ACF) de la serie de precios de cierre de GLTR en niveles, usando solo los datos de entrenamiento.
+<h4>5.1.1 Serie original- ACF</h4>
+
+<p>La Figura muestra la función de autocorrelación (ACF) de la serie de precios de cierre de GLTR en niveles, usando solo los datos de entrenamiento.</p>
 
 ```{r stationarity-tests}
 acf_data_GLTR <- acf(Entrenamiento_GLTR, lag.max = 30, plot = FALSE)
@@ -2728,10 +2552,9 @@ ggplot(df_acf_GLTR, aes(x = Lag, y = ACF)) +
   )
 ```
 
-La autocorrelación en el rezago 1 es cercana a 1, las autocorrelaciones decrecen muy lentamente y se mantienen significativamente distintas de cero más allá del rezago 30 (todas por encima de las bandas rojas al 95%).
-Este patrón indica que contamos con una serie no estacionaria con tendencia, donde los choques tienen efectos persistentes y la memoria de la serie es muy larga.
+<p>La autocorrelación en el rezago 1 es cercana a 1, las autocorrelaciones decrecen muy lentamente y se mantienen significativamente distintas de cero más allá del rezago 30 (todas por encima de las bandas rojas al 95%). Este patrón indica que contamos con una serie no estacionaria con tendencia, donde los choques tienen efectos persistentes y la memoria de la serie es muy larga.</p>
 
-### Test de Dickey-Fuller Aumentada (ADF)
+<h4>5.1.2 Test de Dickey-Fuller Aumentada (ADF)</h4>
 
 ```{r Test de Dickey-Fuller Aumentada}
 adf_resultado_GLTR <- adf.test(Entrenamiento_GLTR)
@@ -2772,13 +2595,11 @@ kable(tabla_adf_GLTR,
   row_spec(6, bold = TRUE, background = "#fef3f2")
 ```
 
-Bajo la hipótesis nula, la serie tiene raíz unitaria (no estacionaria).
-Como el p‑valor 0.984 \> 0.05, no se rechaza $H0$.
-Por tanto, tanto la ACF como el test ADF coinciden en que la serie de precios en niveles NO es estacionaria y requiere la aplicación de una primera diferenciación antes de ajustar un modelo ARIMA, ya que, en su forma original, no cumple el supuesto de estacionariedad en media ni en autocovarianza.
+<p>Bajo la hipótesis nula, la serie tiene raíz unitaria (no estacionaria). Como el p‑valor 0.984 \> 0.05, no se rechaza $H0$. Por tanto, tanto la ACF como el test ADF coinciden en que la serie de precios en niveles NO es estacionaria y requiere la aplicación de una primera diferenciación antes de ajustar un modelo ARIMA, ya que, en su forma original, no cumple el supuesto de estacionariedad en media ni en autocovarianza.</p>
 
-### Diferenciación
+<h4>5.1.3 Diferenciación</h4>
 
-Para abordar la no estacionariedad detectada en la serie en niveles, se aplicó una diferenciación de primer orden sobre el conjunto de entrenamiento:
+<p>Para abordar la no estacionariedad detectada en la serie en niveles, se aplicó una diferenciación de primer orden sobre el conjunto de entrenamiento:</p>
 
 ```{r Diferenciacion}
 GLTR_diff <- diff(Entrenamiento_GLTR) %>% na.omit()
@@ -2791,9 +2612,7 @@ GLTR_diff_df <- data.frame(
 GLTR_diff_df$ID <- seq.int(nrow(GLTR_diff_df))
 ```
 
-El gráfico de la serie diferenciada muestra ahora los cambios diarios en el precio de GLTR alrededor de un nivel aproximadamente constante, sin tendencia evidente.
-La variabilidad parece relativamente estable en la mayor parte del período, aunque con algunos aumentos de volatilidad hacia el final.
-Este comportamiento respalda la elección de $d = 1$ en el modelo ARIMA, ya que una sola diferenciación elimina la tendencia de largo plazo observada en la serie original.
+<p>El gráfico de la serie diferenciada muestra ahora los cambios diarios en el precio de GLTR alrededor de un nivel aproximadamente constante, sin tendencia evidente. La variabilidad parece relativamente estable en la mayor parte del período, aunque con algunos aumentos de volatilidad hacia el final. Este comportamiento respalda la elección de $d = 1$ en el modelo ARIMA, ya que una sola diferenciación elimina la tendencia de largo plazo observada en la serie original.</p>
 
 ```{r grafico-diferenciado, fig.width=7, fig.height=5}
 accumulate_by <- function(dat, var) {
@@ -2865,12 +2684,9 @@ fig_diff_animated
 
 ```
 
-La Figura muestra la ACF de la serie diferenciada una vez.
-A diferencia de la serie en niveles, ahora contamos con casi todos los coeficientes de autocorrelación caen dentro de las bandas verdes al 95%, no se observa un patrón de decrecimiento lento ni correlaciones altas y persistentes.
-Solo aparecen unos pocos picos aislados, compatibles con ruido alrededor de cero.
-Este comportamiento es coherente con una serie aproximadamente estacionaria, por lo que la elección de $d = 1$ resulta adecuada: una sola diferencia elimina la tendencia sin sobre diferenciar la serie.
+<p>La Figura muestra la ACF de la serie diferenciada una vez. A diferencia de la serie en niveles, ahora contamos con casi todos los coeficientes de autocorrelación caen dentro de las bandas verdes al 95%, no se observa un patrón de decrecimiento lento ni correlaciones altas y persistentes. Solo aparecen unos pocos picos aislados, compatibles con ruido alrededor de cero. Este comportamiento es coherente con una serie aproximadamente estacionaria, por lo que la elección de $d = 1$ resulta adecuada: una sola diferencia elimina la tendencia sin sobre diferenciar la serie.</p>
 
-### Test ADF - Serie Diferenciada
+<h4>5.1.4 Test ADF - Serie Diferenciada</h4>
 
 ```{r adf-diferenciada}
 adf_diff_resultado_GLTR <- adf.test(GLTR_diff)
@@ -2909,17 +2725,13 @@ kable(tabla_adf_diff_GLTR,
   row_spec(6, bold = TRUE, background = "#efd9ce")
 ```
 
-La prueba ADF aplicada a la serie diferenciada mostró un estadístico de $−10.0227$, con 9 rezagos y un valor p de $0.01$, lo que nos indica que podemos rechazar $(H0)$ y concluir que la serie diferenciada es estacionaria.
-Esto coincide con la ACF, confirmando que con $(d = 1)$ se logra la estacionariedad necesaria para dar paso a la identificación de los valores adecuados de $(p)$ y $(q)$.
+<p>La prueba ADF aplicada a la serie diferenciada mostró un estadístico de $−10.0227$, con 9 rezagos y un valor p de $0.01$, lo que nos indica que podemos rechazar $(H0)$ y concluir que la serie diferenciada es estacionaria. Esto coincide con la ACF, confirmando que con $(d = 1)$ se logra la estacionariedad necesaria para dar paso a la identificación de los valores adecuados de $(p)$ y $(q)$.</p>
 
-En la serie ya diferenciada el ACF no muestra picos grandes ni un patrón de corte claro; las autocorrelaciones son pequeñas y la mayoría cae dentro de las bandas.
-A su vez, en el PACF aparecen algunos picos algo más notorios en rezagos bajos y medios (por ejemplo, alrededor de lag 3 y 24), pero ninguno domina claramente.
-Este comportamiento sugiere que no existe una estructura AR o MA “pura”, es decir las dependencias son débiles y se dispersan en varios rezagos.
-Por ello, resulta más adecuado probar modelos ARIMA de bajo orden que suelen capturar bien la dinámica residual de series diferenciadas con correlaciones débiles y reducen el riesgo de sobreestimar la complejidad del modelo.
+<p>En la serie ya diferenciada el ACF no muestra picos grandes ni un patrón de corte claro; las autocorrelaciones son pequeñas y la mayoría cae dentro de las bandas. A su vez, en el PACF aparecen algunos picos algo más notorios en rezagos bajos y medios (por ejemplo, alrededor de lag 3 y 24), pero ninguno domina claramente. Este comportamiento sugiere que no existe una estructura AR o MA "pura", es decir las dependencias son débiles y se dispersan en varios rezagos. Por ello, resulta más adecuado probar modelos ARIMA de bajo orden que suelen capturar bien la dinámica residual de series diferenciadas con correlaciones débiles y reducen el riesgo de sobreestimar la complejidad del modelo.</p>
 
-# Identificación del modelo
+<h3>5.2 Identificación del modelo</h3>
 
-A partir de la serie ya diferenciada $(d=1)$, se analizan las funciones ACF y PACF para sugerir órdenes tentativos de los componentes $AR (p)$ y $MA (q)$.
+<p>A partir de la serie ya diferenciada $(d=1)$, se analizan las funciones ACF y PACF para sugerir órdenes tentativos de los componentes $AR (p)$ y $MA (q)$.</p>
 
 ```{r funcion-acf-pacf}
 crear_grafico_acf_pacf <- function(serie, titulo_serie = "GLTR", lag_max = NULL) {
@@ -3095,7 +2907,6 @@ crear_grafico_acf_pacf <- function(serie, titulo_serie = "GLTR", lag_max = NULL)
   return(list(ACF = p_acf, PACF = p_pacf))
 }
 ```
-
 ```{r graficos-acf-pacf, fig.width=12, fig.height=6}
 graficos <- crear_grafico_acf_pacf(
   serie = GLTR_diff,
@@ -3122,9 +2933,9 @@ panel_completo <- grid.arrange(
 
 ```
 
-La ausencia de picos muy dominantes y la presencia de algunas autocorrelaciones moderadas en rezagos bajos motivan la consideración de modelos de bajo a mediano orden, combinando términos $AR$ y $MA$.
+<p>La ausencia de picos muy dominantes y la presencia de algunas autocorrelaciones moderadas en rezagos bajos motivan la consideración de modelos de bajo a mediano orden, combinando términos $AR$ y $MA$.</p>
 
-Con base en este análisis visual y en el procedimiento automatizado de auto.arima(), se definió el siguiente conjunto de modelos candidatos:
+<p>Con base en este análisis visual y en el procedimiento automatizado de auto.arima(), se definió el siguiente conjunto de modelos candidatos:</p>
 
 ```{r modelos}
 Modelo_GLTR_auto <- auto.arima(Entrenamiento_GLTR)
@@ -3133,7 +2944,6 @@ Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(1, 1, 1))
 Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(2, 1, 4))
 Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
 ```
-
 ```{r modelos-t}
 # Crear el dataframe
 datos_modelos <- data.frame(
@@ -3228,9 +3038,9 @@ tabla_modelos <- datos_modelos %>%
 tabla_modelos
 ```
 
-# Estimación y comparación de modelos
+<h3>5.3 Estimación y comparación de modelos</h3>
 
-Estos modelos serán comparados en la siguiente sección usando criterios de información $(AIC, AICc, BIC)$ y métricas de precisión.
+<p>Estos modelos serán comparados en la siguiente sección usando criterios de información $(AIC, AICc, BIC)$ y métricas de precisión.</p>
 
 ```{r t-modelos}
 tabla_modelos_GLTR <- data.frame(
@@ -3252,8 +3062,7 @@ kable(tabla_modelos_GLTR,
   row_spec(1, bold = TRUE, background = "#efd9ce")
 ```
 
-La tabla resume los valores de $AIC, AICc$ y $BIC$ para los cinco modelos ARIMA estimados.
-Aunque el modelo Auto‑ARIMA presenta los menores $AIC y AICc (2637.30 y 2637.41)$, y también el menor $BIC (2665.04)$, la comparación con los modelos manuales permite ver que ninguno logra acercarse lo suficiente como para ser competitivo.
+<p>La tabla resume los valores de $AIC, AICc$ y $BIC$ para los cinco modelos ARIMA estimados. Aunque el modelo Auto‑ARIMA presenta los menores $AIC y AICc (2637.30 y 2637.41)$, y también el menor $BIC (2665.04)$, la comparación con los modelos manuales permite ver que ninguno logra acercarse lo suficiente como para ser competitivo.</p>
 
 ```{r metricas-precision}
 accuracy_auto <- accuracy(Modelo_GLTR_auto)
@@ -3278,18 +3087,15 @@ kable(tabla_accuracy_GLTR,
                 position = "center")
 ```
 
-La tabla compara las métricas de precisión para los cinco modelos los cuales presentan un rendimiento muy similar, con MAPE alrededor de 0.9% y diferencias pequeñas en los errores absolutos.
-Las diferencias en MAE son mínimas $(0.9817$ vs $0.983x)$, aun así, el Auto-ARIMA obtiene los mejores valores de RMSE y MAE, además de un sesgo casi nulo, mientras que los demás muestran un sesgo positivo más evidente.
-Esto indica que, aunque todos los modelos ajustan bien, el Auto-ARIMA se considera el modelo con mejor capacidad de ajuste, aunque la ventaja sobre los modelos manuales es moderada.
+<p>La tabla compara las métricas de precisión para los cinco modelos los cuales presentan un rendimiento muy similar, con MAPE alrededor de 0.9% y diferencias pequeñas en los errores absolutos. Las diferencias en MAE son mínimas $(0.9817$ vs $0.983x)$, aun así, el Auto-ARIMA obtiene los mejores valores de RMSE y MAE, además de un sesgo casi nulo, mientras que los demás muestran un sesgo positivo más evidente. Esto indica que, aunque todos los modelos ajustan bien, el Auto-ARIMA se considera el modelo con mejor capacidad de ajuste, aunque la ventaja sobre los modelos manuales es moderada.</p>
 
-En consecuencia, el auto.arima no solo es el más parsimonioso dentro de su complejidad, sino también el que captura mejor la estructura de la serie.
-Por ello se selecciona como el modelo principal para los diagnósticos de residuos para confirmar su validez final.
+<p>En consecuencia, el auto.arima no solo es el más parsimonioso dentro de su complejidad, sino también el que captura mejor la estructura de la serie. Por ello se selecciona como el modelo principal para los diagnósticos de residuos para confirmar su validez final.</p>
 
-# Selección del Modelo
+<h3>5.4 Selección del Modelo</h3>
 
-Para evaluar si el modelo ARIMA seleccionado cumple con los supuestos fundamentales, se analizan los gráficos de diagnóstico de residuos.
+<p>Para evaluar si el modelo ARIMA seleccionado cumple con los supuestos fundamentales, se analizan los gráficos de diagnóstico de residuos.</p>
 
-## Diagnóstico de Residuales
+<h4>5.4.1 Diagnóstico de Residuales</h4>
 
 ```{r residuales-tiempo, fig.height=7}
 residuos_auto <- residuals(Modelo_GLTR_auto)
@@ -3368,11 +3174,9 @@ ggplot(residuos_df, aes(x = tiempo, y = residuales)) +
   )
 ```
 
-Los residuos se comportan adecuadamente: oscilan alrededor de cero sin tendencia, lo que indica ausencia de sesgo, y no muestran patrones evidentes, por lo que el modelo captura bien la estructura temporal principal.
-Sin embargo, en conjunto, se comportan en general como ruido blanco alrededor de cero, lo que respalda la adecuación del modelo.
-No obstante, la presencia de algunos outliers sugiere episodios de volatilidad no explicados por el ARIMA, algo esperable en datos financieros.
+<p>Los residuos se comportan adecuadamente: oscilan alrededor de cero sin tendencia, lo que indica ausencia de sesgo, y no muestran patrones evidentes, por lo que el modelo captura bien la estructura temporal principal. Sin embargo, en conjunto, se comportan en general como ruido blanco alrededor de cero, lo que respalda la adecuación del modelo. No obstante, la presencia de algunos outliers sugiere episodios de volatilidad no explicados por el ARIMA, algo esperable en datos financieros.</p>
 
-## Histograma de Residuales
+<h4>5.4.2 Histograma de Residuales</h4>
 
 ```{r histograma-residuales, fig.height=7}
 residuales_valores <- as.numeric(residuos_auto)
@@ -3472,10 +3276,9 @@ ggplot(residuales_df, aes(x = Residuales)) +
   )
 ```
 
-En segundo lugar, se analiza la distribución de los residuos del modelo Auto‑ARIMA mediante un histograma con curvas de densidad ajustada y normal teórica.
-Este gráfico permite evaluar si los errores se concentran alrededor de cero y si su forma es aproximadamente simétrica y en campana, como se espera bajo el supuesto de normalidad residual
+<p>En segundo lugar, se analiza la distribución de los residuos del modelo Auto‑ARIMA mediante un histograma con curvas de densidad ajustada y normal teórica. Este gráfico permite evaluar si los errores se concentran alrededor de cero y si su forma es aproximadamente simétrica y en campana, como se espera bajo el supuesto de normalidad residual</p>
 
-## ACF de Residuales
+<h4>5.4.3 ACF de Residuales</h4>
 
 ```{r acf-residuales}
 acf_residuos <- acf(residuos_auto, lag.max = 40, plot = FALSE)
@@ -3548,11 +3351,9 @@ ggplot(df_acf_residuos, aes(x = Lag, y = ACF)) +
   )
 ```
 
-Al examinar la ACF de los residuos, se observa un comportamiento claramente consistente con lo esperado para un buen modelo ARIMA.
-La mayoría de los coeficientes se mantienen dentro de las bandas de confianza y no emerge ningún patrón definido que sugiera dependencia temporal persistente.
-Los pocos rezagos que se aproximan a los límites lo hacen de manera aislada y con poca magnitud.
+<p>Al examinar la ACF de los residuos, se observa un comportamiento claramente consistente con lo esperado para un buen modelo ARIMA. La mayoría de los coeficientes se mantienen dentro de las bandas de confianza y no emerge ningún patrón definido que sugiera dependencia temporal persistente. Los pocos rezagos que se aproximan a los límites lo hacen de manera aislada y con poca magnitud.</p>
 
-## Prueba de Ljung-Box
+<h4>5.4.4 Prueba de Ljung-Box</h4>
 
 ```{r ljung-box}
 ljung_box_result <- Box.test(residuals(Modelo_GLTR_auto), lag = 10, type = "Ljung-Box")
@@ -3576,16 +3377,13 @@ kable(tabla_ljung_box,
   row_spec(4, bold = TRUE, background = "#d5f4e6")
 ```
 
-Finalmente, se aplicó la prueba de Ljung‑Box para evaluar la presencia de autocorrelación conjunta en los residuos.
-El estadístico de contraste fue $X2 =4.5822$ con 10 grados de libertad y un valor p de $0.9173$.
-Dado que este valor p es muy superior al nivel de significancia habitual $(α =0.05)$, no se rechaza la hipótesis nula de que los residuos se comportan como ruido blanco.
-En conjunto, los distintos análisis confirman que el modelo ARIMA seleccionado es adecuado, los residuos se mantienen alrededor de cero sin patrones sistemáticos, muestran una distribución razonablemente simétrica y su ACF indica comportamiento de ruido blanco.
-Aunque aparecen algunos outliers típicos de la volatilidad financiera, estos no comprometen el ajuste general, adicionalmente la prueba de Ljung-Box respalda esta conclusión al no evidenciar autocorrelación conjunta $(p = 0.9173)$.
-En síntesis, el modelo cumple razonablemente con los supuestos fundamentales y puede considerarse estadísticamente consistente para fines de pronóstico.
+<p>Finalmente, se aplicó la prueba de Ljung‑Box para evaluar la presencia de autocorrelación conjunta en los residuos. El estadístico de contraste fue $X2 =4.5822$ con 10 grados de libertad y un valor p de $0.9173$. Dado que este valor p es muy superior al nivel de significancia habitual $(α =0.05)$, no se rechaza la hipótesis nula de que los residuos se comportan como ruido blanco.
 
-# Pronóstico y Evaluación
+En conjunto, los distintos análisis confirman que el modelo ARIMA seleccionado es adecuado, los residuos se mantienen alrededor de cero sin patrones sistemáticos, muestran una distribución razonablemente simétrica y su ACF indica comportamiento de ruido blanco. Aunque aparecen algunos outliers típicos de la volatilidad financiera, estos no comprometen el ajuste general, adicionalmente la prueba de Ljung-Box respalda esta conclusión al no evidenciar autocorrelación conjunta $(p = 0.9173)$. En síntesis, el modelo cumple razonablemente con los supuestos fundamentales y puede considerarse estadísticamente consistente para fines de pronóstico.</p>
 
-## Generación del Pronóstico
+<h3>5.5 Pronóstico y Evaluación</h3>
+
+<h4>5.5.1 Generación del Pronóstico</h4>
 
 ```{r pronostico, fig.height=7}
 h_value <- length(Prueba_GLTR)
@@ -3643,10 +3441,9 @@ pronostico_GLTR %>%
   )
 ```
 
-El gráfico muestra el pronóstico del precio de cierre de GLTR a partir del modelo ARIMA(2,1,2) con drift para un horizonte de 15 observaciones.
-El modelo genera una proyección que mantiene el nivel actual del precio con ligeras variaciones y con una incertidumbre creciente en el tiempo, lo cual es coherente con la naturaleza estocástica de una serie financiera: a medida que se pronostican pasos más lejanos, el rango de valores posibles se amplía.
+<p>El gráfico muestra el pronóstico del precio de cierre de GLTR a partir del modelo ARIMA(2,1,2) con drift para un horizonte de 15 observaciones. El modelo genera una proyección que mantiene el nivel actual del precio con ligeras variaciones y con una incertidumbre creciente en el tiempo, lo cual es coherente con la naturaleza estocástica de una serie financiera: a medida que se pronostican pasos más lejanos, el rango de valores posibles se amplía.</p>
 
-## Tabla Comparativa
+<h4>5.5.2 Tabla Comparativa</h4>
 
 ```{r t-comparativa}
 tabla_comparativa_GLTR <- data.frame(
@@ -3667,7 +3464,7 @@ kable(tabla_comparativa_GLTR[1:5, ],
                 position = "center")
 ```
 
-## Gráfico: Predicho vs Real
+**Gráfico: Predicho vs Real**
 
 ```{r predicho-vs-real}
 fechas_pronostico_GLTR <- index(Prueba_GLTR)
@@ -3691,7 +3488,7 @@ ggplot() +
   theme_minimal()
 ```
 
-# Métricas de Desempeño
+<h4>5.5.3 Gráfico: Predicho vs Real</h4>
 
 ```{r metricas-finales}
 MAE_GLTR <- mean(abs(tabla_comparativa_GLTR$Error_USD))
@@ -3718,95 +3515,88 @@ kable(tabla_metricas_finales,
                 position = "center")
 ```
 
-# Conclusiones
+<p>El modelo ARIMA(2,1,2) con drift seleccionado para el ETF GLTR mostró un buen desempeño predictivo en el período de prueba de 15 días. Las métricas de error absoluto medio (MAE) y error porcentual absoluto medio (MAPE) se mantuvieron en niveles bajos, con un MAPE de aproximadamente 0.9%, lo que indica una precisión razonable para un activo financiero volátil como un ETF de metales preciosos.</p> 
 
-## Hallazgos Principales
-
-El análisis ARIMA realizado permite caracterizar la serie temporal mediante la identificación de su estructura de autocorrelación, estacionariedad y componentes de tendencia y estacionalidad.
-Los resultados obtenidos proporcionan una base sólida para la generación de pronósticos confiables.
-
-::: {.alert .alert-info}
-📌 **Síntesis de Hallazgos:**
-
--   La serie presenta componentes de tendencia y estacionalidad claros
--   El modelo seleccionado captura adecuadamente la estructura temporal
--   Los pronósticos generados mantienen intervalos de confianza razonables
--   La validación de residuos indica un buen ajuste del modelo
 :::
 
-## Implicaciones y Recomendaciones
+<!-- CONCLUSIONES -->
+::: {#conclusiones .content-card}
 
-Los pronósticos obtenidos pueden utilizarse para:
+<h2>6. Conclusiones</h2>
 
--   Planificación estratégica a corto y mediano plazo
--   Asignación eficiente de recursos
--   Identificación de desviaciones significativas
--   Apoyo en la toma de decisiones basada en evidencia
+<p>Los pronósticos generados por el modelo ARIMA(2,1,2) con término de drift no solo tienen relevancia técnica, sino que también ofrecen una lectura estructurada de la dinámica de precios en series financieras. El componente autorregresivo de orden 2 refleja que los precios actuales dependen de los dos valores previos, capturando la inercia y memoria de corto plazo típica de los mercados, mientras que el componente de media móvil de orden 2 modela cómo los shocks idiosincráticos se propagan y se van disipando en unos pocos períodos en lugar de persistir indefinidamente. El término de drift incorpora la tendencia positiva observada en el tramo 2024‑2025, permitiendo que las trayectorias de pronóstico proyecten una apreciación gradual bajo el supuesto de que el entorno macroeconómico y de política monetaria permanece relativamente estable.</p>
 
-::: {.alert .alert-warning}
-⚠️ **Limitaciones Metodológicas:**
+<p>Los intervalos de confianza crecientes a medida que aumenta el horizonte de pronóstico cuantifican rigurosamente la acumulación de incertidumbre: las proyecciones de muy corto plazo (por ejemplo, a 1 día) tienden a mostrar errores relativos bajos cuando el ajuste in‑sample es adecuado, mientras que los pronósticos a varios días o semanas amplían sustancialmente la banda de probabilidad alrededor de la trayectoria central. Esta estructura permite que los tomadores de decisiones adapten su nivel de exposición según el horizonte de su estrategia, utilizando las predicciones ARIMA como herramienta operativa para gestión táctica de posiciones y evaluación de riesgos, especialmente en ventanas de corto plazo.</p>
 
--   Los pronósticos pierden precisión en horizontes muy lejanos
--   Cambios estructurales no capturados afectarían la predicción
--   La calidad de los datos es fundamental para la confiabilidad
--   Validación con datos nuevos es recomendada
+<p>Aun así, el análisis pone de relieve varias limitaciones que apuntan a líneas claras de trabajo futuro. En primer lugar, los modelos ARIMA se emplean de forma predominante para horizontes cortos (días o, a lo sumo, pocas semanas), ya que su capacidad predictiva se deteriora cuando se extiende el horizonte por la acumulación de errores y por su naturaleza puramente univariante y lineal. La incorporación de información macroeconómica y financiera relevante mediante extensiones como ARIMAX o sistemas VAR permitiría abordar pronósticos de horizonte medio‑largo, integrando explícitamente variables como tasas de interés de bancos centrales, inflación o indicadores de riesgo.</p>
+
+<p>En segundo lugar, el modelo ARIMA estándar supone parámetros constantes en el tiempo y, por tanto, tiene dificultades para capturar cambios de régimen abruptos asociados a crisis financieras, shocks geopolíticos o giros inesperados en la política monetaria. Para representar transiciones entre fases como “mercado alcista”, “lateral” o “bajista”, o entre regímenes de baja y alta volatilidad, resulta natural considerar extensiones con cambio de régimen, como modelos ARIMA con conmutación de Markov o marcos híbridos ARIMA–HMM que permiten que la dinámica y la volatilidad dependan del estado latente del mercado.</p>
+
+<p>En tercer lugar, el ETF GLTR representa una canasta física de cuatro metales preciosos (oro, plata, platino y paladio), donde oro y plata concentran la mayor parte del peso y combinan roles distintos como activo refugio y como insumos industriales. Modelar únicamente la serie agregada implica superponer dinámicas parciales que pueden ser divergentes, por lo que estimar modelos ARIMA específicos para cada metal, o emplear sistemas de ecuaciones que recogen interdependencias entre ellos, permitiría descomponer mejor las contribuciones individuales a la evolución del valor del fondo.</p>
+
+<p>La aplicación sistemática de un ARIMA(2,1,2) con drift a GLTR muestra que los modelos lineales de series temporales pueden capturar de forma razonable la dependencia temporal y la tendencia observada en los precios de metales preciosos durante fases de transición macroeconómica, proporcionando pronósticos útiles y cuantificados en términos de incertidumbre para la toma de decisiones de inversión y gestión de riesgos en el corto plazo. En contextos de creciente incertidumbre global, disponer de metodologías econométricas robustas para anticipar movimientos en mercados de materias primas contribuye a extraer señales tempranas sobre presiones inflacionarias, cambios en la percepción de riesgo geopolítico y expectativas de política monetaria, complementando otros marcos más estructurales en el análisis de estabilidad financiera.</p>
+
 :::
 
-# Referencias Bibliográficas
+<!-- BIBLIOGRAFÍA -->
+::: {#bibliografia .content-card}
+<h2>7. Bibliografía</h2>
 
-Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M.
-(2016).
-Time series analysis: Forecasting and control (5th ed.).
-Wiley.
-Brockwell, P. J., & Davis, R. A.
-(2016).
-Introduction to time series and forecasting (3rd ed.).
-Springer.
-DataCamp.
-(2024).
-Time series analysis in Python.
-<https://www.datacamp.com/tutorial/time-series-analysis-python> finance.yahoo.com.
-(2025).
-abrdn Physical Precious Metals Basket Shares ETF (GLTR) – Performance.
-<https://finance.yahoo.com/quote/GLTR/performance/> gainesvillecoins.com.
-(2025).
-Gold \$3269, platinum surges 47%: Bullion brief July 2025.
-<https://gainesvillecoins.com/blog/gold-3269-platinum-surges-47-bullion-brief-july-2025> goldavenue.com.
-(2025).
-Gold price forecast 2025: Will precious metals prices go up.
-<https://www.goldavenue.com/gold-price-forecast-2025> Hyndman, R. J., & Athanasopoulos, G.
-(2021).
-Forecasting: Principles and practice (3rd ed.).
-OTexts.
-<https://otexts.com/fpp3/> NumXL.
-(2024).
-Box-Jenkins methodology.
-<https://www.numxl.com/support/docs/reference_manual/arima/box-jenkins-methodology> repec.org.
-(n.d.).
-Geopolitical shocks and commodity market dynamics – NBER Working Papers.
-<https://repec.org/> sciencedirect.com.
-(2024).
-Precious metals and currency markets during the Russia-Ukraine war.
-<https://www.sciencedirect.com/science/article/pii/S1544612324000085> seekingalpha.com.
-(2025).
-Precious metals in 2025: GLTR for a diversified approach.
-<https://seekingalpha.com/article/4747357-precious-metals-in-2025-gltr-for-a-diversified-approach> Shumway, R. H., & Stoffer, D. S.
-(2017).
-Time series analysis and its applications: With R examples (4th ed.).
-Springer.
-stockanalysis.com.
-(2025).
-abrdn Physical Precious Metals Basket Shares ETF (GLTR).
-<https://stockanalysis.com/etf/gltr/> tradingview.com.
-(2025).
-Análisis ETF GLTR – TradingView.
-<https://es.tradingview.com/symbols/BMV-GLTR/analysis/> Wikipedia.
-(2014).
-Ljung-Box test.
-<https://en.wikipedia.org/wiki/Ljung%E2%80%93Box_test> worldbank.org.
-(2022).
-Commodity markets outlook, April 2022.
-<https://www.worldbank.org/en/research/commodity-markets>
+<p>Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M. (2016). Time series analysis: Forecasting and control (5th ed.). Wiley.</p>
+
+<p>Brockwell, P. J., & Davis, R. A. (2016). Introduction to time series and forecasting (3rd ed.). Springer.</p>
+
+<p>DataCamp. (2024). Time series analysis in Python. <https://www.datacamp.com/tutorial/time-series-analysis-python></p>
+
+<p>finance.yahoo.com. (2025). abrdn Physical Precious Metals Basket Shares ETF (GLTR) – Performance. <https://finance.yahoo.com/quote/GLTR/performance/></p>
+
+<p>gainesvillecoins.com. (2025). Gold \$3269, platinum surges 47%: Bullion brief July 2025. <https://gainesvillecoins.com/blog/gold-3269-platinum-surges-47-bullion-brief-july-2025></p>
+
+<p>goldavenue.com. (2025). Gold price forecast 2025: Will precious metals prices go up. <https://www.goldavenue.com/gold-price-forecast-2025></p>
+
+<p>Hyndman, R. J., & Athanasopoulos, G. (2021). Forecasting: Principles and practice (3rd ed.). OTexts. <https://otexts.com/fpp3/></p>
+
+<p>NumXL. (2024). Box-Jenkins methodology. <https://www.numxl.com/support/docs/reference_manual/arima/box-jenkins-methodology></p>
+
+<p>repec.org. (n.d.). Geopolitical shocks and commodity market dynamics – NBER Working Papers. <https://repec.org/></p>
+
+<p>sciencedirect.com. (2024). Precious metals and currency markets during the Russia-Ukraine war. <https://www.sciencedirect.com/science/article/pii/S1544612324000085></p>
+
+<p>seekingalpha.com. (2025). Precious metals in 2025: GLTR for a diversified approach. <https://seekingalpha.com/article/4747357-precious-metals-in-2025-gltr-for-a-diversified-approach></p>
+
+<p>Shumway, R. H., & Stoffer, D. S. (2017). Time series analysis and its applications: With R examples (4th ed.). Springer.</p>
+
+<p>stockanalysis.com. (2025). abrdn Physical Precious Metals Basket Shares ETF (GLTR). <https://stockanalysis.com/etf/gltr/></p>
+
+<p>tradingview.com. (2025). Análisis ETF GLTR – TradingView. <https://es.tradingview.com/symbols/BMV-GLTR/analysis/></p>
+
+<p>Wikipedia. (2014). Ljung-Box test. <https://en.wikipedia.org/wiki/Ljung%E2%80%93Box_test></p>
+
+<p>worldbank.org. (2022). Commodity markets outlook, April 2022. <https://www.worldbank.org/en/research/commodity-markets></p> 
+
+:::
+
+
+<!-- FOOTER -->
+
+::: footer
+<p>Universidad del Valle - Facultad de Ingeniería</p>
+
+<p>Gestión de Datos - Profesor: Orlando Joaqui Barandica</p>
+
+<p>Fecha: `r format(Sys.Date(), "%d/%m/%Y")`</p>
+:::
+::::::::::::::
+::::::::::::::::::
+
+<!-- BOTÓN FLOTANTE ELEGANTE -->
+
+<button class="floating-code-btn" onclick="toggleAllCode()">
+
+📝 Mostrar Todo el Código
+
+</button>
+
 
 ```{=html}
 <div class="footer">
