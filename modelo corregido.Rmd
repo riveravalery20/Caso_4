@@ -62,11 +62,10 @@ gltr_pal <- list(
 # Carga y Preparación de Datos
 
 ```{r datos}
-# Configuración de fechas - CAMBIAR SOLO AQUÍ
 fecha_inicio_entrenamiento <- "2022-10-31"
 fecha_fin_entrenamiento <- "2025-10-31"
 fecha_inicio_prueba <- "2025-11-03"
-fecha_fin_prueba <- "2025-11-21"  # ← FECHA FINAL AGREGADA
+fecha_fin_prueba <- "2025-11-21"  
 
 AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
                          from = fecha_inicio_entrenamiento)
@@ -643,7 +642,7 @@ Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
 library(gt)
 library(dplyr)
 
-# Crear el dataframe
+
 datos_modelos <- data.frame(
   `Etiqueta del Modelo` = c(
     "Modelo_GLTR_auto",
@@ -669,7 +668,7 @@ datos_modelos <- data.frame(
   check.names = FALSE
 )
 
-# Crear tabla profesional con gt
+
 tabla_modelos <- datos_modelos %>%
   gt() %>%
   tab_header(
