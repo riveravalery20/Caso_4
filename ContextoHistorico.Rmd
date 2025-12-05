@@ -54,7 +54,7 @@ composition_data <- composition_data %>%
       "(", Valor_Mercado, ")"
     ),
     # Colores metálicos realistas
-    Color = c("#FFD700", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
+    Color = c("goldenrod", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
     # Texto para hover
     HoverText = paste0(
       "<b>", Metal, "</b><br>",
