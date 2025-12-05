@@ -9,6 +9,7 @@ AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE,
 
 names(AccionesEX)
 GLTR <- AccionesEX$GLTR.Close
+
 plot(GLTR, main = "Precio de cierre GLTR")
 
 
@@ -44,16 +45,17 @@ grid.arrange(ggAcf(GLTR_diff),
 Modelo_GLTR_auto <- auto.arima(Entrenamiento_GLTR)
 
 Modelo_GLTR_1 <- Arima(Entrenamiento_GLTR, order = c(3, 1, 4))
-Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(5, 1, 5))
-Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(6, 1, 6))
-Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(7, 1, 6))
+Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(1, 1, 1))
+Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(2, 1, 4))
+Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
 
-# Visualización de los modelos
+#Visualización de los modelos
+
 Modelo_GLTR_auto
-Modelo_GLTR_1
-Modelo_GLTR_2
-Modelo_GLTR_3  # Instabilidad numérica (NaNs)-
-Modelo_GLTR_4  # sobre-parametrizado
+Modelo_GLTR_1 
+Modelo_GLTR_2 
+Modelo_GLTR_3 
+Modelo_GLTR_4 
 
 # VALIDACIÓN DE RESIDUOS
 
@@ -96,3 +98,14 @@ MAE
 RMSE
 MAPE
 
+# Número de observaciones en entrenamiento
+n_entrenamiento <- length(Entrenamiento_GLTR)
+print(paste("Observaciones en entrenamiento:", n_entrenamiento))
+
+# Número de observaciones en prueba
+n_prueba <- length(Prueba_GLTR)
+print(paste("Observaciones en prueba:", n_prueba))
+
+# Total de observaciones
+n_total <- length(GLTR)
+print(paste("Observaciones totales:", n_total))
