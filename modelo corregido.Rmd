@@ -1,0 +1,1209 @@
+---
+title: "Análisis de Series Temporales - GLTR"
+author: "Tu Nombre"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: show
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 10,
+  fig.height = 6,
+  fig.align = 'center'
+)
+```
+
+# Configuración Inicial
+
+## Librerías
+
+```{r librerías}
+library(plotly)
+library(quantmod)
+library(tseries)
+library(fpp2)
+library(gridExtra)
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(ggplot2)
+library(forecast)
+library(viridis)
+library(patchwork)
+library(grid)
+```
+
+## Paleta de Colores
+
+```{r paleta}
+gltr_pal <- list(
+  primary = "#2C3E50",
+  secondary = "#E74C3C",
+  tertiary = "#3498DB",
+  positive = "#27AE60",
+  negative = "#E74C3C",
+  text_dark = "#2C3E50",
+  text_gray = "#7F8C8D",
+  grid = "#BDC3C7"
+)
+```
+
+# Carga y Preparación de Datos
+
+```{r datos}
+# Configuración de fechas - CAMBIAR SOLO AQUÍ
+fecha_inicio_entrenamiento <- "2022-10-31"
+fecha_fin_entrenamiento <- "2025-10-31"
+fecha_inicio_prueba <- "2025-11-03"
+fecha_fin_prueba <- "2025-11-21"  # ← FECHA FINAL AGREGADA
+
+AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
+                         from = fecha_inicio_entrenamiento)
+GLTR <- AccionesEX$GLTR.Close
+
+Entrenamiento_GLTR <- window(GLTR, start = fecha_inicio_entrenamiento, end = fecha_fin_entrenamiento)
+Prueba_GLTR <- window(GLTR, start = fecha_inicio_prueba, end = fecha_fin_prueba)
+
+df_train_GLTR <- data.frame(
+  Fecha = index(Entrenamiento_GLTR),
+  Precio = as.numeric(Entrenamiento_GLTR),
+  Conjunto = "Entrenamiento"
+)
+
+df_test_GLTR <- data.frame(
+  Fecha = index(Prueba_GLTR),
+  Precio = as.numeric(Prueba_GLTR),
+  Conjunto = "Prueba"
+)
+
+df_completo_GLTR <- bind_rows(df_train_GLTR, df_test_GLTR)
+fecha_corte_GLTR <- as.Date("2025-11-01")
+```
+
+### Visualización de la Partición
+
+```{r grafico-particion, fig.height=7}
+ggplot(df_completo_GLTR, aes(x = Fecha, y = Precio)) +
+  geom_ribbon(data = df_train_GLTR, 
+              aes(ymin = min(df_completo_GLTR$Precio) * 0.95, ymax = Precio),
+              fill = gltr_pal$primary, alpha = 0.08) +
+  geom_ribbon(data = df_test_GLTR, 
+              aes(ymin = min(df_completo_GLTR$Precio) * 0.95, ymax = Precio),
+              fill = gltr_pal$secondary, alpha = 0.15) +
+  geom_line(data = df_train_GLTR, color = gltr_pal$primary, linewidth = 0.9) +
+  geom_line(data = df_test_GLTR, color = gltr_pal$secondary, linewidth = 1.1) +
+  geom_vline(xintercept = fecha_corte_GLTR, 
+             linetype = "dashed", color = gltr_pal$negative, linewidth = 0.8) +
+  annotate("text", x = fecha_corte_GLTR, y = max(df_completo_GLTR$Precio) * 1.02,
+           label = "Corte: 01-Nov-2025", hjust = -0.05, vjust = 0,
+           color = gltr_pal$negative, fontface = "bold", size = 3.5) +
+  annotate("label", 
+           x = as.Date("2024-01-01"), 
+           y = max(df_completo_GLTR$Precio) * 0.85,
+           label = paste0("ENTRENAMIENTO\n", nrow(df_train_GLTR), " observaciones"),
+           fill = gltr_pal$primary, color = "white", 
+           fontface = "bold", size = 3.5, label.padding = unit(0.5, "lines")) +
+  annotate("label", 
+           x = max(df_test_GLTR$Fecha) - 1,
+           y = min(df_completo_GLTR$Precio) * 1.15,
+           label = paste0("PRUEBA\n", nrow(df_test_GLTR), " obs."),
+           fill = gltr_pal$secondary, color = "white", 
+           fontface = "bold", size = 3.2, label.padding = unit(0.4, "lines")) +
+  scale_x_date(date_breaks = "4 months", date_labels = "%b %Y",
+               expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = dollar_format(prefix = "$"),
+                     expand = expansion(mult = c(0.05, 0.08))) +
+  labs(
+    title = "Partición de Datos: Entrenamiento vs Prueba",
+    subtitle = "GLTR | Serie de precios de cierre diarios",
+    x = NULL,
+    y = "Precio de Cierre (USD)",
+    caption = paste0("Fuente: Yahoo Finance | Período: ", 
+                     min(df_completo_GLTR$Fecha), " a ", max(df_completo_GLTR$Fecha))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(face = "bold", size = 16, color = gltr_pal$text_dark,
+                              margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 11, color = gltr_pal$secondary,
+                                 margin = margin(b = 15)),
+    plot.caption = element_text(size = 9, color = gltr_pal$text_gray,
+                                margin = margin(t = 15), hjust = 0),
+    axis.title.y = element_text(face = "bold", size = 10, color = gltr_pal$text_gray),
+    axis.text = element_text(size = 9, color = gltr_pal$text_gray),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_line(color = gltr_pal$grid, linetype = "dashed", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(20, 25, 15, 15)
+  )
+```
+
+# Análisis de Estacionariedad
+
+## Serie Original - ACF
+
+```{r acf-original}
+acf_data_GLTR <- acf(Entrenamiento_GLTR, lag.max = 30, plot = FALSE)
+
+df_acf_GLTR <- data.frame(
+  Lag = acf_data_GLTR$lag[-1], 
+  ACF = acf_data_GLTR$acf[-1]
+)
+
+n_GLTR <- length(Entrenamiento_GLTR)
+limite_sup_GLTR <- qnorm(0.975) / sqrt(n_GLTR)
+limite_inf_GLTR <- -limite_sup_GLTR
+
+ggplot(df_acf_GLTR, aes(x = Lag, y = ACF)) +
+  geom_segment(aes(xend = Lag, yend = 0), 
+               color = gltr_pal$primary, linewidth = 0.8) +
+  geom_point(color = gltr_pal$primary, size = 2) +
+  geom_hline(yintercept = limite_sup_GLTR, linetype = "dashed", 
+             color = gltr_pal$secondary, linewidth = 0.7) +
+  geom_hline(yintercept = limite_inf_GLTR, linetype = "dashed", 
+             color = gltr_pal$secondary, linewidth = 0.7) +
+  geom_hline(yintercept = 0, color = gltr_pal$text_gray, linewidth = 0.5) +
+  annotate("rect", xmin = -Inf, xmax = Inf, 
+           ymin = limite_inf_GLTR, ymax = limite_sup_GLTR,
+           fill = gltr_pal$secondary, alpha = 0.1) +
+  annotate("label", x = 20, y = 0.5,
+           label = "Serie NO estacionaria",
+           fill = gltr_pal$negative, color = "white",
+           fontface = "bold", size = 3.5, label.padding = unit(0.5, "lines")) +
+  scale_x_continuous(breaks = seq(0, 30, 5)) +
+  scale_y_continuous(limits = c(-0.1, 1.05), breaks = seq(0, 1, 0.25)) +
+  labs(
+    title = "Función de Autocorrelación (ACF) - Serie en Niveles",
+    subtitle = "GLTR: Precio de cierre | Datos de entrenamiento",
+    x = "Rezago (Lag)",
+    y = "Autocorrelación",
+    caption = "Bandas rojas: Límites de significancia al 95%"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(face = "bold", size = 14, color = gltr_pal$text_dark),
+    plot.subtitle = element_text(size = 10, color = gltr_pal$secondary),
+    plot.caption = element_text(size = 9, color = gltr_pal$text_gray, hjust = 0),
+    axis.title = element_text(face = "bold", size = 10, color = gltr_pal$text_gray),
+    axis.text = element_text(size = 9, color = gltr_pal$text_gray),
+    panel.grid.major = element_line(color = gltr_pal$grid, linetype = "dashed", linewidth = 0.4),
+    panel.grid.minor = element_blank()
+  )
+```
+
+## Test de Dickey-Fuller Aumentada (ADF)
+
+```{r adf-original}
+adf_resultado_GLTR <- adf.test(Entrenamiento_GLTR)
+
+tabla_adf_GLTR <- data.frame(
+  Métrica = c("Estadístico Dickey-Fuller", 
+              "Orden de Rezagos (Lag)", 
+              "P-valor",
+              "Nivel de Significancia (α)",
+              "Hipótesis Nula (H₀)",
+              "Decisión"),
+  
+  Valor = c(round(adf_resultado_GLTR$statistic, 4),
+            adf_resultado_GLTR$parameter,
+            round(adf_resultado_GLTR$p.value, 4),
+            "0.05",
+            "Serie tiene raíz unitaria",
+            ifelse(adf_resultado_GLTR$p.value > 0.05, 
+                   "No rechazar H₀", "Rechazar H₀")),
+  
+  Interpretación = c("Valor del estadístico de prueba",
+                     "Rezagos incluidos en el test",
+                     "Probabilidad bajo H₀",
+                     "Umbral de decisión",
+                     "La serie NO es estacionaria",
+                     ifelse(adf_resultado_GLTR$p.value > 0.05,
+                            "Serie NO estacionaria",
+                            "Serie estacionaria"))
+)
+
+kable(tabla_adf_GLTR, 
+      caption = "Prueba de Dickey-Fuller Aumentada (ADF) - Serie en Niveles GLTR",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(3, bold = TRUE, color = "#e17055") %>% 
+  row_spec(6, bold = TRUE, background = "#fef3f2")
+```
+
+# Diferenciación (d=1)
+
+```{r diferenciacion}
+GLTR_diff <- diff(Entrenamiento_GLTR) %>% na.omit()
+
+GLTR_diff_df <- data.frame(
+  Fecha = as.Date(time(GLTR_diff)),
+  Cambio = as.numeric(GLTR_diff)
+)
+
+GLTR_diff_df$ID <- seq.int(nrow(GLTR_diff_df))
+```
+
+## Gráfico Interactivo - Serie Diferenciada
+
+```{r grafico-diferenciado, fig.width=7, fig.height=5}
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+GLTR_diff_df <- GLTR_diff_df %>% accumulate_by(~ID)
+
+fig_diff_animated <- plot_ly(
+  data = GLTR_diff_df,
+  x = ~Fecha,  
+  y = ~Cambio,
+  frame = ~frame,
+  type = 'scatter',
+  mode = 'lines',
+  fill = 'tozeroy',
+  fillcolor = 'rgba(0, 100, 200, 0.3)',
+  line = list(color = 'rgb(0, 0, 0)', width = 1.5),
+  text = ~paste(
+    "Fecha: ", format(Fecha, "%d/%m/%Y"),
+    "<br>Cambio: $", round(Cambio, 4)
+  ),
+  hoverinfo = 'text'
+) %>%
+  layout(
+    title = list(
+      text = "<b>Serie diferenciada GLTR</b>",
+      font = list(size = 16, family = "Arial"),
+      x = 0.5,
+      xanchor = 'center'
+    ),
+    xaxis = list(
+      title = "Fecha",
+      range = c(min(GLTR_diff_df$Fecha), max(GLTR_diff_df$Fecha)),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200, 200, 200, 0.3)',
+      zeroline = FALSE
+    ),
+    yaxis = list(
+      title = "Cambio en Precio",
+      showgrid = TRUE,
+      gridcolor = 'rgba(200, 200, 200, 0.3)',
+      zeroline = TRUE,
+      zerolinecolor = 'rgba(0, 0, 0, 0.3)',
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = '#f0f0f0',
+    paper_bgcolor = 'white',
+    hovermode = 'closest'
+  ) %>%
+  animation_opts(
+    frame = 50,
+    transition = 0,
+    redraw = FALSE
+  ) %>%
+  animation_slider(
+    currentvalue = list(
+      prefix = "Fecha: ",
+      font = list(color = "black")
+    )
+  )
+
+fig_diff_animated
+```
+
+## ACF de Serie Diferenciada
+
+```{r acf-diferenciada}
+acf_diff_data_GLTR <- acf(GLTR_diff, lag.max = 30, plot = FALSE)
+
+df_acf_diff_GLTR <- data.frame(
+  Lag = acf_diff_data_GLTR$lag[-1], 
+  ACF = acf_diff_data_GLTR$acf[-1]
+)
+
+n_diff_GLTR <- length(GLTR_diff)
+limite_sup_diff_GLTR <- qnorm(0.975) / sqrt(n_diff_GLTR)
+limite_inf_diff_GLTR <- -limite_sup_diff_GLTR
+
+ggplot(df_acf_diff_GLTR, aes(x = Lag, y = ACF)) +
+  geom_segment(aes(xend = Lag, yend = 0), 
+               color = gltr_pal$tertiary, linewidth = 0.8) +
+  geom_point(color = gltr_pal$tertiary, size = 2) +
+  geom_hline(yintercept = limite_sup_diff_GLTR, linetype = "dashed", 
+             color = gltr_pal$positive, linewidth = 0.7) +
+  geom_hline(yintercept = limite_inf_diff_GLTR, linetype = "dashed", 
+             color = gltr_pal$positive, linewidth = 0.7) +
+  geom_hline(yintercept = 0, color = gltr_pal$text_gray, linewidth = 0.5) +
+  annotate("rect", xmin = -Inf, xmax = Inf, 
+           ymin = limite_inf_diff_GLTR, ymax = limite_sup_diff_GLTR,
+           fill = gltr_pal$positive, alpha = 0.1) +
+  scale_x_continuous(breaks = seq(0, 30, 5)) +
+  scale_y_continuous(limits = c(-0.3, 0.4), breaks = seq(-0.3, 0.4, 0.1)) +
+  labs(
+    title = "Función de Autocorrelación (ACF) - Serie Diferenciada",
+    subtitle = "GLTR: Primera diferencia | Datos de entrenamiento",
+    x = "Rezago (Lag)",
+    y = "Autocorrelación",
+    caption = "Bandas verdes: Límites de significancia al 95%"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(face = "bold", size = 14, color = gltr_pal$text_dark),
+    plot.subtitle = element_text(size = 10, color = gltr_pal$tertiary),
+    plot.caption = element_text(size = 9, color = gltr_pal$text_gray, hjust = 0),
+    axis.title = element_text(face = "bold", size = 10, color = gltr_pal$text_gray),
+    axis.text = element_text(size = 9, color = gltr_pal$text_gray),
+    panel.grid.major = element_line(color = gltr_pal$grid, linetype = "dashed", linewidth = 0.4),
+    panel.grid.minor = element_blank()
+  )
+```
+
+## Test ADF - Serie Diferenciada
+
+```{r adf-diferenciada}
+adf_diff_resultado_GLTR <- adf.test(GLTR_diff)
+
+tabla_adf_diff_GLTR <- data.frame(
+  Métrica = c("Estadístico Dickey-Fuller", 
+              "Orden de Rezagos (Lag)", 
+              "P-valor",
+              "Nivel de Significancia (α)",
+              "Hipótesis Nula (H₀)",
+              "Decisión"),
+  Valor = c(round(adf_diff_resultado_GLTR$statistic, 4),
+            adf_diff_resultado_GLTR$parameter,
+            round(adf_diff_resultado_GLTR$p.value, 4),
+            "0.05",
+            "Serie tiene raíz unitaria",
+            ifelse(adf_diff_resultado_GLTR$p.value > 0.05, 
+                   "No rechazar H₀", "Rechazar H₀")),
+  Interpretación = c("Valor del estadístico de prueba",
+                     "Rezagos incluidos en el test",
+                     "Probabilidad bajo H₀",
+                     "Umbral de decisión",
+                     "La serie NO es estacionaria",
+                     ifelse(adf_diff_resultado_GLTR$p.value > 0.05,
+                            "Serie NO estacionaria",
+                            "Serie estacionaria"))
+)
+
+kable(tabla_adf_diff_GLTR, 
+      caption = "Prueba de Dickey-Fuller Aumentada (ADF) - Serie Diferenciada GLTR",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(3, bold = TRUE, color = "#27AE60") %>% 
+  row_spec(6, bold = TRUE, background = "#d5f4e6")
+```
+
+# Identificación del Modelo
+
+## Función para ACF y PACF
+
+```{r funcion-acf-pacf}
+crear_grafico_acf_pacf <- function(serie, titulo_serie = "GLTR", lag_max = NULL) {
+  
+  acf_data <- acf(serie, plot = FALSE, lag.max = lag_max)
+  pacf_data <- pacf(serie, plot = FALSE, lag.max = lag_max)
+  
+  acf_df <- data.frame(
+    lag = as.numeric(acf_data$lag)[-1], 
+    acf = as.numeric(acf_data$acf)[-1]
+  )
+  
+  pacf_df <- data.frame(
+    lag = as.numeric(pacf_data$lag), 
+    pacf = as.numeric(pacf_data$acf)
+  )
+  
+  conf_level <- qnorm((1 + 0.95)/2)/sqrt(acf_data$n.used)
+  
+  y_max <- max(c(abs(acf_df$acf), abs(pacf_df$pacf), conf_level)) * 1.2
+  
+  # GRÁFICO ACF
+  p_acf <- ggplot(acf_df, aes(x = lag, y = acf)) +
+    geom_bar(stat = "identity", 
+             width = 0.7,
+             fill = ifelse(acf_df$acf > 0, "#2196F3", "#FF5252"),
+             color = NA,
+             alpha = 0.8) +
+    geom_hline(yintercept = conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = -conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = 0, 
+               color = "#212121", 
+               linewidth = 0.3) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = -conf_level, ymax = conf_level,
+             fill = "#E8F5E9",
+             alpha = 0.2) +
+    geom_text(data = subset(acf_df, abs(acf) > conf_level),
+              aes(label = round(acf, 2)),
+              vjust = ifelse(subset(acf_df, abs(acf) > conf_level)$acf > 0, -0.8, 1.2),
+              size = 3.2,
+              fontface = "bold",
+              color = "#212121") +
+    labs(
+      title = "AUTOCORRELACIÓN (ACF)",
+      subtitle = paste("Serie diferenciada:", titulo_serie),
+      x = "Desfase (Lags)",
+      y = "Autocorrelación",
+      caption = paste(" ")
+    ) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = min(20, max(acf_df$lag)))) +
+    scale_y_continuous(limits = c(-y_max, y_max),
+                       breaks = scales::pretty_breaks(n = 8)) +
+    theme_minimal(base_size = 12) +
+    theme(
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.border = element_rect(color = "#E0E0E0", fill = NA, linewidth = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 14,
+        color = "#0D47A1",
+        hjust = 0,
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 11,
+        color = "#546E7A",
+        hjust = 0,
+        margin = margin(b = 15)
+      ),
+      axis.title = element_text(
+        size = 11,
+        color = "#37474F",
+        face = "bold"
+      ),
+      axis.text = element_text(
+        size = 10,
+        color = "#546E7A"
+      ),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.y = element_line(color = "#F5F5F5", linewidth = 0.5),
+      panel.grid.minor.y = element_blank(),
+      plot.margin = margin(15, 20, 15, 15)
+    )
+  
+  # GRÁFICO PACF
+  p_pacf <- ggplot(pacf_df, aes(x = lag, y = pacf)) +
+    geom_bar(stat = "identity", 
+             width = 0.7,
+             fill = ifelse(pacf_df$pacf > 0, "#4CAF50", "#FF9800"),
+             color = NA,
+             alpha = 0.8) +
+    geom_hline(yintercept = conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = -conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = 0, 
+               color = "#212121", 
+               linewidth = 0.3) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = -conf_level, ymax = conf_level,
+             fill = "#F3E5F5",
+             alpha = 0.2) +
+    geom_text(data = subset(pacf_df, abs(pacf) > conf_level),
+              aes(label = round(pacf, 2)),
+              vjust = ifelse(subset(pacf_df, abs(pacf) > conf_level)$pacf > 0, -0.8, 1.2),
+              size = 3.2,
+              fontface = "bold",
+              color = "#212121") +
+    labs(
+      title = "AUTOCORRELACIÓN PARCIAL (PACF)",
+      subtitle = paste("Serie diferenciada:", titulo_serie),
+      x = "Desfase (Lags)",
+      y = "Autocorrelación Parcial",
+      caption = paste(" ", 
+                      format(Sys.Date(), "%d/%m/%Y"))
+    ) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = min(20, max(pacf_df$lag)))) +
+    scale_y_continuous(limits = c(-y_max, y_max),
+                       breaks = scales::pretty_breaks(n = 8)) +
+    theme_minimal(base_size = 12) +
+    theme(
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.border = element_rect(color = "#E0E0E0", fill = NA, linewidth = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 14,
+        color = "#7B1FA2",
+        hjust = 0,
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 11,
+        color = "#546E7A",
+        hjust = 0,
+        margin = margin(b = 15)
+      ),
+      axis.title = element_text(
+        size = 11,
+        color = "#37474F",
+        face = "bold"
+      ),
+      axis.text = element_text(
+        size = 10,
+        color = "#546E7A"
+      ),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.y = element_line(color = "#F5F5F5", linewidth = 0.5),
+      panel.grid.minor.y = element_blank(),
+      plot.margin = margin(15, 20, 15, 15)
+    )
+  
+  return(list(ACF = p_acf, PACF = p_pacf))
+}
+```
+
+## Gráficos ACF y PACF
+
+```{r graficos-acf-pacf, fig.width=12, fig.height=6}
+graficos <- crear_grafico_acf_pacf(
+  serie = GLTR_diff,
+  titulo_serie = "GLTR (Diferenciada d=1)",
+  lag_max = 36
+)
+
+panel_completo <- grid.arrange(
+  graficos$ACF,
+  graficos$PACF,
+  nrow = 1,
+  top = textGrob(
+    "",
+    gp = gpar(fontsize = 18, fontface = "bold", col = "#0D47A1"),
+    vjust = 1.5
+  ),
+  bottom = textGrob(
+    paste("Análisis generado:", Sys.Date(), "| Método: Diferenciación (d=1)"),
+    gp = gpar(fontsize = 10, col = "#78909C"),
+    vjust = -0.5
+  ),
+  padding = unit(2, "cm")
+)
+```
+
+# Estimación y Comparación de Modelos
+
+## Estimación de Modelos Candidatos
+
+```{r modelos}
+Modelo_GLTR_auto <- auto.arima(Entrenamiento_GLTR)
+Modelo_GLTR_1 <- Arima(Entrenamiento_GLTR, order = c(3, 1, 4))
+Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(1, 1, 1))
+Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(2, 1, 4))
+Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
+```
+
+#tabla de modelos
+
+```{r modelos_table}
+library(gt)
+library(dplyr)
+
+# Crear el dataframe
+datos_modelos <- data.frame(
+  `Etiqueta del Modelo` = c(
+    "Modelo_GLTR_auto",
+    "Modelo_GLTR_1", 
+    "Modelo_GLTR_2",
+    "Modelo_GLTR_3",
+    "Modelo_GLTR_4"
+  ),
+  `Especificación ARIMA` = c(
+    "ARIMA(p, d, q) elegido por auto.arima()",
+    "ARIMA(3, 1, 4)",
+    "ARIMA(1, 1, 1)",
+    "ARIMA(2, 1, 4)",
+    "ARIMA(4, 1, 4)"
+  ),
+  `Motivo de Elección` = c(
+    "Búsqueda automática exhaustiva que minimiza AICc. Sirve como referencia objetiva y verifica si el algoritmo identifica estructuras que no son evidentes en ACF/PACF manual.",
+    "Estructura ARMA balanceada sugerida por picos moderados en PACF (rezagos 1–3) y ACF (rezagos 1–4) de la serie diferenciada. Permite capturar dinámicas de mediano plazo pero puede llegar a sobreparametrizar.",
+    "Modelo parsimonioso de bajo orden, ideal como referencia simple. Consistente con ACF/PACF sin picos dominantes; útil para comparar si modelos más complejos justifican el costo de parsimonia.",
+    "Variante intermedia que aumenta ligeramente el orden MA respecto al AR, sugerida por ligeras persistencias en ACF a rezagos altos. Permite evaluar si componentes MA adicionales mejoran el ajuste.",
+    "Modelo más complejo que captura estructuras AR y MA de mayor orden, útil para verificar si autocorrelaciones parciales en rezagos 3–4 son significativas o solo ruido. Sirve como benchmark de máxima complejidad razonable."
+  ),
+  check.names = FALSE
+)
+
+# Crear tabla profesional con gt
+tabla_modelos <- datos_modelos %>%
+  gt() %>%
+  tab_header(
+    title = md("**Tabla 1: Modelos ARIMA Considerados para la Serie GLTR**"),
+    subtitle = "Especificaciones y justificación de cada configuración"
+  ) %>%
+  cols_label(
+    `Etiqueta del Modelo` = md("**Etiqueta del Modelo**"),
+    `Especificación ARIMA` = md("**Especificación ARIMA**"),
+    `Motivo de Elección` = md("**Motivo de Elección**")
+  ) %>%
+  tab_style(
+    style = cell_text(
+      font = "Segoe UI",
+      size = "small",
+      weight = "normal"
+    ),
+    locations = cells_body()
+  ) %>%
+  tab_style(
+    style = cell_text(
+      font = "Segoe UI",
+      size = "medium",
+      weight = "bold"
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#f8f9fa"),
+    locations = cells_body(rows = seq(1, nrow(datos_modelos), by = 2))
+  ) %>%
+  tab_style(
+    style = cell_borders(
+      sides = c("top", "bottom"),
+      color = "#dee2e6",
+      weight = px(1)
+    ),
+    locations = cells_body()
+  ) %>%
+  cols_width(
+    `Etiqueta del Modelo` ~ px(150),
+    `Especificación ARIMA` ~ px(200),
+    `Motivo de Elección` ~ px(500)
+  ) %>%
+  tab_options(
+    table.font.names = "Segoe UI",
+    table.font.size = px(13),
+    heading.title.font.size = px(20),
+    heading.subtitle.font.size = px(15),
+    heading.align = "left",
+    table.width = pct(100),
+    column_labels.border.top.color = "black",
+    column_labels.border.top.width = px(2),
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = px(2),
+    table_body.hlines.color = "#f0f0f0",
+    source_notes.font.size = px(11)
+  ) %>%
+  tab_source_note(
+    source_note = md("**Nota:** Todos los modelos incluyen diferenciación (d=1) para asegurar estacionariedad de la serie.")
+  )
+
+# IMPORTANTE: Mostrar la tabla
+tabla_modelos
+```
+
+
+## Comparación por Criterios de Información
+
+```{r tabla-modelos}
+tabla_modelos_GLTR <- data.frame(
+  Modelo = c('Auto-ARIMA', 'ARIMA(3,1,4)', 'ARIMA(1,1,1)', 'ARIMA(2,1,4)', 'ARIMA(4,1,4)'),
+  AIC = round(c(Modelo_GLTR_auto$aic, Modelo_GLTR_1$aic, Modelo_GLTR_2$aic, 
+                Modelo_GLTR_3$aic, Modelo_GLTR_4$aic), 2),
+  AICc = round(c(Modelo_GLTR_auto$aicc, Modelo_GLTR_1$aicc, Modelo_GLTR_2$aicc, 
+                 Modelo_GLTR_3$aicc, Modelo_GLTR_4$aicc), 2),
+  BIC = round(c(Modelo_GLTR_auto$bic, Modelo_GLTR_1$bic, Modelo_GLTR_2$bic, 
+                Modelo_GLTR_3$bic, Modelo_GLTR_4$bic), 2)
+) %>% arrange(AICc)
+
+kable(tabla_modelos_GLTR, 
+      caption = "Comparación de Modelos ARIMA - Criterios de Información",
+      align = c("l", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(1, bold = TRUE, background = "#d5f4e6")
+```
+
+## Métricas de Precisión
+
+```{r metricas-precision}
+accuracy_auto <- accuracy(Modelo_GLTR_auto)
+accuracy_1 <- accuracy(Modelo_GLTR_1)
+accuracy_2 <- accuracy(Modelo_GLTR_2)
+accuracy_3 <- accuracy(Modelo_GLTR_3)
+accuracy_4 <- accuracy(Modelo_GLTR_4)
+
+tabla_accuracy_GLTR <- data.frame(
+  Modelo = c('Auto-ARIMA', 'ARIMA(3,1,4)', 'ARIMA(1,1,1)', 'ARIMA(2,1,4)', 'ARIMA(4,1,4)'),
+  ME = round(c(accuracy_auto[1], accuracy_1[1], accuracy_2[1], accuracy_3[1], accuracy_4[1]), 4),
+  RMSE = round(c(accuracy_auto[2], accuracy_1[2], accuracy_2[2], accuracy_3[2], accuracy_4[2]), 4),
+  MAE = round(c(accuracy_auto[3], accuracy_1[3], accuracy_2[3], accuracy_3[3], accuracy_4[3]), 4),
+  MAPE = round(c(accuracy_auto[5], accuracy_1[5], accuracy_2[5], accuracy_3[5], accuracy_4[5]), 2)
+)
+
+kable(tabla_accuracy_GLTR, 
+      caption = "Métricas de Precisión - Modelos ARIMA GLTR",
+      align = c("l", "c", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+# Diagnóstico de Residuales
+
+## Gráfico de Residuales vs Tiempo
+
+```{r residuales-tiempo, fig.height=7}
+residuos_auto <- residuals(Modelo_GLTR_auto)
+
+residuos_df <- data.frame(
+  tiempo = time(residuos_auto),
+  residuales = as.numeric(residuos_auto)
+)
+
+sd_resid <- sd(residuos_df$residuales, na.rm = TRUE)
+residuos_df$extremo <- abs(residuos_df$residuales) > 2 * sd_resid
+residuos_df$muy_extremo <- abs(residuos_df$residuales) > 3 * sd_resid
+
+ggplot(residuos_df, aes(x = tiempo, y = residuales)) +
+  geom_ribbon(
+    aes(ymin = -1.96 * sd_resid, 
+        ymax = 1.96 * sd_resid),
+    fill = "#E8F4F8",
+    alpha = 0.3
+  ) +
+  geom_line(color = "#1E88E5", linewidth = 0.8) +
+  geom_hline(yintercept = 0, color = "#2E5A87", linetype = "solid", 
+             linewidth = 1.2, alpha = 0.8) +
+  geom_smooth(method = "loess", se = TRUE, color = "#D55E00", 
+              fill = "#F0E442", alpha = 0.3, linewidth = 0.8) +
+  geom_point(
+    data = residuos_df[residuos_df$extremo, ],
+    aes(x = tiempo, y = residuales),
+    color = "red",
+    size = 2,
+    alpha = 0.7
+  ) +
+  geom_text(
+    data = residuos_df[residuos_df$muy_extremo, ],
+    aes(x = tiempo, y = residuales, label = round(residuales, 2)),
+    vjust = -1,
+    size = 3,
+    color = "#D32F2F"
+  ) +
+  labs(
+    title = "Análisis de Residuales - Modelo Auto ARIMA",
+    subtitle = paste("Especificación del modelo: ARIMA(", 
+                     paste(arimaorder(Modelo_GLTR_auto), collapse = ","), ")"),
+    x = "Período Temporal",
+    y = "Valor de los Residuales",
+    caption = "Fuente: Análisis propio | Línea naranja: tendencia LOESS"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(
+      face = "bold", 
+      size = 16,
+      color = "#1E3A5F",
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 12,
+      color = "#4A4A4A",
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    axis.title = element_text(
+      face = "bold",
+      size = 11,
+      color = "#333333"
+    ),
+    panel.grid.major = element_line(
+      color = "#F0F0F0",
+      linewidth = 0.5
+    ),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "#FAFAFA", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(20, 30, 20, 30)
+  )
+```
+
+## Histograma de Residuales
+
+```{r histograma-residuales, fig.height=7}
+residuales_valores <- as.numeric(residuos_auto)
+residuales_df <- data.frame(Residuales = residuales_valores)
+
+media_res <- mean(residuales_valores)
+sd_res <- sd(residuales_valores)
+n_res <- length(residuales_valores)
+
+rango_residuales <- range(residuales_valores)
+x_lim_inf <- rango_residuales[1] - 0.1 * diff(rango_residuales)
+x_lim_sup <- rango_residuales[2] + 0.1 * diff(rango_residuales)
+
+dens <- density(residuales_valores)
+max_densidad <- max(dens$y)
+y_lim_sup <- max_densidad * 1.15
+
+ggplot(residuales_df, aes(x = Residuales)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 30,
+    fill = "#2E5A87",
+    alpha = 0.7,
+    color = "white",
+    size = 0.3
+  ) +
+  geom_density(
+    color = "#D55E00",
+    linewidth = 1.2,
+    adjust = 1.2
+  ) +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = media_res, sd = sd_res),
+    color = "#009E73",
+    linewidth = 1.2,
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    xintercept = media_res,
+    color = "#333333",
+    linetype = "solid",
+    linewidth = 1,
+    alpha = 0.8
+  ) +
+  geom_vline(
+    xintercept = c(media_res - sd_res, media_res + sd_res),
+    color = "#666666",
+    linetype = "dashed",
+    linewidth = 0.6,
+    alpha = 0.6
+  ) +
+  annotate(
+    "text",
+    x = media_res,
+    y = y_lim_sup * 0.95,
+    label = paste("Media =", round(media_res, 3)),
+    hjust = ifelse(media_res > mean(c(x_lim_inf, x_lim_sup)), 1.1, -0.1),
+    size = 3.5,
+    color = "#333333",
+    fontface = "bold"
+  ) +
+  coord_cartesian(
+    xlim = c(x_lim_inf, x_lim_sup),
+    ylim = c(0, y_lim_sup)
+  ) +
+  labs(
+    title = "Distribución de Residuales - Modelo Auto ARIMA",
+    subtitle = paste(
+      "Media =", round(media_res, 4), 
+      "| SD =", round(sd_res, 4),
+      "| n =", format(n_res, big.mark = ",")
+    ),
+    x = "Valor de los Residuales",
+    y = "Densidad",
+    caption = "Líneas: Media (negra sólida), ±1 SD (gris discontinua), ±2 SD (gris punteada)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(
+      face = "bold", 
+      size = 16,
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 12,
+      color = "gray40",
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    axis.title = element_text(face = "bold", size = 11),
+    panel.grid.major = element_line(color = "gray90", size = 0.3),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+```
+
+## ACF de Residuales
+
+```{r acf-residuales}
+acf_residuos <- acf(residuos_auto, lag.max = 40, plot = FALSE)
+
+df_acf_residuos <- data.frame(
+  Lag = acf_residuos$lag[-1], 
+  ACF = acf_residuos$acf[-1]
+)
+
+n_residuos <- length(residuos_auto)
+limite_sup_residuos <- qnorm(0.975) / sqrt(n_residuos)
+limite_inf_residuos <- -limite_sup_residuos
+
+ggplot(df_acf_residuos, aes(x = Lag, y = ACF)) +
+  annotate("rect", 
+           xmin = -Inf, xmax = Inf, 
+           ymin = limite_inf_residuos, ymax = limite_sup_residuos,
+           fill = "#E63946", 
+           alpha = 0.05) +
+  geom_segment(aes(xend = Lag, yend = 0), 
+               color = "#2E86AB", 
+               linewidth = 0.9, 
+               lineend = "round") +
+  geom_point(color = "#2E86AB", 
+             fill = "#2E86AB", 
+             size = 2.5, 
+             shape = 21, 
+             stroke = 0.5) +
+  geom_hline(yintercept = c(limite_sup_residuos, limite_inf_residuos), 
+             linetype = "dashed", 
+             color = "#E63946", 
+             linewidth = 0.6) +
+  geom_hline(yintercept = 0, 
+             color = "#4A4A4A", 
+             linewidth = 0.4) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5),
+                     expand = expansion(mult = c(0.02, 0.02))) +
+  scale_y_continuous(limits = c(-0.35, 0.35),
+                     breaks = seq(-0.3, 0.3, by = 0.1),
+                     expand = expansion(mult = c(0, 0.05))) +
+  labs(
+    title = "FUNCIÓN DE AUTOCORRELACIÓN DE RESIDUALES",
+    subtitle = "Modelo Auto ARIMA | Análisis de independencia de residuales",
+    x = "Rezago (Lag)",
+    y = "Coeficiente de Autocorrelación (ACF)",
+    caption = paste0(
+      "Intervalo de confianza del 95% (±", 
+      round(limite_sup_residuos, 3), 
+      ") | n = ", 
+      format(n_residuos, big.mark = ",")
+    )
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "#F8F9FA", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(20, 25, 20, 25),
+    plot.title = element_text(
+      face = "bold", 
+      size = 16, 
+      color = "#212529",
+      hjust = 0.5,
+      margin = margin(b = 8)
+    ),
+    panel.grid.major = element_line(
+      color = "#E9ECEF", 
+      linewidth = 0.3
+    ),
+    panel.grid.minor = element_blank()
+  )
+```
+
+## Prueba de Ljung-Box
+
+```{r ljung-box}
+ljung_box_result <- Box.test(residuals(Modelo_GLTR_auto), lag = 10, type = "Ljung-Box")
+
+tabla_ljung_box <- data.frame(
+  Estadístico = c("X-squared", "Grados de libertad", "P-valor", "Decisión"),
+  Valor = c(round(ljung_box_result$statistic, 4),
+            ljung_box_result$parameter,
+            round(ljung_box_result$p.value, 4),
+            ifelse(ljung_box_result$p.value > 0.05, 
+                   "No rechazar H₀: Residuos = Ruido Blanco ✓", 
+                   "Rechazar H₀: Residuos ≠ Ruido Blanco ✗"))
+)
+
+kable(tabla_ljung_box, 
+      caption = "Prueba de Ljung-Box - Validación de Residuos",
+      align = c("l", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(4, bold = TRUE, background = "#d5f4e6")
+```
+
+# Pronóstico y Evaluación
+
+## Generación del Pronóstico
+
+```{r pronostico, fig.height=7}
+h_value <- length(Prueba_GLTR)
+pronostico_GLTR <- Modelo_GLTR_auto %>% 
+  forecast(h = h_value, level = 0.95)
+
+pronostico_GLTR %>% 
+  autoplot(include = 100) +
+  labs(
+    title = "Pronóstico del Precio de Cierre GLTR",
+    subtitle = paste0("Modelo: ", Modelo_GLTR_auto, " | Intervalo de Confianza: 95%"),
+    x = "Fecha",
+    y = "Precio de Cierre (USD)",
+    caption = paste0("Horizonte de pronóstico: ", h_value, " observaciones")
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 16,
+      hjust = 0.5,
+      margin = margin(b = 5),
+      color = "#2C3E50"
+    ),
+    plot.subtitle = element_text(
+      size = 11,
+      hjust = 0.5,
+      margin = margin(b = 15),
+      color = "#7F8C8D"
+    ),
+    axis.title.x = element_text(
+      face = "bold",
+      size = 12,
+      margin = margin(t = 10),
+      color = "#34495E"
+    ),
+    axis.title.y = element_text(
+      face = "bold",
+      size = 12,
+      margin = margin(r = 10),
+      color = "#34495E"
+    ),
+    panel.grid.major = element_line(color = "#ECF0F1", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "#F8F9F9", linewidth = 0.3),
+    legend.position = "bottom",
+    plot.margin = margin(20, 20, 15, 20)
+  ) +
+  scale_color_manual(
+    values = c("Data" = "#3498DB", "Forecast" = "#E74C3C"),
+    name = "Serie"
+  ) +
+  scale_fill_manual(
+    values = c("95%" = alpha("#E74C3C", 0.2)),
+    name = "Intervalo"
+  )
+```
+
+## Tabla Comparativa
+
+```{r tabla-comparativa}
+tabla_comparativa_GLTR <- data.frame(
+  Día = 1:length(Prueba_GLTR),
+  Fecha = format(index(Prueba_GLTR), "%Y-%m-%d"),
+  Real = round(as.numeric(Prueba_GLTR), 2),
+  Pronóstico = round(as.numeric(pronostico_GLTR$mean), 2),
+  Error_USD = round(as.numeric(Prueba_GLTR) - as.numeric(pronostico_GLTR$mean), 2),
+  Error_Pct = round(((as.numeric(Prueba_GLTR) - as.numeric(pronostico_GLTR$mean)) / 
+                       as.numeric(Prueba_GLTR)) * 100, 3)
+)
+
+kable(tabla_comparativa_GLTR[1:5, ], 
+      caption = "Comparación: Valores Reales vs Pronósticos GLTR",
+      align = c("c", "c", "c", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+## Gráfico: Predicho vs Real
+
+```{r predicho-vs-real}
+fechas_pronostico_GLTR <- index(Prueba_GLTR)
+
+ggplot() +
+  geom_line(data = data.frame(Fecha = index(Entrenamiento_GLTR), 
+                              Precio = as.numeric(Entrenamiento_GLTR)),
+            aes(x = Fecha, y = Precio), color = 'black', alpha = 0.6) +
+  geom_line(data = data.frame(Fecha = index(Prueba_GLTR), 
+                              Precio = as.numeric(Prueba_GLTR)),
+            aes(x = Fecha, y = Precio), color = gltr_pal$negative, linewidth = 1.2) +
+  geom_line(data = data.frame(Fecha = fechas_pronostico_GLTR,
+                              Precio = as.numeric(pronostico_GLTR$mean)),
+            aes(x = Fecha, y = Precio), color = gltr_pal$tertiary, linewidth = 1) +
+  labs(
+    title = "GLTR: Pronóstico vs Real",
+    subtitle = paste0("Negro=Entrenamiento | Rojo=Real | Azul=Pronóstico ", Modelo_GLTR_auto),
+    x = "Fecha", 
+    y = "Precio USD"
+  ) +
+  theme_minimal()
+```
+
+# Métricas de Desempeño
+
+```{r metricas-finales}
+MAE_GLTR <- mean(abs(tabla_comparativa_GLTR$Error_USD))
+RMSE_GLTR <- sqrt(mean(tabla_comparativa_GLTR$Error_USD^2))
+MAPE_GLTR <- mean(abs(tabla_comparativa_GLTR$Error_Pct))
+
+tabla_metricas_finales <- data.frame(
+  Métrica = c("MAE (Error Absoluto Medio)", 
+              "RMSE (Raíz del Error Cuadrático Medio)", 
+              "MAPE (Error Porcentual Absoluto Medio)"),
+  Valor = c(round(MAE_GLTR, 4), 
+            round(RMSE_GLTR, 4), 
+            paste0(round(MAPE_GLTR, 2), "%")),
+  Interpretación = c("Promedio de errores en USD", 
+                     "Penaliza errores grandes", 
+                     "Error promedio en porcentaje")
+)
+
+kable(tabla_metricas_finales, 
+      caption = "Métricas de Desempeño del Pronóstico - Datos de Prueba",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+# Conclusiones
+
+El análisis de series temporales aplicado a GLTR mediante modelos ARIMA ha permitido identificar el mejor modelo predictivo basado en criterios de información y métricas de error. El modelo Auto-ARIMA seleccionado demostró un ajuste adecuado, con residuales que cumplen las propiedades de ruido blanco según la prueba de Ljung-Box.
+
+**Hallazgos principales:**
+
+- La serie original presentó no estacionariedad, requiriendo diferenciación
+- El modelo seleccionado mostró residuales sin autocorrelación significativa
+- Las métricas de pronóstico indican un desempeño razonable en el conjunto de prueba
+
+---
+
+**Documento generado:** `r Sys.Date()`
