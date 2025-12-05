@@ -987,99 +987,309 @@ ficha_tecnica %>%
 ```
 
 ```{r dona interactiva}
-# Datos de composición del ETF
+library(plotly)
+library(dplyr)
+
 composition_data <- data.frame(
   Metal = c("Oro Físico", "Plata Física", "Paladio Físico", "Platino Físico"),
   Porcentaje = c(61.77, 30.72, 4.26, 3.26),
   Valor_Mercado = c("1B", "702M", "97M", "74M")
 )
 
-# Añadir etiquetas detalladas
 composition_data <- composition_data %>%
   mutate(
-    Etiqueta = paste0(
-      "<b>", Metal, "</b><br>",
-      Porcentaje, "%<br>",
-      "(", Valor_Mercado, ")"
-    ),
-    # Colores metálicos realistas
-    Color = c("#FFD700", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
-    # Texto para hover
+    
+    Color = c("goldenrod", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
+    
     HoverText = paste0(
       "<b>", Metal, "</b><br>",
       "Composición: <b>", Porcentaje, "%</b><br>",
       "Valor de mercado: <b>", Valor_Mercado, "</b><br>",
-      "Aproximado en cartera:<br>",
+      "Rango aproximado en cartera:<br>",
       case_when(
         Metal == "Oro Físico" ~ "60-65%",
         Metal == "Plata Física" ~ "25-30%",
         Metal == "Paladio Físico" ~ "3-5%",
         Metal == "Platino Físico" ~ "3-5%"
       )
+    ),
+    
+    Etiqueta = paste0(
+      "<b>", Metal, "</b><br>",
+      Porcentaje, "%"
     )
   )
 
-# Crear donut chart interactivo
+
+aplicar_tema_ishares_donut <- function(plotly_obj) {
+  plotly_obj %>%
+    layout(
+      
+      font = list(
+        family = "Inter, sans-serif",
+        size = 11,
+        color = "#2E3842"
+      ),
+      
+      
+      title = list(
+        text = "Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares",
+        font = list(
+          family = "Roboto, sans-serif",
+          size = 14,
+          color = "#001A5C",
+          weight = "bold"
+        ),
+        x = 0.5,
+        y = 0.95,
+        xanchor = "center",
+        yanchor = "top"
+      ),
+      
+      
+      legend = list(
+        orientation = "v",
+        x = 1.05,
+        y = 0.5,
+        bgcolor = "#F5F7FA",
+        bordercolor = "#D1D8E0",
+        borderwidth = 1,
+        font = list(
+          family = "Inter, sans-serif",
+          size = 10,
+          color = "#5D6D7E"
+        ),
+        title = list(
+          text = "<b>METALES</b>",
+          font = list(
+            family = "Roboto, sans-serif",
+            size = 11,
+            color = "#001A5C",
+            weight = "bold"
+          )
+        )
+      ),
+      
+      
+      annotations = list(
+        list(
+          text = "<b>Total AUM</b><br>~$1.9B",
+          x = 0.5,
+          y = 0.5,
+          font = list(
+            family = "Roboto, sans-serif",
+            size = 14,
+            color = "#001A5C",
+            weight = "bold"
+          ),
+          showarrow = FALSE,
+          align = "center"
+        )
+      ),
+      
+      
+      paper_bgcolor = "white",
+      plot_bgcolor = "white",
+      
+      
+      margin = list(
+        t = 100,  
+        b = 50,   
+        l = 20,   
+        r = 180,  
+        pad = 10
+      ),
+      
+      hoverlabel = list(
+        bgcolor = "#001A5C",
+        bordercolor = "#0056B3",
+        font = list(
+          family = "Inter, sans-serif",
+          size = 11,
+          color = "white"
+        )
+      )
+    ) %>%
+    config(
+      displayModeBar = TRUE,
+      displaylogo = FALSE,
+      modeBarButtonsToRemove = c(
+        'sendDataToCloud',
+        'autoScale2d',
+        'resetScale2d',
+        'hoverClosestCartesian',
+        'hoverCompareCartesian',
+        'toggleSpikelines'
+      ),
+      toImageButtonOptions = list(
+        format = "png",
+        filename = "composicion_etf_ishares",
+        height = 600,
+        width = 800,
+        scale = 2
+      )
+    )
+}
+
 donut_interactive <- plot_ly(
   composition_data,
   labels = ~Metal,
   values = ~Porcentaje,
   type = 'pie',
-  hole = 0.5,  # Esto crea el efecto donut
+  hole = 0.5,
   textposition = 'outside',
-  textinfo = 'label+percent',
+  textinfo = 'text',
+  text = ~Etiqueta,
   hoverinfo = 'text',
-  text = ~HoverText,
+  hovertext = ~HoverText,
+  
   marker = list(
     colors = ~Color,
-    line = list(color = '#FFFFFF', width = 2)
+    line = list(
+      color = 'white', 
+      width = 2
+    ),
+    pattern = list(
+      shape = "/", 
+      solidity = 0.3, 
+      size = 10, 
+      fillmode = "overlay"
+    )
   ),
-  # Añadir texto en el centro
-  domain = list(x = c(0, 1), y = c(0, 1))
+  
+  outsidetextfont = list(
+    family = "Inter, sans-serif",
+    size = 11,
+    color = "#2E3842"
+  ),
+  
+  insidetextfont = list(
+    family = "Roboto, sans-serif",
+    size = 12,
+    color = "white",
+    weight = "bold"
+  ),
+  
+  domain = list(x = c(0, 0.8), y = c(0, 1)),
+  
+  rotation = 90,
+  
+  direction = "clockwise",
+  
+  pull = 0.01,
+  
+  hovertemplate = paste(
+    "%{hovertext}",
+    "<extra></extra>"
+  )
+) %>%
+  aplicar_tema_ishares_donut() %>%
+  add_annotations(
+    x = 0.5,
+    y = -0.1,
+    text = "<i>Fuente: Datos aproximados del ETF GLTR - Aberdeen Standard</i>",
+    showarrow = FALSE,
+    font = list(
+      family = "Inter, sans-serif",
+      size = 9,
+      color = "#5D6D7E",
+      style = "italic"
+    ),
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center"
+  )
+
+donut_interactive
+
+donut_simple <- plot_ly(
+  composition_data,
+  labels = ~Metal,
+  values = ~Porcentaje,
+  type = 'pie',
+  hole = 0.5,
+  textinfo = 'percent',
+  textposition = 'inside',
+  hoverinfo = 'text',
+  hovertext = ~HoverText,
+  marker = list(
+    colors = ~Color,
+    line = list(color = 'white', width = 2)
+  )
 ) %>%
   layout(
     title = list(
-      text = "<b>Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares</b>",
+      text = "<b>Composición del ETF GLTR</b>",
       font = list(
-        size = 20,
-        color = "#1E3A8A",
-        family = "Arial, sans-serif"
+        family = "Roboto, sans-serif",
+        size = 14,
+        color = "#001A5C",
+        weight = "bold"
       ),
       x = 0.5,
       y = 0.95
     ),
     showlegend = TRUE,
     legend = list(
-      orientation = "v",
-      x = 1.05,
-      y = 0.5,
-      font = list(size = 12),
+      font = list(
+        family = "Inter, sans-serif",
+        size = 10,
+        color = "#5D6D7E"
+      ),
       title = list(
         text = "<b>Metales</b>",
-        font = list(size = 14)
-      )
-    ),
-    # Añadir anotación en el centro del donut
-    annotations = list(
-      list(
-        text = "<b>Total AUM</b><br>~$1.9B",
-        x = 0.5,
-        y = 0.5,
         font = list(
-          size = 16,
-          color = "#1E3A8A",
-          family = "Arial, sans-serif"
-        ),
-        showarrow = FALSE
+          family = "Roboto, sans-serif",
+          size = 11,
+          color = "#001A5C",
+          weight = "bold"
+        )
       )
     ),
-    paper_bgcolor = "#F8F9FA",
-    plot_bgcolor = "#F8F9FA",
-    margin = list(t = 100, b = 80, l = 20, r = 150)
-  )
+    paper_bgcolor = "white",
+    plot_bgcolor = "white",
+    margin = list(t = 80, b = 40, l = 20, r = 20)
+  ) %>%
+  config(displayModeBar = TRUE, displaylogo = FALSE)
 
-# Mostrar donut chart
-donut_interactive
+donut_ishares_colors <- plot_ly(
+  composition_data,
+  labels = ~Metal,
+  values = ~Porcentaje,
+  type = 'pie',
+  hole = 0.5,
+  textinfo = 'label+percent',
+  textposition = 'outside',
+  hoverinfo = 'text',
+  hovertext = ~HoverText,
+  
+  marker = list(
+    colors = c("#001A5C", "#0056B3", "#007BFF", "#5D6D7E"),
+    line = list(color = 'white', width = 2)
+  )
+) %>%
+  aplicar_tema_ishares_donut()
+
+
+exportar_donut_ishares <- function(plotly_obj, filename = "donut_ishares") {
+  plotly_obj %>%
+    config(
+      toImageButtonOptions = list(
+        format = "png",
+        filename = filename,
+        height = 600,
+        width = 800,
+        scale = 2
+      )
+    )
+}
+
+
+donut_interactive_exportable <- donut_interactive %>%
+  exportar_donut_ishares("composicion_etf_gltr_ishares")
+
+# Mostrar el gráfico final
+donut_interactive_exportable
 ```
 
 <p>La composición refleja que GLTR está dominado por oro y plata (\>92 % en conjunto), mientras que platino y paladio proporcionan exposición industrial complementaria.
@@ -1093,16 +1303,21 @@ Como ETF de metales físicos, GLTR refleja ciclos macroeconómicos, decisiones d
 Desde su lanzamiento en 2010, ha experimentado múltiples regímenes: expansiones monetarias post-crisis, normalización, shocks geopolíticos, crisis financieras y el actual rally de máximos históricos.</p>
 
 ```{r Serie de niveles}
-# Descargar datos
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(zoo)
+
+
 GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2010-01-01")
 
-# Preparar datos
+
 GLTR_df <- data.frame(
   Fecha = index(GLTR),
   Precio = as.numeric(Cl(GLTR))
 )
 
-# Gráfico interactivo
+
 plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
         line = list(color = "#1E3A8A", width = 2),
         hoverinfo = "text",
@@ -1129,7 +1344,6 @@ La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y 
 </p>
 
 ```{r 2010-2012}
-# Plata 2010–2012 (proxy: SLV)
 silver_10_12 <- getSymbols("SLV", src = "yahoo", auto.assign = FALSE,
                            from = "2010-01-01", to = "2012-12-31")
 silver_10_12_close <- Cl(silver_10_12)
@@ -1148,6 +1362,7 @@ g_plata_10_12 <- ggplot(silver_10_12_df, aes(x = fecha, y = precio)) +
 
 g_plata_10_12_int <- ggplotly(g_plata_10_12)
 g_plata_10_12_int
+
 
 ```
 
@@ -1186,16 +1401,16 @@ Alcanza máximos históricos por encima de 2.000 USD/oz hacia agosto de 2020.
 GLTR refleja este movimiento con un rally espectacular de \~30–40 % anual.</p>
 
 ```{r 2020}
-# Descargar datos si no los tienes
-GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2020-01-01", to = "2020-12-31")
+library(plotly)
+library(quantmod)
+library(dplyr)
 
-# Preparar datos para 2020
+GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2020-01-01", to = "2020-12-31")
 datos_2020 <- data.frame(
   Fecha = index(GLTR),
   Precio = as.numeric(Cl(GLTR))
 )
 
-# Crear gráfico interactivo
 plot_ly(datos_2020, x = ~Fecha) %>%
   add_trace(y = ~Precio, type = 'scatter', mode = 'lines',
             line = list(color = '#1E3A8A', width = 3),
@@ -1203,17 +1418,16 @@ plot_ly(datos_2020, x = ~Fecha) %>%
             hoverinfo = 'text',
             text = ~paste('<b>Fecha:</b>', Fecha, '<br><b>Precio:</b> $', round(Precio, 2))) %>%
   
-  # Eventos clave
   add_trace(x = as.Date('2020-03-16'), y = ~Precio[Fecha == as.Date('2020-03-16')],
             type = 'scatter', mode = 'markers',
-            marker = list(color = '#9fa0ff', size = 12, symbol = 'circle'),
+            marker = list(color = '#DC2626', size = 12, symbol = 'circle'),
             name = 'Colapso mercados',
             hoverinfo = 'text',
             text = '<b>16 Mar 2020:</b> Colapso de mercados globales<br>Fed anuncia estímulos de emergencia') %>%
   
   add_trace(x = as.Date('2020-08-07'), y = ~Precio[Fecha == as.Date('2020-08-07')],
             type = 'scatter', mode = 'markers',
-            marker = list(color = '#dab6fc', size = 12, symbol = 'diamond'),
+            marker = list(color = '#059669', size = 12, symbol = 'diamond'),
             name = 'Récord oro',
             hoverinfo = 'text',
             text = '<b>07 Ago 2020:</b> Oro supera $2,000/oz<br>Rally histórico de metales preciosos') %>%
@@ -1222,8 +1436,8 @@ plot_ly(datos_2020, x = ~Fecha) %>%
     title = list(
       text = '<b>Comportamiento del ETF GLTR durante la Pandemia COVID-19 (2020)</b>',
       font = list(size = 18, color = '#1E3A8A', family = 'Arial'),
-      y = 0.98,  # Posición vertical del título
-      x = 0.5,   # Posición horizontal centrada
+      y = 0.98,  
+      x = 0.5,   
       xanchor = 'center',
       yanchor = 'top'
     ),
@@ -1241,7 +1455,7 @@ plot_ly(datos_2020, x = ~Fecha) %>%
     hovermode = 'x unified',
     plot_bgcolor = 'white',
     paper_bgcolor = '#F8F9FA',
-    margin = list(t = 120, b = 80, l = 80, r = 40),  # Aumentado margen superior
+    margin = list(t = 120, b = 80, l = 80, r = 40),  
     showlegend = TRUE,
     legend = list(
       orientation = 'h',
@@ -1284,7 +1498,11 @@ El resultado es volatilidad extrema con GLTR oscilando entre \$70–95, cerrando
 </p>
 
 ```{r Oro 2022}
-# Oro 2022 (proxy: GLD)
+library(quantmod)
+library(ggplot2)
+library(plotly)
+
+
 gold_2022 <- getSymbols("GLD", src = "yahoo", auto.assign = FALSE,
                         from = "2022-01-01", to = "2022-12-31")
 gold_2022_close <- Cl(gold_2022)
@@ -1323,11 +1541,14 @@ El patrón es típico de shocks puntuales que generan picos temporales pero no t
 </p>
 
 ```{r 2023 vs 2024}
-# Descargar datos para 2023 y 2024
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(tidyr)
+
 GLTR_2023 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01", to = "2023-12-31")
 GLTR_2024 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2024-01-01", to = "2024-12-31")
 
-# Preparar datos para 2023
 datos_2023 <- data.frame(
   Fecha = index(GLTR_2023),
   Precio = as.numeric(Cl(GLTR_2023))
@@ -1338,7 +1559,6 @@ datos_2023 <- data.frame(
     Precio_Norm = Precio / first(Precio) * 100
   )
 
-# Preparar datos para 2024
 datos_2024 <- data.frame(
   Fecha = index(GLTR_2024),
   Precio = as.numeric(Cl(GLTR_2024))
@@ -1349,17 +1569,14 @@ datos_2024 <- data.frame(
     Precio_Norm = Precio / first(Precio) * 100
   )
 
-# Combinar datos
 datos_comparativos <- bind_rows(datos_2023, datos_2024)
 
-# Crear gráfico comparativo interactivo
 plot_ly(datos_comparativos, x = ~Dia) %>%
-  # Línea para 2023
   add_trace(data = subset(datos_comparativos, Año == "2023"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines',
-            line = list(color = '#e0c3fc', width = 3),
+            line = list(color = '#DC2626', width = 3),
             name = '2023',
             hoverinfo = 'text',
             text = ~paste('<b>2023 - Día', Dia, '</b><br>',
@@ -1367,12 +1584,11 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
                           'Precio: $', round(Precio, 2), '<br>',
                           'Normalizado:', round(Precio_Norm, 1))) %>%
   
-  # Línea para 2024
   add_trace(data = subset(datos_comparativos, Año == "2024"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines',
-            line = list(color = '#957fef', width = 3),
+            line = list(color = '#059669', width = 3),
             name = '2024',
             hoverinfo = 'text',
             text = ~paste('<b>2024 - Día', Dia, '</b><br>',
@@ -1380,7 +1596,6 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
                           'Precio: $', round(Precio, 2), '<br>',
                           'Normalizado:', round(Precio_Norm, 1))) %>%
   
-  # Línea de referencia en 100
   add_trace(x = c(0, max(datos_comparativos$Dia)),
             y = c(100, 100),
             type = 'scatter',
@@ -1389,7 +1604,6 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
             name = 'Línea base (100)',
             showlegend = FALSE) %>%
   
-  # Layout
   layout(
     title = list(
       text = '<b>Comparativo de Desempeño: ETF GLTR 2023 vs 2024</b>',
@@ -1430,23 +1644,23 @@ La aceleración es concluyente en términos anuales: 2023 cierra plano con +2.1%
 </p>
 
 ```{r Desempeño por año}
-# Descargar datos desde 2023
+library(plotly)
+library(quantmod)
+library(dplyr)
+library(lubridate)
+
 GLTR_all <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01")
 
-# Función para preparar datos por año
 preparar_datos_año <- function(año, datos) {
-  # Filtrar por año
   datos_año <- datos[year(index(datos)) == año]
   
   if (nrow(datos_año) == 0) return(NULL)
   
-  # Crear dataframe
   df <- data.frame(
     Fecha = index(datos_año),
     Precio = as.numeric(Cl(datos_año))
   )
   
-  # Calcular día del año y precio normalizado
   df <- df %>%
     mutate(
       Dia_del_año = row_number(),
@@ -1458,24 +1672,19 @@ preparar_datos_año <- function(año, datos) {
   return(df)
 }
 
-# Preparar datos para cada año
 datos_2023 <- preparar_datos_año(2023, GLTR_all)
 datos_2024 <- preparar_datos_año(2024, GLTR_all)
 datos_2025 <- preparar_datos_año(2025, GLTR_all)
 
-# Combinar todos los datos
 datos_todos <- bind_rows(datos_2023, datos_2024, datos_2025)
 
-# Crear gráfico interactivo
 plot_ly(datos_todos, x = ~Dia_del_año) %>%
-  
-  # Año 2023
-  add_trace(data = subset(datos_todos, Año == "2023"),
+    add_trace(data = subset(datos_todos, Año == "2023"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines+markers',
-            line = list(color = '#b79ced', width = 2.5),
-            marker = list(size = 6, color = '#dec0f1'),
+            line = list(color = '#DC2626', width = 2.5),
+            marker = list(size = 6, color = '#DC2626'),
             name = '2023',
             hoverinfo = 'text',
             text = ~paste('<b>2023 - Día', Dia_del_año, '</b><br>',
@@ -1484,13 +1693,12 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Año 2024
   add_trace(data = subset(datos_todos, Año == "2024"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines+markers',
-            line = list(color = '#8e94f2', width = 2.5),
-            marker = list(size = 6, color = '#8e94f2'),
+            line = list(color = '#059669', width = 2.5),
+            marker = list(size = 6, color = '#059669'),
             name = '2024',
             hoverinfo = 'text',
             text = ~paste('<b>2024 - Día', Dia_del_año, '</b><br>',
@@ -1499,7 +1707,6 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Año 2025 (hasta la fecha disponible)
   add_trace(data = subset(datos_todos, Año == "2025"),
             y = ~Precio_Norm,
             type = 'scatter',
@@ -1514,7 +1721,6 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Línea de referencia en 100
   add_trace(x = c(0, max(datos_todos$Dia_del_año, na.rm = TRUE)),
             y = c(100, 100),
             type = 'scatter',
@@ -1524,7 +1730,6 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
             showlegend = FALSE,
             hoverinfo = 'skip') %>%
   
-  # Layout
   layout(
     title = list(
       text = '<b>Comparativo de Desempeño Anual - ETF GLTR</b><br><span style="font-size:14px">Cada año normalizado a 100 en su primer día de negociación</span>',
@@ -1550,14 +1755,13 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
     ),
     margin = list(t = 100, b = 100, l = 80, r = 40),
     
-    # Anotaciones con rendimiento final de cada año
     annotations = list(
       list(
         x = max(datos_2023$Dia_del_año, na.rm = TRUE),
         y = tail(datos_2023$Precio_Norm, 1),
         text = paste('2023:', round(tail(datos_2023$Retorno, 1), 1), '%'),
         showarrow = FALSE,
-        font = list(size = 12, color = '#b7bced'),
+        font = list(size = 12, color = '#DC2626'),
         xanchor = 'left',
         xshift = 10
       ),
@@ -1566,7 +1770,7 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
         y = tail(datos_2024$Precio_Norm, 1),
         text = paste('2024:', round(tail(datos_2024$Retorno, 1), 1), '%'),
         showarrow = FALSE,
-        font = list(size = 12, color = '#8e94f2'),
+        font = list(size = 12, color = '#059669'),
         xanchor = 'left',
         xshift = 10
       ),
@@ -1591,7 +1795,8 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
 
 ```{r T de sintesis histórica}
 
-# Crear tabla de síntesis histórica
+library(kableExtra)
+
 sintesis_historica <- data.frame(
   Período = c(
     "2010–2012",
@@ -1625,7 +1830,6 @@ sintesis_historica <- data.frame(
   )
 )
 
-# Crear tabla profesional
 sintesis_historica %>%
   kable(
     align = "lll",
@@ -1642,7 +1846,7 @@ sintesis_historica %>%
   ) %>%
   row_spec(
     0,
-    background = "#957fef",
+    background = "#1E3A8A",
     color = "white",
     bold = TRUE,
     align = "center",
@@ -1666,7 +1870,6 @@ sintesis_historica %>%
     width = "65%",
     background = "#FFFFFF"
   ) %>%
-  # Añadir notas al pie
   footnote(
     general = "Fuente: Análisis histórico basado en datos de Yahoo Finance, Bloomberg y Aberdeen Standard Investments",
     general_title = "Nota:",
