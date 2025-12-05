@@ -1,0 +1,3817 @@
+---
+output:
+  html_document:
+    css: style.css
+    theme: null
+    highlight: null
+    self_contained: true
+    toc: false
+    df_print: kable
+---
+
+
+```{=html}
+<script>
+// Función mejorada para mostrar/ocultar TODO el código R
+function toggleAllCode() {
+  // Seleccionar TODOS los contenedores de código que R Markdown genera
+  var codeContainers = document.querySelectorAll('pre:not(.r-output), div.sourceCode pre');
+  var button = document.querySelector('.floating-code-btn');
+  
+  if (!button || codeContainers.length === 0) {
+    console.warn('No se encontraron bloques de código o el botón');
+    return;
+  }
+  
+  var allHidden = true;
+  
+  // Verificar si algún código está visible
+  codeContainers.forEach(function(container) {
+    if (container.style.display !== 'none') {
+      allHidden = false;
+    }
+  });
+  
+  // Mostrar u ocultar todo el código
+  codeContainers.forEach(function(container) {
+    if (allHidden) {
+      container.style.display = 'block';
+      container.classList.add('code-visible');
+      // Animación suave
+      container.style.opacity = '0';
+      setTimeout(function() {
+        container.style.transition = 'opacity 0.3s ease';
+        container.style.opacity = '1';
+      }, 10);
+    } else {
+      container.style.transition = 'opacity 0.3s ease';
+      container.style.opacity = '0';
+      setTimeout(function() {
+        container.style.display = 'none';
+        container.classList.remove('code-visible');
+      }, 300);
+    }
+  });
+  
+  // Cambiar texto del botón
+  if (allHidden) {
+    button.innerHTML = '📝 Ocultar Todo el Código R';
+  } else {
+    button.innerHTML = '📝 Mostrar Todo el Código R';
+  }
+}
+
+// Ocultar código al cargar la página - MEJORADO
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var codeContainers = document.querySelectorAll('pre:not(.r-output), div.sourceCode pre');
+    console.log('Bloques de código encontrados:', codeContainers.length);
+    
+    codeContainers.forEach(function(container) {
+      container.style.display = 'none';
+      // Agregar clase para identificación
+      container.classList.add('r-code-block');
+    });
+    
+    // Verificar que el botón existe
+    var button = document.querySelector('.floating-code-btn');
+    if (button) {
+      console.log('Botón de toggle encontrado y funcional');
+    } else {
+      console.error('¡Botón no encontrado!');
+    }
+  }, 500); // Aumentado el delay para asegurar que todo esté cargado
+});
+</script>
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.5,
+  out.width = "95%",
+  class.source = "r-code-chunk",
+  dev = "png",
+  dpi = 120
+)
+
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(showtext)
+library(factoextra)
+
+# Configurar fuentes financieras
+font_add_google("Roboto", "Roboto")
+font_add_google("Inter", "Inter")
+font_add_google("Open Sans", "Open Sans")
+showtext_auto()
+
+options(kableExtra.html.bsTable = TRUE)
+
+# =============================================================================
+# TEMA GGPLOT2 PERSONALIZADO - TEMA iSHARES
+# =============================================================================
+
+theme_ishares <- function() {
+  theme_minimal(base_size = 11) +
+    theme(
+      text = element_text(family = "Inter", size = 11, color = "#2E3842"),
+      
+      plot.title = element_text(
+        family = "Roboto",
+        size = 14,
+        face = "bold", 
+        hjust = 0.5,
+        color = "#001A5C",
+        margin = margin(b = 15)
+      ),
+      plot.subtitle = element_text(
+        family = "Roboto",
+        size = 12,
+        hjust = 0.5,
+        color = "#5D6D7E",
+        margin = margin(b = 12)
+      ),
+      plot.caption = element_text(
+        family = "Inter",
+        size = 9,
+        color = "#5D6D7E",
+        hjust = 0.5,
+        face = "italic",
+        margin = margin(t = 10)
+      ),
+      
+      axis.title = element_text(
+        family = "Roboto",
+        size = 11,
+        face = "bold",
+        color = "#0056B3"
+      ),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
+      axis.text = element_text(
+        family = "Inter",
+        size = 10,
+        color = "#5D6D7E",
+        face = "plain"
+      ),
+      axis.line = element_line(color = "#0056B3", linewidth = 0.5),
+      axis.ticks = element_line(color = "#007BFF", linewidth = 0.3),
+      
+      legend.title = element_text(
+        family = "Roboto",
+        size = 11,
+        face = "bold",
+        color = "#001A5C"
+      ),
+      legend.text = element_text(
+        family = "Inter", 
+        size = 10,
+        color = "#5D6D7E"
+      ),
+      legend.background = element_rect(fill = "#F5F7FA", color = "#D1D8E0"),
+      legend.key = element_rect(fill = "#F5F7FA", color = NA),
+      
+      panel.grid.major = element_line(
+        color = "#E8ECF1", 
+        linewidth = 0.5,
+        linetype = "solid"
+      ),
+      panel.grid.minor = element_line(
+        color = "#F5F7FA", 
+        linewidth = 0.3,
+        linetype = "solid"
+      ),
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      
+      plot.margin = margin(15, 15, 15, 15),
+      panel.spacing = unit(1.5, "lines"),
+      
+      strip.background = element_rect(
+        fill = "#0056B3",
+        color = "#0056B3",
+        linewidth = 1
+      ),
+      strip.text = element_text(
+        family = "Roboto",
+        color = "white",
+        face = "bold",
+        size = 11
+      )
+    )
+}
+
+# ⭐ APLICAR EL TEMA iSHARES AUTOMÁTICAMENTE A GGPLOT2
+theme_set(theme_ishares())
+
+# =============================================================================
+# FUNCIÓN WRAPPER PARA FACTOEXTRA - VERSIÓN iSHARES
+# =============================================================================
+
+fviz_eig_ishares <- function(...) {
+  p <- fviz_eig(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_pca_ishares <- function(...) {
+  p <- fviz_pca(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_pca_ind_ishares <- function(...) {
+  p <- fviz_pca_ind(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_pca_var_ishares <- function(...) {
+  p <- fviz_pca_var(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_pca_biplot_ishares <- function(...) {
+  p <- fviz_pca_biplot(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_dend_ishares <- function(...) {
+  p <- fviz_dend(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+fviz_cluster_ishares <- function(...) {
+  p <- fviz_cluster(..., ggtheme = theme_void())
+  p + theme_ishares()
+}
+
+# =============================================================================
+# PALETA DE COLORES iSHARES
+# =============================================================================
+
+colores_ishares <- c(
+  "#001A5C",  # Azul oscuro iShares
+  "#0056B3",  # Azul medio
+  "#007BFF",  # Azul claro
+  "#00B0F0",  # Cian
+  "#2E3842",  # Gris oscuro
+  "#5D6D7E",  # Gris medio
+  "#00A859",  # Verde para positivos
+  "#E74C3C",  # Rojo para negativos
+  "#D4AF37",  # Dorado para destacados
+  "#A6ACB5"   # Plata para elementos secundarios
+)
+
+scale_color_ishares <- function(palette = colores_ishares, ...) {
+  scale_color_manual(values = palette, ...)
+}
+
+scale_fill_ishares <- function(palette = colores_ishares, ...) {
+  scale_fill_manual(values = palette, ...)
+}
+
+scale_fill_gradient_ishares <- function(low = "#00B0F0", high = "#001A5C", ...) {
+  scale_fill_gradient(low = low, high = high, ...)
+}
+
+scale_color_gradient_ishares <- function(low = "#00B0F0", high = "#001A5C", ...) {
+  scale_color_gradient(low = low, high = high, ...)
+}
+
+# =============================================================================
+# FUNCIONES PARA INDICADORES FINANCIEROS
+# =============================================================================
+
+# Función para mostrar cambios de precio
+format_price_change <- function(value) {
+  if (value >= 0) {
+    sprintf("<span style='color:#00A859;font-weight:bold;'>+%.2f%%</span>", value)
+  } else {
+    sprintf("<span style='color:#E74C3C;font-weight:bold;'>%.2f%%</span>", value)
+  }
+}
+
+# Función para colores condicionales en tablas
+colorize_cell <- function(value, type = "return") {
+  if (type == "return") {
+    if (value >= 0) {
+      kableExtra::cell_spec(value, color = "#00A859", bold = TRUE)
+    } else {
+      kableExtra::cell_spec(value, color = "#E74C3C", bold = TRUE)
+    }
+  } else if (type == "volume") {
+    kableExtra::cell_spec(value, color = "#0056B3", bold = FALSE)
+  } else {
+    kableExtra::cell_spec(value, color = "#2E3842", bold = FALSE)
+  }
+}
+
+# =============================================================================
+# SOBRESCRIBIR KABLE PARA AUTO-ESTILIZADO CON TEMA iSHARES
+# =============================================================================
+
+kable_original <- knitr::kable
+
+kable <- function(x, format = "html", ..., 
+                  bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = TRUE,
+                  position = "center",
+                  financial_table = FALSE) {
+  
+  if (inherits(x, "knitr_kable")) {
+    return(x)
+  }
+  
+  if (financial_table) {
+    # Estilo especial para tablas financieras
+    tabla <- kable_original(x, format = format, ...) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = full_width,
+        position = position,
+        font_size = 13,
+        html_font = "Inter, 'Segoe UI', sans-serif"
+      ) %>%
+      row_spec(0, 
+               bold = TRUE, 
+               background = "linear-gradient(135deg, #001A5C 0%, #0056B3 100%)",
+               color = "white",
+               font_size = 14,
+               align = "c") %>%
+      row_spec(1:nrow(x), 
+               extra_css = "transition: background-color 0.3s;") %>%
+      column_spec(1, bold = TRUE, color = "#001A5C")
+  } else {
+    # Estilo estándar
+    tabla <- kable_original(x, format = format, ...) %>%
+      kable_styling(
+        bootstrap_options = bootstrap_options,
+        full_width = full_width,
+        position = position,
+        font_size = 13,
+        html_font = "Inter, 'Segoe UI', sans-serif"
+      ) %>%
+      row_spec(0, 
+               bold = TRUE, 
+               background = "#001A5C",
+               color = "white",
+               font_size = 14)
+  }
+  
+  return(tabla)
+}
+
+kbl_original <- kableExtra::kbl
+
+kbl <- function(x, format = "html", ..., financial = FALSE) {
+  if (financial) {
+    tabla <- kbl_original(x, format = format, ...) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = TRUE,
+        position = "center",
+        font_size = 13,
+        html_font = "Inter, 'Segoe UI', sans-serif"
+      ) %>%
+      row_spec(0, 
+               bold = TRUE, 
+               background = "linear-gradient(135deg, #001A5C 0%, #0056B3 100%)",
+               color = "white",
+               font_size = 14) %>%
+      column_spec(1, bold = TRUE, color = "#001A5C")
+  } else {
+    tabla <- kbl_original(x, format = format, ...) %>%
+      kable_styling(
+        bootstrap_options = c("striped", "hover", "condensed"),
+        full_width = TRUE,
+        position = "center",
+        font_size = 13,
+        html_font = "Inter, 'Segoe UI', sans-serif"
+      ) %>%
+      row_spec(0, 
+               bold = TRUE, 
+               background = "#001A5C",
+               color = "white",
+               font_size = 14)
+  }
+  
+  return(tabla)
+}
+
+# =============================================================================
+# FUNCIONES ADICIONALES PARA ANÁLISIS FINANCIERO
+# =============================================================================
+
+# Calculadora de rendimientos
+calculate_returns <- function(prices, period = "daily") {
+  returns <- diff(prices) / prices[-length(prices)]
+  
+  if (period == "annual") {
+    returns <- returns * 252  # Días de trading anuales
+  } else if (period == "monthly") {
+    returns <- returns * 21   # Días de trading mensuales
+  }
+  
+  return(returns)
+}
+
+# Métricas de riesgo
+calculate_risk_metrics <- function(returns) {
+  list(
+    mean_return = mean(returns, na.rm = TRUE),
+    sd_return = sd(returns, na.rm = TRUE),
+    sharpe_ratio = ifelse(sd(returns, na.rm = TRUE) > 0, 
+                          mean(returns, na.rm = TRUE) / sd(returns, na.rm = TRUE), 
+                          NA),
+    max_drawdown = min(returns, na.rm = TRUE)
+  )
+}
+
+
+format_financial <- function(x, type = "price") {
+  if (type == "price") {
+    scales::dollar(x, accuracy = 0.01)
+  } else if (type == "percent") {
+    scales::percent(x, accuracy = 0.01)
+  } else if (type == "volume") {
+    if (x >= 1e9) {
+      paste0(scales::comma(x/1e9, accuracy = 0.1), "B")
+    } else if (x >= 1e6) {
+      paste0(scales::comma(x/1e6, accuracy = 0.1), "M")
+    } else {
+      scales::comma(x)
+    }
+  }
+}
+
+theme_financial <- function() {
+  theme_ishares() +
+    theme(
+      panel.grid.major.x = element_line(color = "#E8ECF1", linewidth = 0.3),
+      panel.grid.major.y = element_line(color = "#E8ECF1", linewidth = 0.5),
+      panel.grid.minor = element_blank(),
+      plot.title = element_text(color = "#001A5C", size = 16, face = "bold"),
+      axis.title = element_text(color = "#0056B3", size = 12),
+      legend.position = "bottom",
+      legend.box = "horizontal"
+    )
+}
+
+# Función para gráfico de velas (candlestick)
+plot_candlestick <- function(data, title = "Candlestick Chart") {
+  # data debe tener: Date, Open, High, Low, Close
+  ggplot(data) +
+    geom_linerange(aes(x = Date, ymin = Low, ymax = High), 
+                   color = "#5D6D7E", linewidth = 0.5) +
+    geom_rect(aes(xmin = Date - 0.45, xmax = Date + 0.45,
+                  ymin = pmin(Open, Close), ymax = pmax(Open, Close),
+                  fill = Close > Open), color = NA) +
+    scale_fill_manual(values = c("#E74C3C", "#00A859"), guide = FALSE) +
+    labs(title = title, x = "Fecha", y = "Precio") +
+    theme_financial()
+}
+
+# =============================================================================
+# INICIALIZACIÓN PARA ANÁLISIS DE SERIES TEMPORALES
+# =============================================================================
+
+library(quantmod)
+library(PerformanceAnalytics)
+library(TTR)
+library(xts)
+library(zoo)
+
+# Configurar opciones para series temporales financieras
+options("getSymbols.warning4.0" = FALSE)
+options("getSymbols.yahoo.warning" = FALSE)
+
+# Función para descargar datos de acciones
+get_stock_data <- function(symbol, start_date = "2020-01-01", end_date = Sys.Date()) {
+  getSymbols(symbol, 
+             from = start_date, 
+             to = end_date, 
+             auto.assign = FALSE)
+}
+
+```
+::::::::::::::::: container
+<!-- SIDEBAR -->
+
+:::: sidebar
+::: sidebar-header
+<img src="logo-ishares.png" alt="iShares by BlackRock" class="logo-ishares"/>
+
+<h1>Análisis Financiero</h1>
+
+<h2>iShares ETF Analysis</h2>
+:::
+
+<ul class="sidebar-nav">
+<li><a href="#introduccion" class="active">[📈]{.icon} Introducción</a></li>
+<li><a href="#datos">[📊]{.icon} Datos de Mercado</a></li>
+<li><a href="#metodologia">[🔧]{.icon} Metodología</a></li>
+<li><a href="#analisis-tecnico">[📉]{.icon} Análisis Técnico</a></li>
+<li><a href="#analisis-fundamental">[💹]{.icon} Análisis Fundamental</a></li>
+<li><a href="#riesgos">[⚠️]{.icon} Evaluación de Riesgos</a></li>
+<li><a href="#recomendaciones">[💡]{.icon} Recomendaciones</a></li>
+<li><a href="#bibliografia">[📚]{.icon} Bibliografía</a></li>
+</ul>
+::::
+
+<!-- CONTENIDO PRINCIPAL -->
+
+:::::::::::::: main-content
+<!-- ENCABEZADO -->
+
+::: main-header
+<h1>Segmentación de Países mediante Indicadores de Mortalidad</h1>
+
+<h2>**Análisis de técnicas de Aprendizaje No Supervisado - Banco Mundial**</h2>
+
+<h3>Universidad del Valle - Facultad de Ingeniería</h3>
+
+<h4>Melany Enriquez - Santiago Posada - Sofia Potosi - Valery Rivera</h4>
+:::
+
+<!-- RESUMEN EJECUTIVO -->
+
+::: {#resumen .content-card}
+<h2>Resumen</h2>
+
+<p>*Este estudio aplica técnicas de aprendizaje no supervisado para identificar patrones naturales de agrupación entre países basándose en 22 indicadores de mortalidad del Banco Mundial correspondientes al año 2019. Se empleó Análisis de Componentes Principales (ACP) para reducir la dimensionalidad del conjunto de datos, seguido de clusterización jerárquica mediante el método de Ward para identificar segmentos de países con perfiles de mortalidad similares. Los indicadores analizados incluyen expectativa de vida por sexo, mortalidad por enfermedades crónicas, mortalidad por causas externas (accidentes de tránsito, envenenamientos, suicidios), mortalidad infantil y neonatal desagregada por sexo, y supervivencia hasta los 65 años. Los resultados permitieron identificar grupos de países con características de mortalidad homogéneas internamente pero diferenciadas entre sí, proporcionando información para la formulación de políticas de salud pública basadas en evidencia.*</p>
+:::
+
+<!-- INTRODUCCIÓN -->
+
+::: {#introduccion .content-card}
+<h2>Introducción</h2>
+
+<p>La mortalidad constituye uno de los indicadores fundamentales para evaluar el estado de salud de las poblaciones y la efectividad de los sistemas sanitarios a nivel global. Los patrones de mortalidad reflejan diferencias significativas entre naciones, resultado de factores como acceso a servicios de salud, nivel de desarrollo económico, infraestructura sanitaria, calidad de la atención materno-infantil y magnitud de determinantes sociales. Estas variaciones no son únicamente atribuibles a regiones geográficas o niveles de ingresos, sino que responden a dinámicas epidemiológicas complejas que estructuran la carga de enfermedad de formas distintas en cada contexto nacional.</p>
+
+<p>Actualmente, la clasificación de países para fines de política sanitaria se realiza mediante categorías predefinidas basadas en criterios geográficos o económicos. Sin embargo, estas clasificaciones convencionales no necesariamente capturan las similitudes reales en los perfiles epidemiológicos entre naciones. Existe una desalineación entre las agrupaciones administrativas que utilizamos para organizar datos internacionales y la realidad de los patrones de mortalidad que los países efectivamente experimentan. Esto implica que una segmentación basada empíricamente en los propios datos de mortalidad podría revelar qué países enfrentan desafíos sanitarios comparables, independientemente de sus características tradicionales, facilitando intercambio de experiencias y estrategias relevantes entre contextos similares.</p>
+
+<p>Las técnicas de aprendizaje no supervisado permiten identificar estas estructuras naturales sin imponer categorías predeterminadas. El Análisis de Componentes Principales sintetiza múltiples indicadores correlacionados en dimensiones fundamentales que explican la variabilidad en mortalidad entre países. La clusterización jerárquica subsecuente agrupa naciones según similitud en estas dimensiones, produciendo segmentaciones coherentes que reflejan realidades epidemiológicas.</p>
+
+<p>El objetivo de este estudio es aplicar estas técnicas para segmentar 182 países según 22 indicadores de mortalidad del año 2019, identificando grupos de naciones con perfiles epidemiológicos similares. Se espera que los clusters resultantes revelen patrones de mortalidad que trascienden categorías convencionales, faciliten la caracterización de inequidades de género, y proporcionen una base empírica para el diseño de políticas de salud pública diferenciadas según contextos epidemiológicos reales.</p>
+:::
+
+<!-- DESCRIPCION DE LA FUENTE DE DATOS -->
+
+::: {#descripcionf .content-card}
+<h2>Descripción de la fuente de Datos</h2>
+
+<p>
+
+**Base de datos:** World Development Indicators (WDI) - Banco Mundial
+
+**Unidad de análisis:** País
+
+**Período:** 2019
+
+**Acceso:** <https://databank.worldbank.org/source/world-development-indicators>
+
+</p>
+
+<p>Los datos utilizados en esta investigación provienen de la base World Development Indicators del Banco Mundial, una de las compilaciones más exhaustivas de indicadores de desarrollo compilados a partir de fuentes internacionales estandarizadas. Esta base integra información de organismos especializados reconocidos mundialmente, incluyendo la Organización Mundial de la Salud (OMS), UNICEF y agencias especializadas de las Naciones Unidas, garantizando comparabilidad metodológica entre países y confiabilidad en la medición de indicadores. El año 2019 fue seleccionado como period
+
+<!-- ... resto del contenido ... -->
+
+<!-- FOOTER -->
+
+::: footer
+<p>Universidad del Valle - Facultad de Ingeniería</p>
+
+<p>Gestión de Datos - Profesor: Orlando Joaqui Barandica</p>
+
+<p>Fecha: `r format(Sys.Date(), "%d/%m/%Y")`</p>
+:::
+::::::::::::::
+::::::::::::::::::
+
+<!-- BOTÓN FLOTANTE ELEGANTE -->
+
+<button class="floating-code-btn" onclick="toggleAllCode()">
+
+📝 Mostrar Todo el Código
+
+</button>
+
+
+```{r setup, include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 6,
+  out.width = "100%"
+)
+
+
+```
+
+```{r libraries, warning=FALSE,message=FALSE}
+library(tidyverse)
+library(forecast)
+library(tseries)
+library(ggplot2)
+library(gridExtra)
+library(knitr)
+library(kableExtra)
+library(plotly)
+library(lubridate)
+library(quantmod)
+library(fpp2)
+library(scales)
+library(viridis)
+library(patchwork)
+library(grid)
+library(RColorBrewer)
+library(dplyr)
+library(gt)
+```
+
+```{r theme-professional, warning=FALSE}
+# Tema personalizado elegante
+theme_professional <- function() {
+  theme_minimal() +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "#f8f9fa", color = NA),
+    panel.grid.major = element_line(color = "#e2e8f0", size = 0.4),
+    panel.grid.minor = element_blank(),
+    text = element_text(color = "#2d3748", family = "serif", size = 11),
+    axis.text = element_text(color = "#4a5568", size = 10),
+    axis.title = element_text(color = "#1a365d", face = "bold", size = 12),
+    plot.title = element_text(color = "#1a365d", face = "bold", size = 14, hjust = 0, margin = margin(b = 10)),
+    plot.subtitle = element_text(color = "#4a5568", size = 11, hjust = 0, margin = margin(b = 15)),
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.text = element_text(color = "#4a5568", size = 10),
+    legend.title = element_text(color = "#1a365d", face = "bold", size = 10),
+    legend.position = "bottom"
+  )
+}
+
+theme_set(theme_professional())
+```
+
+::: abstract
+
+# Introducción
+
+Los mercados de metales preciosos constituyen componentes esenciales de la economía global cuya dinámica responde a múltiples factores interconectados: ciclos económicos, expectativas inflacionarias, volatilidad de sistemas financieros, demanda sectorial diversificada (manufactura, electrónica, automoción, joyería) y restricciones de oferta minera amplificadas por tensiones geopolíticas.
+La interacción simultánea de estos elementos genera comportamientos complejos que trascienden la simple oferta y demanda, demandando enfoques analíticos rigurosos para su comprensión.
+El ETF GLTR (abrdn Physical Precious Metals Basket Shares) proporciona exposición diversificada a cuatro metales preciosos—oro, plata, platino y paladio—cuya correlación con ciclos macroeconómicos varía según el metal específico y el contexto económico prevaleciente.
+Esta composición equilibrada lo posiciona como indicador agregado particularmente sensible de la salud de mercados de commodities globales, funcionando simultáneamente como proxy de demanda por activos refugio durante episodios de inestabilidad financiera severa o depreciación acelerada de monedas fiduciarias.
+Su estructura respaldada por depósito físico de metales en bóvedas certificadas elimina riesgos de contraparte, vinculando directamente el valor del fondo a precios spot de metales subyacentes.
+El análisis de series temporales resulta indispensable para decodificar esta complejidad multidimensional de mercados de metales preciosos.
+Permite identificar tendencias estructurales de mediano y largo plazo que subyacen a fluctuaciones de corto plazo, detectar y cuantificar patrones estacionales y componentes cíclicos recurrentes, reconocer puntos de quiebre que señalan cambios significativos en condiciones de equilibrio de mercado, medir la evolución dinámica de volatilidad para calibración precisa de riesgo, y generar pronósticos probabilísticos fundamentados que orienten decisiones de inversión y gestión de exposiciones en contextos de incertidumbre persistente.
+Este tipo de análisis trasciende significativamente el interés puramente financiero, poseyendo implicaciones para múltiples stakeholders con responsabilidades estratégicas distintas.
+Para inversores institucionales y de retail, la precisión predictiva sobre GLTR mejora sustancialmente estrategias de diversificación de portafolios y cobertura de riesgos sistémicos.
+Para gestores de riesgos en instituciones financieras, estos pronósticos alimentan directamente modelos de pérdidas potenciales, pruebas de estrés bajo escenarios adversos, y cálculos de requerimientos de capital regulatorio.
+Para autoridades monetarias y bancos centrales, la dinámica observable de metales preciosos proporciona señales tempranas sobre presiones inflacionarias emergentes, credibilidad de políticas monetarias implementadas, y cambios en expectativas de inversores globales respecto a estabilidad macroeconómica.
+En síntesis, la capacidad de anticipar cambios en mercados de materias primas resulta crítica para preservar estabilidad financiera sistémica y prevenir crisis financieras en contextos de creciente incertidumbre global.
+:::
+
+:::
+
+
+## Relevancia del Análisis
+
+::: {.alert .alert-info}
+📊 **Importancia del Análisis ARIMA**
+
+El modelo ARIMA es ampliamente reconocido como una herramienta estadística robusta para analizar y pronosticar series temporales en contextos donde prevalecen patrones de autocorrelación e integración.
+:::
+
+# Metodología
+
+GLTR (abrdn Physical Precious Metals Basket Shares ETF) fue seleccionado como instrumento de análisis por ser un fondo que proporciona exposición diversificada a cuatro metales preciosos: oro (65%), plata (27%), platino (4%) y paladio (4%).
+Esta composición permite capturar dinámicas agregadas de mercados de materias primas globales.
+Adicionalmente, GLTR respalda sus participaciones con depósito físico de metales en bóvedas certificadas, elimina riesgos de contraparte, y ofrece datos diarios públicamente disponibles con alta liquidez, características esenciales para análisis de series temporales robustas.​
+
+La ventana octubre 2022 – octubre 2025 captura la transición desde endurecimiento monetario máximo (tasas a 4.0% para combatir inflación de 40 años tras invasión de Rusia a Ucrania) hacia relajación monetaria con rally estructural de metales preciosos.
+2022: GLTR oscila sin dirección clara (\$70-95) bajo presiones contrapuestas de inflación extrema versus tasas reales elevadas.
+2023: Crisis bancaria (SVB, marzo) genera demanda puntual de refugio, pero se resuelve rápidamente.
+Año cierra plano (+2%).
+2024-2025: Rally sostenido impulsado por expectativas de recortes de tasas, deuda pública máxima, riesgos geopolíticos y sanciones a Rusia.
+GLTR sube 40% en diez meses; desempeño anual: 2024 (+21%), 2025 (+69%).
+Aproximadamente 750-760 observaciones diarias proporciona robustez estadística para ARIMA.
+El período captura cambio de régimen claro, validando la serie para pronóstico.
+
+## Concepto de Serie de Tiempo
+
+Una serie de tiempo se define como una colección ordenada de observaciones de una misma variable registradas en instantes discretos y equiespaciados.
+Desde el punto de vista probabilístico, puede interpretarse como una realización de un proceso estocástico ${Yt}t∈Z$, donde cada $Yt$ es una variable aleatoria indexada por el tiempo.
+A diferencia de los datos independientes e idénticamente distribuidos, en las series temporales las observaciones sucesivas suelen presentar dependencia, de modo que la distribución conjunta de $(Y_t, Y_t−_1,…,Y_t−_k)$ no puede factorizarse como producto de distribuciones marginales independientes.
+La teoría clásica considera que una serie observada puede descomponerse en componentes deterministas y estocásticos.
+En un esquema aditivo, se escribe: $Yt=Tt+St+Ct+It$ donde $Tt$ representa la tendencia de largo plazo, asociada a cambios sistemáticos en el nivel medio de la serie; St recoge la estacionalidad, esto es, patrones que se repiten con periodicidad fija (mensual, trimestral, anual); Ct refleja el componente cíclico, vinculado a oscilaciones de medio y largo plazo sin periodo exactamente constante, a menudo relacionadas con ciclos económicos; e It es el componente irregular, que agrupa las fluctuaciones aleatorias no explicadas por los anteriores.
+Un concepto central en la modelización es la estacionariedad.
+Una serie estacionaria en sentido débil presenta media constante $E(Yt)=μ$, varianza finita y constante $Var(Yt)=σ^2$ y una función de autocovarianza $γk=Cov(Y_t,Y_t−_k)$ que depende solo del desfase k, no del instante calendario.
+Esta propiedad permite aplicar la teoría de procesos lineales y garantiza estabilidad de la estructura de dependencia en el tiempo.
+En la práctica, muchas series financieras en niveles, como los precios de activos, no son estacionarias y requieren transformaciones (por ejemplo, diferencias o rendimientos logarítmicos) para aproximarse a procesos estacionarios antes de ser modeladas.
+
+### Componentes Fundamentales
+
+$$Y_t = T_t + S_t + C_t + I_t$$
+
+Donde cada componente representa:
+
+-   $Y_t$: Valor observado en el tiempo $t$
+-   $T_t$: Componente de tendencia (movimiento de largo plazo)
+-   $S_t$: Componente estacional (patrones regulares)
+-   $C_t$: Componente cíclico (fluctuaciones periódicas)
+-   $I_t$: Componente irregular o ruido
+
+## Modelo ARIMA
+
+Dentro de los modelos lineales para series temporales, la familia ARIMA (AutoRegressive Integrated Moving Average) constituye una de las herramientas más utilizadas para describir y pronosticar procesos que pueden hacerse estacionarios mediante diferenciación.
+La idea fundamental es representar la serie transformada como combinación de un componente autorregresivo y uno de medias móviles, permitiendo capturar tanto la influencia de valores pasados como el efecto persistente de perturbaciones aleatorias.
+En su forma general, un modelo ARIMA(p,d,q) para una serie {Yt} se expresa mediante la acción conjunta de tres operadores: el operador de rezago B, definido por BYt=Yt−1; el operador de diferencia (1−B)\^d , aplicado d veces para eliminar tendencias estocásticas; y dos polinomios en B que describen la parte autorregresiva y de medias móviles.
+La estructura autorregresiva de orden p se recoge en la ecuación (1): yt=c+ϕ1yt−1+ϕ2yt−2+…+ϕpyt−p+εt (1)
+
+donde c es una constante, ϕi son los coeficientes autorregresivos y εt es un término de error, usualmente modelado como ruido blanco con media cero y varianza constante.
+La parte integrada del modelo se vincula al número de diferencias necesarias para lograr estacionariedad.
+La primera y segunda diferencias ilustran los casos d=1 y d=2: $$y′t=yt−y_t−_1  \ (2)$$ $$yt′′=(yt−y_t−_1)−(y_t−_1−y_t−_2)=yt−2yt−1+yt−2   \  (3)$$ Por su parte, el componente de medias móviles de orden q se representa en la ecuación (4): $$yt=c+εt+θ1εt−1+θ2εt−2+…+θqεt−q\ (4)$$ donde $θj$ son los coeficientes de medias móviles.
+La combinación de las partes AR y MA para una serie ya estacionaria da lugar al modelo ARMA(p,q), cuya forma general se sintetiza en (5): $$yt=c+ϕ1yt−1+ϕ2yt−2+⋯+ϕpyt−p+εt+θ1εt−1+θ2εt−2+⋯+θqεt−q   \   (5)$$ Cuando el modelo se aplica sobre la serie diferenciada $d$ veces, se obtiene un ARIMA(p,d,q).
+Así, por ejemplo, un ARIMA(3,1,0) indica un proceso autorregresivo de orden 3 sobre la primera diferencia de la serie, sin componente de medias móviles.
+La importancia de los modelos ARIMA en predicción radica en que proporcionan un marco probabilístico capaz de representar de forma explícita las autocorrelaciones presentes en los datos.
+Al combinar la memoria de la serie (a través de la parte autorregresiva) con la influencia de shocks pasados (a través de la parte de medias móviles), permiten construir pronósticos condicionados a la información disponible en el tiempo t y obtener expresiones para la varianza del error de predicción.
+Esto posibilita no solo generar valores esperados futuros, sino también intervalos de confianza que cuantifican la incertidumbre inherente al proceso.
+En contextos financieros, donde variables como precios, tipos de cambio o índices muestran dependencia temporal y, con frecuencia, no estacionariedad, los modelos ARIMA se han consolidado como herramientas estándar para el pronóstico de corto y mediano plazo.
+
+### Estructura ARIMA(p, d, q)
+
+El modelo se compone de tres elementos:
+
+**1. AR(p) - Autorregresivo:** $$Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \cdots + \phi_p Y_{t-p} + \epsilon_t$$
+
+**2. I(d) - Integrado:** Número de diferencias necesarias para conseguir estacionariedad
+
+**3. MA(q) - Media Móvil:** $$Y_t = c + \epsilon_t + \theta_1 \epsilon_{t-1} + \theta_2 \epsilon_{t-2} + \cdots + \theta_q \epsilon_{t-q}$$ \## Metodología de Box–Jenkins.
+La implementación práctica de modelos ARIMA se estructura habitualmente mediante la metodología de Box–Jenkins, que organiza el proceso de modelización en cuatro etapas principales: identificación, estimación, diagnóstico y predicción.
+Este enfoque proporciona un marco iterativo que permite seleccionar, ajustar y validar el modelo más adecuado para una serie dada.
+
+### Identificación del modelo
+
+La etapa de identificación tiene como objetivo determinar si la serie requiere diferenciación para alcanzar estacionariedad y proponer valores iniciales para los órdenes $p$ y $q$.
+En primer lugar, se evalúa la presencia de raíz unitaria mediante pruebas como la de Dickey–Fuller aumentada, cuya hipótesis nula plantea que la serie es no estacionaria.
+Si esta hipótesis no puede rechazarse, se procede a diferenciar la serie, aplicando una o más diferencias hasta que los estadísticos sugieran estacionariedad en la serie transformada.
+Una vez alcanzada una aproximación razonable a la estacionariedad, se analizan la función de autocorrelación (ACF) y la función de autocorrelación parcial (PACF).
+Patrones de decaimiento gradual o cortes abruptos en estas funciones proporcionan información sobre la posible estructura autorregresiva o de medias móviles subyacente.
+Por ejemplo, un corte claro en la PACF con ACF que decae de forma suave suele asociarse a un modelo AR, mientras que el patrón inverso sugiere la presencia de un modelo MA.
+
+### Estimación de parámetros
+
+Definida una especificación preliminar ARIMA(p,d,q), la segunda etapa consiste en estimar sus parámetros.
+Este ajuste se realiza habitualmente mediante el método de máxima verosimilitud, que busca los valores de $ϕi, θj$ y de la varianza del término de error que maximizan la probabilidad de observar la muestra disponible, bajo el supuesto de que los errores $εt$ son aproximadamente independientes y con distribución normal.
+Los algoritmos numéricos empleados resuelven un problema de optimización no lineal y proporcionan estimadores puntuales junto con errores estándar que permiten evaluar la significancia estadística de los coeficientes.
+
+### Diagnóstico y validación del modelo
+
+En la tercera etapa se analiza si el modelo ajustado describe adecuadamente la dinámica de la serie.
+Para que un modelo ARIMA sea considerado adecuado, los residuos estimados $εt=yt−yt$ deben comportarse como ruido blanco: no presentar autocorrelación significativa, tener media aproximadamente nula y varianza constante.
+Estas condiciones se verifican mediante la inspección gráfica de los residuos, el análisis de su ACF residual y pruebas de hipótesis como la de Ljung–Box, que contrasta de manera conjunta la ausencia de autocorrelación hasta un cierto número de rezagos.
+Además, se comparan especificaciones alternativas utilizando criterios de información como el AIC o el BIC, que equilibran la calidad del ajuste con la complejidad del modelo penalizando el exceso de parámetros.
+Un modelo con residuos no blancos o con criterios de información claramente peores que otro candidato se considera inadecuado y suele descartarse o reformularse, regresando a la fase de identificación.
+
+### Predicción o pronóstico
+
+Una vez que el modelo ha superado los controles de diagnóstico, se utiliza para generar pronósticos a diferentes horizontes.
+Los modelos ARIMA permiten obtener, para cada horizonte $h$, un valor pronosticado $y^t+h∣t$ y la varianza asociada al error de predicción, lo que facilita la construcción de intervalos de confianza que reflejan la incertidumbre creciente a medida que aumenta el horizonte temporal.
+Estos pronósticos pueden evaluarse ex post mediante medidas como el error cuadrático medio (RMSE) o el error absoluto medio (MAE), comparando valores pronosticados con realizaciones observadas en una ventana de validación.
+En el caso del ETF GLTR, la aplicación de la metodología Box–Jenkins permite ajustar un modelo ARIMA coherente con la estructura de dependencia temporal identificada en la serie de precios y utilizarlo como herramienta para el pronóstico de corto plazo, aportando una base cuantitativa sólida para el análisis prospectivo y la gestión del riesgo financiero.
+
+### Ventajas Metodológicas
+
+::: {.alert .alert-success}
+✓ **Características del Modelo ARIMA:**
+
+-   Captura patrones complejos de autocorrelación
+-   Flexible para diferentes estructuras de datos
+-   Ampliamente validado en literatura académica
+-   Genera pronósticos confiables a corto-mediano plazo
+-   Fundamentado en teoría estadística sólida
+:::
+
+# Descripción
+
+--- Carga y Preparación----
+
+```{r data-preparation, include=FALSE}
+
+AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
+                         from = "2022-10-31")
+
+names(AccionesEX)
+GLTR <- AccionesEX$GLTR.Close
+
+# Preparar dataframe para análisis descriptivo
+GLTR_df <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(GLTR),
+  Año = year(index(GLTR)),
+  Mes = month(index(GLTR), label = TRUE, abbr = FALSE),
+  Dia_Semana = wday(index(GLTR), label = TRUE, abbr = FALSE)
+)
+```
+
+## Descripción de la serie
+
+###Ficha técnica
+
+<p>
+
+El abrdn Physical Precious Metals Basket Shares ETF (GLTR) es un fondo cotizado en bolsa que busca replicar el comportamiento conjunto de una canasta de metales preciosos físicos, integrada principalmente por oro, plata, platino y paladio.
+Fue lanzado en octubre de 2010, en un contexto posterior a la crisis financiera global de 2008–2009, cuando se intensificó el interés de los inversionistas por activos refugio y vehículos que ofrecieran exposición directa a metales sin necesidad de almacenar lingotes de forma individual.
+GLTR está estructurado como un grantor trust respaldado por lingotes físicos, custodiados en bóvedas certificadas en centros financieros como Londres y Zúrich.
+Esta configuración evita riesgos asociados a derivados y contratos de futuros, vinculando el valor del fondo directamente a los precios spot de los metales subyacentes.
+El activo bajo gestión asciende a aproximadamente 1.850 millones de USD, validando su relevancia y liquidez en los mercados institucionales y de retail.
+
+<p>
+
+```{r ficha técnica-stats, include=FALSE}
+# Crear tabla comparativa estilo profesional
+ficha_tecnica <- data.frame(
+  Característica = c(
+    "Nombre del ETF",
+    "Símbolo/Ticker",
+    "Tipo de activo",
+    "Activos subyacentes",
+    "Composición actual",
+    "Activos bajo gestión (AUM)",
+    "Expense Ratio",
+    "Beta (vs. S&P 500)",
+    "Rango 52 semanas",
+    "Precio actual (aprox)",
+    "Rendimiento 2024",
+    "Rendimiento YTD 2025",
+    "Volumen promedio diario",
+    "Bolsa de cotización",
+    "Fecha de lanzamiento"
+  ),
+  Valor = c(
+    "Aberdeen Standard Physical Precious Metals Basket Shares ETF",
+    "GLTR",
+    "ETF de metales preciosos físicos",
+    "Oro, plata, paladio, platino físicos",
+    "Oro: 62%, Plata: 31%, Paladio: 4%, Platino: 3%",
+    "$1,850 millones USD",
+    "0.60%",
+    "0.21",
+    "$109.20 - $171.85",
+    "$168.50",
+    "+20.3%",
+    "+38.5% (hasta octubre)",
+    "150,000 acciones",
+    "NYSE Arca",
+    "Octubre 2010"
+  ),
+  Nota = c(
+    "Nombre completo del instrumento",
+    "Ticker de negociación principal",
+    "Clasificación del producto",
+    "Metales físicos almacenados en bóvedas",
+    "Distribución basada en valores de mercado actuales",
+    "Ha crecido 35% en los últimos 12 meses",
+    "Competitivo dentro del sector de ETFs de metales",
+    "Baja correlación con el mercado accionario",
+    "Mínimo histórico: $109.20 (Oct 2024)",
+    "Precio de cierre más reciente disponible",
+    "Impulsado por rally de metales preciosos",
+    "Fuerte desempeño por demanda de activos refugio",
+    "Alta liquidez para entrada/salida",
+    "Principal exchange para ETFs en EE.UU.",
+    "Más de 15 años en el mercado"
+  )
+)
+
+# Formatear la tabla profesional
+ficha_tecnica %>%
+  kable(align = "lcl", 
+        caption = "Tabla 1. FICHA TÉCNICA DEL ETF GLTR - METALES PRECIOSOS") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), 
+                full_width = FALSE,
+                font_size = 12) %>%
+  row_spec(0, background = "#1E3A8A", color = "white", bold = TRUE) %>%
+  column_spec(1, bold = TRUE, width = "25%") %>%
+  column_spec(2, width = "35%") %>%
+  column_spec(3, width = "40%", 
+              color = "#666666") %>%
+  # Resaltar valores importantes
+  column_spec(2,
+              color = ifelse(
+                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  # Verde para rendimientos positivos
+                ifelse(
+                  grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    # Azul para valores monetarios
+                  "black"
+                )
+              ),
+              bold = ifelse(
+                grepl("\\+[0-9]|^\\$", ficha_tecnica$Valor),
+                TRUE,
+                FALSE
+              ))
+```
+
+###Distribución de la canasta
+
+```{r dona interactiva}
+# Datos de composición del ETF
+composition_data <- data.frame(
+  Metal = c("Oro Físico", "Plata Física", "Paladio Físico", "Platino Físico"),
+  Porcentaje = c(61.77, 30.72, 4.26, 3.26),
+  Valor_Mercado = c("1B", "702M", "97M", "74M")
+)
+
+# Añadir etiquetas detalladas
+composition_data <- composition_data %>%
+  mutate(
+    Etiqueta = paste0(
+      "<b>", Metal, "</b><br>",
+      Porcentaje, "%<br>",
+      "(", Valor_Mercado, ")"
+    ),
+    # Colores metálicos realistas
+    Color = c("#FFD700", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
+    # Texto para hover
+    HoverText = paste0(
+      "<b>", Metal, "</b><br>",
+      "Composición: <b>", Porcentaje, "%</b><br>",
+      "Valor de mercado: <b>", Valor_Mercado, "</b><br>",
+      "Aproximado en cartera:<br>",
+      case_when(
+        Metal == "Oro Físico" ~ "60-65%",
+        Metal == "Plata Física" ~ "25-30%",
+        Metal == "Paladio Físico" ~ "3-5%",
+        Metal == "Platino Físico" ~ "3-5%"
+      )
+    )
+  )
+
+# Crear donut chart interactivo
+donut_interactive <- plot_ly(
+  composition_data,
+  labels = ~Metal,
+  values = ~Porcentaje,
+  type = 'pie',
+  hole = 0.5,  # Esto crea el efecto donut
+  textposition = 'outside',
+  textinfo = 'label+percent',
+  hoverinfo = 'text',
+  text = ~HoverText,
+  marker = list(
+    colors = ~Color,
+    line = list(color = '#FFFFFF', width = 2)
+  ),
+  # Añadir texto en el centro
+  domain = list(x = c(0, 1), y = c(0, 1))
+) %>%
+  layout(
+    title = list(
+      text = "<b>Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares</b>",
+      font = list(
+        size = 20,
+        color = "#1E3A8A",
+        family = "Arial, sans-serif"
+      ),
+      x = 0.5,
+      y = 0.95
+    ),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "v",
+      x = 1.05,
+      y = 0.5,
+      font = list(size = 12),
+      title = list(
+        text = "<b>Metales</b>",
+        font = list(size = 14)
+      )
+    ),
+    # Añadir anotación en el centro del donut
+    annotations = list(
+      list(
+        text = "<b>Total AUM</b><br>~$1.9B",
+        x = 0.5,
+        y = 0.5,
+        font = list(
+          size = 16,
+          color = "#1E3A8A",
+          family = "Arial, sans-serif"
+        ),
+        showarrow = FALSE
+      )
+    ),
+    paper_bgcolor = "#F8F9FA",
+    plot_bgcolor = "#F8F9FA",
+    margin = list(t = 100, b = 80, l = 20, r = 150)
+  )
+
+# Mostrar donut chart
+donut_interactive
+```
+
+<p>
+
+La composición refleja que GLTR está dominado por oro y plata (\>92 % en conjunto), mientras que platino y paladio proporcionan exposición industrial complementaria.
+Esta ponderación es deliberada: oro y plata funcionan como depósitos de valor refugio, mientras que platino y paladio están ligados a demanda industrial.
+De este modo, GLTR combina protección contra riesgos macroeconómicos con exposición a fundamentales de demanda física de metales preciosos.
+
+## Contexto histórico.
+
+El análisis de series de tiempo requiere entender el contexto económico que determina el comportamiento.
+Como ETF de metales físicos, GLTR refleja ciclos macroeconómicos, decisiones de bancos centrales y eventos geopolíticos.
+Desde su lanzamiento en 2010, ha experimentado múltiples regímenes: expansiones monetarias post-crisis, normalización, shocks geopolíticos, crisis financieras y el actual rally de máximos históricos.
+
+```{r Serie de niveles}
+# Descargar datos
+GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2010-01-01")
+
+# Preparar datos
+GLTR_df <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(Cl(GLTR))
+)
+
+# Gráfico interactivo
+plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
+        line = list(color = "#1E3A8A", width = 2),
+        hoverinfo = "text",
+        text = ~paste("Fecha:", Fecha, "<br>Precio: $", round(Precio, 2))) %>%
+  layout(
+    title = "<b>ETF GLTR - Serie Histórica (2010-2025)</b>",
+    xaxis = list(title = "Fecha", rangeslider = list(visible = TRUE)),
+    yaxis = list(title = "Precio (USD)", tickformat = "$,.2f"),
+    hovermode = "x unified"
+  )
+```
+
+La trayectoria completa de GLTR durante los 15 años de historia desde su creación muestra cinco fases claramente diferenciadas.
+La ventana de análisis (2022–2025) captura la transición crítica desde volatilidad indeterminada hacia rally sólido, justificando ARIMA para modelar cambios de régimen.
+
+### Rally post-crisis y búsqueda de refugio (2010–2012)
+
+GLTR se lanza en octubre de 2010 tras la crisis financiera de 2008–2009, cuando bancos centrales implementan flexibilización cuantitativa (QE) masiva para estabilizar mercados.
+La Reserva Federal inicia programas de compra de activos sin precedentes (QE1, QE2), el Banco Central Europeo y el Banco de Japón adoptan políticas ultra-expansivas, inyectando miles de millones de dólares en liquidez al sistema financiero.​ En este contexto de expansión monetaria extrema, surge demanda masiva por metales como cobertura contra inflación futura y depreciación de monedas fiduciarias.
+Durante 2010–2012, GLTR sube de &#95–100 a \~&#115–120, reflejando el rally del oro de &#1.200 a 1.900+ USD/oz y la plata de &#18 a 48+ USD/oz en sus máximos de abril de 2011.
+La tendencia alcista es coherente con la tesis de refugio: estímulos masivos y temor inflacionario implican apreciación de metales con pocas correcciones
+
+```{r 2010-2012}
+# Plata 2010–2012 (proxy: SLV)
+silver_10_12 <- getSymbols("SLV", src = "yahoo", auto.assign = FALSE,
+                           from = "2010-01-01", to = "2012-12-31")
+silver_10_12_close <- Cl(silver_10_12)
+
+silver_10_12_df <- data.frame(
+  fecha  = index(silver_10_12_close),
+  precio = as.numeric(silver_10_12_close)
+)
+
+g_plata_10_12 <- ggplot(silver_10_12_df, aes(x = fecha, y = precio)) +
+  geom_line(color = "gray40", linewidth = 0.8) +
+  labs(title = "Precio de la plata 2010–2012 (proxy: SLV)",
+       subtitle = "Rally post-crisis y máximos asociados a QE e inflación esperada",
+       x = "Fecha", y = "Precio de cierre (USD)") +
+  theme_minimal()
+
+g_plata_10_12_int <- ggplotly(g_plata_10_12)
+g_plata_10_12_int
+
+```
+
+La Figura 3 muestra el comportamiento de la plata entre 2010 y 2012 (proxy SLV), con un rally acelerado hasta máximos históricos en 2011 (\~\$48/oz) y una posterior corrección moderada hacia finales de 2011 e inicios de 2012.
+Esta dinámica es consistente con el contexto de expansión monetaria extrema y temor inflacionario posterior a la crisis de 2008–2009, en el que los metales preciosos se revalorizaron de forma pronunciada como depósitos de valor refugio.
+La volatilidad observada en 2011 refleja especulación intensiva y ajustes de portafolio conforme aumentaban preocupaciones sobre sostenibilidad de precios.
+
+### Corrección y consolidación durante normalización monetaria (2013–2015)
+
+En 2013, la Reserva Federal anuncia el "tapering" (reducción gradual) de compras de activos y la economía estadounidense muestra recuperación más sólida, aumentando expectativas de subidas futuras en tasas de interés.
+Con tasas reales esperadas más altas, el costo de oportunidad de mantener oro aumenta.
+Además, el dólar estadounidense se fortalece, encareciendo commodities para inversionistas internacionales y presionando precios a la baja.​ GLTR cae sostenidamente desde máximos de 2011–2012 a mínimos cercanos a \$50–60 hacia mediados de 2015.
+Este período de corrección es completamente explicable por los fundamentales: normalización monetaria y fortalecimiento del dólar.
+
+### Recuperación moderada bajo incertidumbre política (2016–2019)
+
+Entre 2016 y 2019, la trayectoria de GLTR es menos volatil pero aún presenta repuntes puntuales asociados a episodios específicos de incertidumbre.
+El Brexit en junio de 2016, la elección de Donald Trump en noviembre de 2016, y tensiones comerciales crecientes entre Estados Unidos y China a partir de 2018 generan episodios de aversión al riesgo que benefician temporalmente al oro y otros metales refugio.
+Sin embargo, estos repuntes son tácticos más que estructurales.
+Las subidas de tasas realizadas por la Reserva Federal entre 2015 y 2018, junto con la fortaleza del dólar, limitan que GLTR consolide ganancias sostenidas.
+El precio del ETF oscila entre &#65–&#85 durante este período, formando un patrón de recuperación lenta pero volátil, donde cada crisis geopolítica genera un pico temporal seguido por corrección cuando la tensión se disipa.
+
+### Pandemia COVID-19 y máximos históricos (2020)
+
+El año 2020 es un punto de inflexión crítico.
+En marzo de 2020, la pandemia desencadena un pánico financiero global sin precedentes en la era moderna.
+Los mercados accionarios caen más de 30 % en semanas.
+El VIX (índice de volatilidad) alcanza máximos históricos.
+Los inversionistas huyen masivamente hacia activos considerados seguros.
+En respuesta, y con una velocidad extraordinaria, los bancos centrales lanzan programas de estímulo sin paralelo histórico: La Reserva Federal reduce tasas a cero y relanza compra de activos ("QE infinito").
+El Banco Central Europeo amplía su programa de compra de bonos.
+Los gobiernos implementan paquetes fiscales masivos de miles de billones de dólares.
+En este contexto extremo, el oro se comporta de forma excepcional.
+Alcanza máximos históricos por encima de 2.000 USD/oz hacia agosto de 2020.
+GLTR refleja este movimiento con un rally espectacular de \~30–40 % anual.
+
+```{r 2020}
+# Descargar datos si no los tienes
+GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2020-01-01", to = "2020-12-31")
+
+# Preparar datos para 2020
+datos_2020 <- data.frame(
+  Fecha = index(GLTR),
+  Precio = as.numeric(Cl(GLTR))
+)
+
+# Crear gráfico interactivo
+plot_ly(datos_2020, x = ~Fecha) %>%
+  add_trace(y = ~Precio, type = 'scatter', mode = 'lines',
+            line = list(color = '#1E3A8A', width = 3),
+            name = 'Precio GLTR',
+            hoverinfo = 'text',
+            text = ~paste('<b>Fecha:</b>', Fecha, '<br><b>Precio:</b> $', round(Precio, 2))) %>%
+  
+  # Eventos clave
+  add_trace(x = as.Date('2020-03-16'), y = ~Precio[Fecha == as.Date('2020-03-16')],
+            type = 'scatter', mode = 'markers',
+            marker = list(color = '#9fa0ff', size = 12, symbol = 'circle'),
+            name = 'Colapso mercados',
+            hoverinfo = 'text',
+            text = '<b>16 Mar 2020:</b> Colapso de mercados globales<br>Fed anuncia estímulos de emergencia') %>%
+  
+  add_trace(x = as.Date('2020-08-07'), y = ~Precio[Fecha == as.Date('2020-08-07')],
+            type = 'scatter', mode = 'markers',
+            marker = list(color = '#dab6fc', size = 12, symbol = 'diamond'),
+            name = 'Récord oro',
+            hoverinfo = 'text',
+            text = '<b>07 Ago 2020:</b> Oro supera $2,000/oz<br>Rally histórico de metales preciosos') %>%
+  
+  layout(
+    title = list(
+      text = '<b>Comportamiento del ETF GLTR durante la Pandemia COVID-19 (2020)</b>',
+      font = list(size = 18, color = '#1E3A8A', family = 'Arial'),
+      y = 0.98,  # Posición vertical del título
+      x = 0.5,   # Posición horizontal centrada
+      xanchor = 'center',
+      yanchor = 'top'
+    ),
+    xaxis = list(
+      title = '<b>Fecha</b>',
+      type = 'date',
+      tickformat = '%b %Y',
+      rangeslider = list(visible = TRUE)
+    ),
+    yaxis = list(
+      title = '<b>Precio (USD)</b>',
+      tickformat = '$.2f',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    margin = list(t = 120, b = 80, l = 80, r = 40),  # Aumentado margen superior
+    showlegend = TRUE,
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      xanchor = 'center',
+      y = -0.2,
+      yanchor = 'top'
+    )
+  )
+```
+
+La serie muestra un colapso inicial agudo a mediados de marzo (cuando el precio cae a &#65–70) debido al pánico de liquidación indiscriminada.
+Sin embargo, a partir de finales de marzo/principios de abril, comienza un rally acelerado y sostenido, con GLTR alcanzando nuevos máximos de \$#105+ hacia finales de año.
+Este comportamiento es textualmente consistente con la teoría: metales preciosos actúan como refugio en contextos de riesgo sistémico extremo, pero también se benefician de la expansión monetaria ultra-expansiva que caracteriza la respuesta de los bancos centrales.
+
+### Normalización post-pandemia y corrección (2021)
+
+En 2021, a medida que avanzan las campañas de vacunación y la actividad económica se recupera, el panorama vuelve a cambiar.
+Los inversionistas comienzan a rotar capital desde activos defensivos hacia activos cíclicos.
+Las expectativas de inflación permanecen elevadas, pero ya están incorporadas en los precios.
+Los bancos centrales comienzan a discutir públicamente la reducción de estímulos ("taper talk").
+El resultado es una corrección en GLTR de aproximadamente –10 % en el año.
+El oro retrocede desde máximos de &#2.000+ a niveles cercanos a &#1.700–1.800.
+GLTR refleja esta dinámica con una serie principalmente lateral con tendencia bajista moderada.
+Este comportamiento no es sorpresa: representa la normalización esperada tras un pico extremo de aversión al riesgo.
+
+###Guerra Rusia-Ucrania, inflación histórica y volatilidad sin precedentes (2022) El 24 de febrero de 2022, Rusia invade Ucrania, desencadenando la mayor crisis geopolítica en Europa en 30 años.
+El shock de oferta en energía (petróleo sube de &#80 a &#120+ por barril, gas natural europeo se multiplica por 5) y alimentos (trigo, maíz, aceites vegetales) dispara inflación global a máximos de 40+ años: inflación estadounidense alcanza 9.1% en junio de 2022, inflación europea supera 10%.​ Simultáneamente, la Reserva Federal realiza subidas de tasas históricas bajo Jerome Powell: de prácticamente 0% en marzo de 2022 a más de 4% hacia finales de año, velocidad más rápida desde los años 1980s bajo Paul Volcker.
+El Banco Central Europeo, Banco de Inglaterra y otros bancos centrales siguen decisiones de endurecimiento similares, marcando el fin definitivo de la era de dinero barato iniciada en 2008.​ GLTR experimenta choque de fuerzas contradictorias: riesgo geopolítico extremo e inflación acelerada favorecen oro como cobertura, pero tasas de interés reales muy altas (superiores a 2% en términos reales hacia finales de 2022) encarecen dramáticamente su costo de oportunidad.
+El resultado es volatilidad extrema con GLTR oscilando entre \$70–95, cerrando prácticamente plano (\~0% anual) sin dirección clara.
+
+```{r Oro 2022}
+# Oro 2022 (proxy: GLD)
+gold_2022 <- getSymbols("GLD", src = "yahoo", auto.assign = FALSE,
+                        from = "2022-01-01", to = "2022-12-31")
+gold_2022_close <- Cl(gold_2022)
+
+gold_2022_df <- data.frame(
+  fecha  = index(gold_2022_close),
+  precio = as.numeric(gold_2022_close)
+)
+
+g_oro_2022 <- ggplot(gold_2022_df, aes(x = fecha, y = precio)) +
+  geom_line(color = "goldenrod", linewidth = 0.8) +
+  labs(title = "Precio del oro en 2022 (proxy: GLD)",
+       subtitle = "Volatilidad por guerra en Ucrania e incremento de tasas",
+       x = "Fecha", y = "Precio de cierre (USD)") +
+  theme_minimal()
+
+g_oro_2022_int <- ggplotly(g_oro_2022)
+g_oro_2022_int
+```
+
+La Figura 5 presenta la evolución del precio del oro durante 2022 (proxy GLD), donde se observa un repunte brusco tras la invasión de Ucrania en febrero-marzo, alcanzando niveles cercanos a &#190 por acción de GLD (equivalente a \~&#1.950/oz de oro spot), seguido de una corrección sostenida a medida que se intensifica el ciclo de subidas de tasas durante el segundo semestre.
+Este patrón respalda la idea de un año dominado por fuerzas contrapuestas: el oro reacciona inicialmente como activo refugio ante el choque geopolítico, pero pierde tracción cuando el endurecimiento monetario eleva de forma significativa las tasas reales, haciendo atractivos activos remunerados (bonos, depósitos) frente a oro que no genera rendimiento.
+
+### Crisis bancaria regional y reactivación de demanda refugio (marzo 2023)
+
+En marzo de 2023, la quiebra de Silicon Valley Bank (SVB) y otros bancos regionales (Signature Bank, First Republic) desencadena pánico bancario por riesgo de liquidez, no por insolvencia sistémica como en 2008.
+Los inversionistas reaccionan inmediatamente con demanda masiva por oro como refugio, que dispara por encima de 2.000 USD/oz en días.
+GLTR experimenta pico abrupto de 5–8%.​ Sin embargo, este es un evento táctico, no estructural.
+Respuesta rápida de autoridades (garantías de depósitos, líneas de crédito de emergencia) alivia tensiones y GLTR retrocede gradualmente, cerrando 2023 con rentabilidad ligeramente positiva de +2%.
+El patrón es típico de shocks puntuales que generan picos temporales pero no tendencias sostenidas.
+
+```{r 2023 vs 2024}
+# Descargar datos para 2023 y 2024
+GLTR_2023 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01", to = "2023-12-31")
+GLTR_2024 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2024-01-01", to = "2024-12-31")
+
+# Preparar datos para 2023
+datos_2023 <- data.frame(
+  Fecha = index(GLTR_2023),
+  Precio = as.numeric(Cl(GLTR_2023))
+) %>%
+  mutate(
+    Dia = seq_along(Fecha),
+    Año = "2023",
+    Precio_Norm = Precio / first(Precio) * 100
+  )
+
+# Preparar datos para 2024
+datos_2024 <- data.frame(
+  Fecha = index(GLTR_2024),
+  Precio = as.numeric(Cl(GLTR_2024))
+) %>%
+  mutate(
+    Dia = seq_along(Fecha),
+    Año = "2024",
+    Precio_Norm = Precio / first(Precio) * 100
+  )
+
+# Combinar datos
+datos_comparativos <- bind_rows(datos_2023, datos_2024)
+
+# Crear gráfico comparativo interactivo
+plot_ly(datos_comparativos, x = ~Dia) %>%
+  # Línea para 2023
+  add_trace(data = subset(datos_comparativos, Año == "2023"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = '#e0c3fc', width = 3),
+            name = '2023',
+            hoverinfo = 'text',
+            text = ~paste('<b>2023 - Día', Dia, '</b><br>',
+                          'Fecha:', Fecha, '<br>',
+                          'Precio: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1))) %>%
+  
+  # Línea para 2024
+  add_trace(data = subset(datos_comparativos, Año == "2024"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = '#957fef', width = 3),
+            name = '2024',
+            hoverinfo = 'text',
+            text = ~paste('<b>2024 - Día', Dia, '</b><br>',
+                          'Fecha:', Fecha, '<br>',
+                          'Precio: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1))) %>%
+  
+  # Línea de referencia en 100
+  add_trace(x = c(0, max(datos_comparativos$Dia)),
+            y = c(100, 100),
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = 'gray', width = 1, dash = 'dash'),
+            name = 'Línea base (100)',
+            showlegend = FALSE) %>%
+  
+  # Layout
+  layout(
+    title = list(
+      text = '<b>Comparativo de Desempeño: ETF GLTR 2023 vs 2024</b>',
+      font = list(size = 22, color = '#1E3A8A')
+    ),
+    xaxis = list(
+      title = '<b>Días de negociación en el año</b>',
+      gridcolor = 'lightgray'
+    ),
+    yaxis = list(
+      title = '<b>Precio Normalizado (Inicio = 100)</b>',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      y = -0.15,
+      xanchor = 'center'
+    ),
+    margin = list(t = 80, b = 100, l = 80, r = 40)
+  )
+```
+
+La Figura 4 contrasta ambos períodos: la crisis bancaria (febrero–mayo 2023) muestra trayectoria errática con cambios frecuentes, mientras el rally 2024 (junio–octubre) exhibe pendiente alcista prácticamente lineal sin correcciones, evidenciando la diferencia entre evento táctico y fundamentales sólidos sostenidos
+
+### Rally estructural y máximos históricos (2024–2025)
+
+A partir de enero de 2024, confluyen cuatro factores estructurales que generan rally robusto: la deuda pública en máximos históricos favorece oro como cobertura inflacionaria, los bancos centrales señalizan futuras reducciones de tasas reduciendo costo de oportunidad del oro, la guerra Ucrania y tensiones comerciales EE.UU.-China sustentan demanda de refugio, y las sanciones a Rusia presionan suministro de paladio.​ El resultado es una apreciación pronunciada: GLTR sube de \$100 a \$140 en diez meses (ganancia de +40%), oro alcanza máximos de 2.500+ USD/oz, y plata alcanza máximos no vistos en década aproximadamente \$30–32/oz.
+La aceleración es concluyente en términos anuales: 2023 cierra plano con +2.1%, 2024 muestra rally de +21.2%, y 2025 hasta octubre registra +68.7%, confirmando intensificación de factores fundamentales.
+
+Figura 5.
+Desempeño comparativo por año (2023–2025)
+
+```{r Desempeño por año}
+# Descargar datos desde 2023
+GLTR_all <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01")
+
+# Función para preparar datos por año
+preparar_datos_año <- function(año, datos) {
+  # Filtrar por año
+  datos_año <- datos[year(index(datos)) == año]
+  
+  if (nrow(datos_año) == 0) return(NULL)
+  
+  # Crear dataframe
+  df <- data.frame(
+    Fecha = index(datos_año),
+    Precio = as.numeric(Cl(datos_año))
+  )
+  
+  # Calcular día del año y precio normalizado
+  df <- df %>%
+    mutate(
+      Dia_del_año = row_number(),
+      Año = as.character(año),
+      Precio_Norm = Precio / first(Precio) * 100,
+      Retorno = (Precio / first(Precio) - 1) * 100
+    )
+  
+  return(df)
+}
+
+# Preparar datos para cada año
+datos_2023 <- preparar_datos_año(2023, GLTR_all)
+datos_2024 <- preparar_datos_año(2024, GLTR_all)
+datos_2025 <- preparar_datos_año(2025, GLTR_all)
+
+# Combinar todos los datos
+datos_todos <- bind_rows(datos_2023, datos_2024, datos_2025)
+
+# Crear gráfico interactivo
+plot_ly(datos_todos, x = ~Dia_del_año) %>%
+  
+  # Año 2023
+  add_trace(data = subset(datos_todos, Año == "2023"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#b79ced', width = 2.5),
+            marker = list(size = 6, color = '#dec0f1'),
+            name = '2023',
+            hoverinfo = 'text',
+            text = ~paste('<b>2023 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Año 2024
+  add_trace(data = subset(datos_todos, Año == "2024"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#8e94f2', width = 2.5),
+            marker = list(size = 6, color = '#8e94f2'),
+            name = '2024',
+            hoverinfo = 'text',
+            text = ~paste('<b>2024 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Año 2025 (hasta la fecha disponible)
+  add_trace(data = subset(datos_todos, Año == "2025"),
+            y = ~Precio_Norm,
+            type = 'scatter',
+            mode = 'lines+markers',
+            line = list(color = '#1E3A8A', width = 2.5),
+            marker = list(size = 6, color = '#1E3A8A'),
+            name = '2025 (hasta fecha)',
+            hoverinfo = 'text',
+            text = ~paste('<b>2025 - Día', Dia_del_año, '</b><br>',
+                          'Fecha:', format(Fecha, '%d/%m/%Y'), '<br>',
+                          'Precio real: $', round(Precio, 2), '<br>',
+                          'Normalizado:', round(Precio_Norm, 1), '<br>',
+                          'Retorno:', round(Retorno, 1), '%')) %>%
+  
+  # Línea de referencia en 100
+  add_trace(x = c(0, max(datos_todos$Dia_del_año, na.rm = TRUE)),
+            y = c(100, 100),
+            type = 'scatter',
+            mode = 'lines',
+            line = list(color = 'gray', width = 1, dash = 'dash'),
+            name = 'Línea base (100)',
+            showlegend = FALSE,
+            hoverinfo = 'skip') %>%
+  
+  # Layout
+  layout(
+    title = list(
+      text = '<b>Comparativo de Desempeño Anual - ETF GLTR</b><br><span style="font-size:14px">Cada año normalizado a 100 en su primer día de negociación</span>',
+      font = list(size = 22, color = '#1E3A8A')
+    ),
+    xaxis = list(
+      title = '<b>Día del año de negociación</b>',
+      gridcolor = 'lightgray'
+    ),
+    yaxis = list(
+      title = '<b>Índice Normalizado (Inicio = 100)</b>',
+      gridcolor = 'lightgray'
+    ),
+    hovermode = 'x unified',
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F8F9FA',
+    legend = list(
+      orientation = 'h',
+      x = 0.5,
+      y = -0.15,
+      xanchor = 'center',
+      bgcolor = 'rgba(255,255,255,0.8)'
+    ),
+    margin = list(t = 100, b = 100, l = 80, r = 40),
+    
+    # Anotaciones con rendimiento final de cada año
+    annotations = list(
+      list(
+        x = max(datos_2023$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2023$Precio_Norm, 1),
+        text = paste('2023:', round(tail(datos_2023$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#b7bced'),
+        xanchor = 'left',
+        xshift = 10
+      ),
+      list(
+        x = max(datos_2024$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2024$Precio_Norm, 1),
+        text = paste('2024:', round(tail(datos_2024$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#8e94f2'),
+        xanchor = 'left',
+        xshift = 10
+      ),
+      list(
+        x = max(datos_2025$Dia_del_año, na.rm = TRUE),
+        y = tail(datos_2025$Precio_Norm, 1),
+        text = paste('2025:', round(tail(datos_2025$Retorno, 1), 1), '%'),
+        showarrow = FALSE,
+        font = list(size = 12, color = '#1E3A8A'),
+        xanchor = 'left',
+        xshift = 10
+      )
+    )
+  )
+```
+
+La serie captura transición crítica desde crisis táctica en 2023 hasta rally estructural en 2024–2025, evidenciando no estacionariedad que justifica ARIMA para capturar cambios de régimen y realizar pronósticos condicionales al entorno macroeconómico actual.
+
+### Síntesis: Estructura de la serie y factores determinantes.
+
+La trayectoria de 15 años (2010–2025) se sintetiza de la siguiente manera:
+
+```{r T de sintesis histórica}
+
+# Crear tabla de síntesis histórica
+sintesis_historica <- data.frame(
+  Período = c(
+    "2010–2012",
+    "2013–2015", 
+    "2016–2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024–2025"
+  ),
+  Comportamiento = c(
+    "Rally alcista",
+    "Corrección",
+    "Laterización volátil",
+    "Rally extremo",
+    "Corrección",
+    "Volatilidad extrema",
+    "Recuperación táctica",
+    "Rally estructural"
+  ),
+  Factores_clave = c(
+    "Estímulos post-2008, temor inflación, búsqueda refugio",
+    "Tapering Fed, fortaleza dólar, normalización monetaria",
+    "Incertidumbre política (Brexit, Trump, guerra comercial), tasas moderadas",
+    "Pandemia COVID, pánico financiero, QE infinito, máximos oro",
+    "Recuperación económica, rotación a cíclicos, normalización de tasas",
+    "Invasión Ucrania (alcista) vs. endurecimiento Fed (bajista) → plano",
+    "Crisis bancaria puntual, demanda refugio momentánea, luego normalización",
+    "Deuda pública ↑, tasas reales esperadas ↓, incertidumbre geopolítica, máximos históricos"
+  )
+)
+
+# Crear tabla profesional
+sintesis_historica %>%
+  kable(
+    align = "lll",
+    col.names = c("PERÍODO", "COMPORTAMIENTO", "FACTORES CLAVE"),
+    caption = "<center><h3 style='color: #1E3A8A;'>Tabla 2. SÍNTESIS HISTÓRICA - TRAYECTORIA DEL ETF GLTR (2010-2025)</h3></center>",
+    escape = FALSE
+  ) %>%
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE,
+    position = "center",
+    font_size = 13,
+    fixed_thead = TRUE
+  ) %>%
+  row_spec(
+    0,
+    background = "#957fef",
+    color = "white",
+    bold = TRUE,
+    align = "center",
+    extra_css = "border-bottom: 2px solid #FFFFFF;"
+  ) %>%
+  column_spec(
+    1,
+    bold = TRUE,
+    width = "15%",
+    background = "#F8FAFC",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    2,
+    width = "20%",
+    background = "#FFFFFF",
+    extra_css = "border-right: 1px solid #E5E7EB;"
+  ) %>%
+  column_spec(
+    3,
+    width = "65%",
+    background = "#FFFFFF"
+  ) %>%
+  # Añadir notas al pie
+  footnote(
+    general = "Fuente: Análisis histórico basado en datos de Yahoo Finance, Bloomberg y Aberdeen Standard Investments",
+    general_title = "Nota:",
+    footnote_as_chunk = TRUE,
+    title_format = c("italic", "bold")
+  )
+```
+
+GLTR no es estacionaria porque está impulsada por ciclos macroeconómicos, decisiones de bancos centrales y cambios en percepción de riesgo global—todos no estacionarios.
+La ventana 2022–2025 captura transición clara desde volatilidad extrema (2022) a rally sólido (2024–2025), validando aplicabilidad de ARIMA para capturar cambios de régimen y realizar pronósticos condicionales.​
+
+# Estadisticas descriptivas
+
+### Tabla indicadores estadisticos
+
+La Tabla 2 presenta un resumen numérico de los estadísticos descriptivos fundamentales del ETF GLTR durante el período de análisis comprendido entre octubre de 2022 y octubre de 2025.
+
+```{Tabla de estadisticas descriptivas}
+# Calcular estadísticas básicas
+estadisticas_basicas <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  summarise(
+    Media = mean(Precio),
+    Mediana = median(Precio),
+    Desviacion = sd(Precio),
+    Minimo = min(Precio),
+    Maximo = max(Precio),
+    Q1 = quantile(Precio, 0.25),
+    Q3 = quantile(Precio, 0.75)
+  ) %>%
+  mutate(across(where(is.numeric), ~round(., 2)))
+
+# Crear el data frame directamente
+estadisticas_df <- data.frame(
+  Estadistica = c("Media", "Mediana", "Desviación Estándar", 
+                  "Mínimo", "Máximo", "Primer Cuartil (Q1)", 
+                  "Tercer Cuartil (Q3)"),
+  Valor = c(
+    estadisticas_basicas$Media,
+    estadisticas_basicas$Mediana,
+    estadisticas_basicas$Desviacion,
+    estadisticas_basicas$Minimo,
+    estadisticas_basicas$Maximo,
+    estadisticas_basicas$Q1,
+    estadisticas_basicas$Q3
+  )
+)
+
+# Crear tabla con GT - versión simplificada
+tabla_estadisticas <- estadisticas_df %>%
+  gt() %>%
+  tab_header(
+    title = "Tabla 1. Estadísticas Descriptivas del ETF GLTR",
+    subtitle = "Período: Octubre 2022 - Octubre 2025"
+  ) %>%
+  fmt_currency(
+    columns = Valor,
+    currency = "USD",
+    decimals = 2
+  ) %>%
+  cols_label(
+    Estadistica = "Estadística",
+    Valor = "Valor (USD)"
+  ) %>%
+  # Estilo para encabezado de columnas
+  tab_style(
+    style = list(
+      cell_fill(color = "#957fef"),
+      cell_text(color = "white", weight = "bold")
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  # Estilo para filas alternas
+  tab_style(
+    style = cell_fill(color = "#f8f9fa"),
+    locations = cells_body(rows = seq(1, nrow(estadisticas_df), 2))
+  ) %>%
+  # Bordes
+  tab_style(
+    style = cell_borders(
+      sides = c("top", "bottom"),
+      color = "#dee2e6",
+      weight = px(1)
+    ),
+    locations = cells_body()
+  ) %>%
+  # Fuente de nota
+  tab_source_note(
+    source_note = "Fuente: Datos históricos del ETF GLTR"
+  ) %>%
+  # Opciones básicas de tabla
+  tab_options(
+    table.font.names = "Arial",
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(14),
+    table_body.hlines.color = "transparent",
+    source_notes.font.size = px(12)
+  )
+
+# Mostrar la tabla
+tabla_estadisticas
+
+```
+
+El precio promedio fue de &#107.28 USD con una mediana de &#101.79 USD.
+La diferencia de &#5.49 entre ambas medidas sugiere una distribución ligeramente asimétrica hacia valores superiores, característica típica de series financieras donde eventos de apreciación significativa generan colas derechas prolongadas.
+La desviación estándar de &#22.90 USD (21.3% de la media) evidencia una variabilidad considerable, típica en mercados de metales preciosos sujetos a ciclos económicos y expectativas inflacionarias.
+El análisis de cuartiles revela una perspectiva más matizada: con Q1 en &#88.58 USD y Q3 en &#119.92 USD, el rango intercuartílico de &#31.34 USD indica que el 50% central de las observaciones fue relativamente estrecho comparado con la amplitud total de &#109.79 USD.
+Los valores extremos fueron ocasionales, no representativos del comportamiento típico de la serie.
+
+### Distribución de Precios por Año: Análisis del Boxplot Interactivo
+
+La visualización mediante boxplots interactivos muestra el comportamiento de la serie temporal por año calendario, exponiendo la evolución de la tendencia central, dispersión y valores extremos a lo largo del período de entrenamiento.
+Este análisis comparativo revela heterogeneidades temporales en la variabilidad de precios, distinguiendo años de estabilidad relativa frente a períodos de volatilidad extrema—información esencial para comprender los cambios estructurales de la serie y anticipar la especificación del modelo de pronóstico.
+
+```{r boxplot por años}
+
+# Asegurarnos de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Extraer el año para el análisis
+GLTR_df <- GLTR_df %>%
+  mutate(Año = as.factor(format(Fecha, "%Y"))) %>%
+  filter(Año %in% c("2022", "2023", "2024", "2025"))
+
+# Crear dataframes separados para cada año
+df_2022 <- GLTR_df %>% filter(Año == "2022")
+df_2023 <- GLTR_df %>% filter(Año == "2023")
+df_2024 <- GLTR_df %>% filter(Año == "2024")
+df_2025 <- GLTR_df %>% filter(Año == "2025")
+
+# Definir colores elegantes para cada año
+colors <- c(
+  "2022" = "#efd9ce",   
+  "2023" = "#dec0f1",    
+  "2024" = "#b79ced",    
+  "2025" = "#957fef",    
+  "Todos" = "#6C757D"    # Gris para "Todos"
+)
+
+# Crear el gráfico base con todos los años
+fig <- plot_ly() %>%
+  # Trazo para 2022
+  add_boxplot(
+    data = df_2022,
+    y = ~Precio,
+    name = "2022",
+    marker = list(
+      color = colors["2022"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2022"], width = 2),
+    fillcolor = 'rgba(46, 134, 171, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2023
+  add_boxplot(
+    data = df_2023,
+    y = ~Precio,
+    name = "2023",
+    marker = list(
+      color = colors["2023"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2023"], width = 2),
+    fillcolor = 'rgba(162, 59, 114, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2024
+  add_boxplot(
+    data = df_2024,
+    y = ~Precio,
+    name = "2024",
+    marker = list(
+      color = colors["2024"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2024"], width = 2),
+    fillcolor = 'rgba(241, 143, 1, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Trazo para 2025
+  add_boxplot(
+    data = df_2025,
+    y = ~Precio,
+    name = "2025",
+    marker = list(
+      color = colors["2025"],
+      size = 5,
+      line = list(color = 'white', width = 1)
+    ),
+    line = list(color = colors["2025"], width = 2),
+    fillcolor = 'rgba(115, 171, 132, 0.5)',
+    boxmean = TRUE,
+    visible = TRUE
+  ) %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 14,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    showlegend = TRUE,
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      )
+    ),
+    hovermode = "x unified",
+    # Definir los botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.8)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar TODOS los años
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE, TRUE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (Todos los Años)</b>",
+                   xaxis = list(title = "<b>Año</b>"))
+            ),
+            label = "Todos los Años"
+          ),
+          # Botón para mostrar solo 2022
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2022)</b>",
+                   xaxis = list(title = "<b>2022</b>"))
+            ),
+            label = "2022"
+          ),
+          # Botón para mostrar solo 2023
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE, FALSE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2023)</b>",
+                   xaxis = list(title = "<b>2023</b>"))
+            ),
+            label = "2023"
+          ),
+          # Botón para mostrar solo 2024
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, TRUE, FALSE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2024)</b>",
+                   xaxis = list(title = "<b>2024</b>"))
+            ),
+            label = "2024"
+          ),
+          # Botón para mostrar solo 2025
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, FALSE, FALSE, TRUE)),
+              list(title = "<b>Boxplot Interactivo: Distribución de Precios del ETF GLTR (2025)</b>",
+                   xaxis = list(title = "<b>2025</b>"))
+            ),
+            label = "2025"
+          )
+        )
+      )
+    )
+  ) %>%
+  # Añadir información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>Haz clic en los botones para ver la distribución de precios por año</i>",
+    x = 0.5,
+    y = -0.2,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig
+```
+
+El año 2022 se caracteriza por una distribución estrecha y homogénea, con una mediana de &#86.62 USD y un rango intercuartílico de apenas &#1.73 USD.
+La caja del boxplot es prácticamente invisible, indicando que el 50% central de las observaciones estuvo concentrado en un intervalo minúsculo.
+El rango total fue de &#10.59 USD, representando una variabilidad relativa del 13.4% respecto a la mediana.
+La media (&#85.88) y la mediana (&#86.62) están prácticamente alineadas, sugiriendo una distribución simétrica con ausencia de picos significativos.
+
+Durante 2023 se observa un incremento moderado pero notable en los niveles de precio, con una mediana de &#88.86 USD, representando un aumento del 2.6% respecto a 2022.
+El rango intercuartílico aumentó a &#4.10 USD, triplicándose respecto al año anterior, lo que indica una expansión de la variabilidad dentro del rango central.
+El rango total se amplió a &#14.09 USD, con máximos alcanzando &#95.57.
+La media (&#88.85) nuevamente coincide prácticamente con la mediana (\$88.86), manteniendo la simetría distribucional.
+Este año marca una transición: los precios comenzaron a recuperarse gradualmente de los mínimos de 2022, pero la volatilidad aún se mantuvo contenida.
+
+El año 2024 presenta un salto significativo en los niveles de precio, con una mediana de &#104.56 USD, equivalente a un incremento del 17.7% respecto a 2023.
+El rango intercuartílico creció sustancialmente a &#12.78 USD, representando casi el triple del observado en 2023.
+La caja del boxplot se expande visiblemente, reflejando una mayor dispersión en las observaciones centrales.
+El rango total fue de &#36.22 USD, con una variabilidad relativa del 34.7% respecto a la mediana.
+La media (&#103.62) nuevamente se alinea con la mediana (&#104.56), manteniendo simetría.
+El año 2025 (período parcial de enero a octubre) muestra la mayor apreciación y volatilidad de todo el período, con una mediana de &#138.65 USD, generando un aumento del 32.6% respecto a 2024.
+El rango intercuartílico alcanzó &#27.41 USD, la mayor dispersión registrada en los cuatro años y aproximadamente 6.7 veces mayor que la de 2022.
+La caja es considerablemente más amplia, reflejando una heterogeneidad considerable en la distribución central.
+El rango total fue de &#77.48 USD, con una variabilidad relativa del 55.9% respecto a la mediana, la más elevada del período.
+La media (&#141.72) se mantiene ligeramente superior a la mediana (\$138.65), sugiriendo eventos de precios particularmente elevados que mueven el promedio.
+La progresión del 2022 al 2025 revela un patrón de volatilidad creciente acompañado de apreciación sistemática.
+Mientras que en 2022 la distribución fue cristalina y homogénea (IQR = &#1.73), en 2025 la dispersión se multiplicó por más de 15 veces (IQR = &#27.41).
+
+### Gráfico de tendencias
+
+La visualización de la serie temporal superpuesta con su componente de tendencia separa el comportamiento del precio en dos dimensiones: los precios diarios y la dirección subyacente de largo plazo.
+
+```{r Tendencia}
+# Convertir a serie temporal para descomposición
+serie_ts <- ts(GLTR_df$Precio, 
+               start = c(2022, 10), 
+               frequency = 365)
+
+# Descomposición STL (Seasonal and Trend decomposition using Loess)
+descomposicion <- stl(serie_ts, s.window = "periodic")
+
+# Crear dataframe para plotly
+descomp_df <- data.frame(
+  Fecha = GLTR_df$Fecha,
+  Original = GLTR_df$Precio,
+  Tendencia = as.numeric(descomposicion$time.series[, "trend"])
+)
+
+# Gráfico interactivo de solo Original + Tendencia
+fig_original_tendencia <- plot_ly(descomp_df) %>%
+  # Serie original
+  add_trace(x = ~Fecha, y = ~Original, type = 'scatter', mode = 'lines',
+            name = 'Serie Original', 
+            line = list(color = 'rgba(46, 134, 171, 0.4)', width = 1),
+            hovertemplate = '<b>Original</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Tendencia
+  add_trace(x = ~Fecha, y = ~Tendencia, type = 'scatter', mode = 'lines',
+            name = 'Tendencia', 
+            line = list(color = '#7161ef', width = 3),
+            hovertemplate = '<b>Tendencia</b>: $%{y:.2f}<br>%{x|%d-%b-%Y}<extra></extra>') %>%
+  # Diseño del gráfico
+  layout(
+    title = list(
+      text = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Fecha</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 12,
+        color = "#2c3e50"
+      ),
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#bdc3c7",
+      linewidth = 1.5,
+      rangeslider = list(visible = FALSE)  # Range slider desactivado
+    ),
+    yaxis = list(
+      title = "<b>Precio (USD)</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickformat = "$.2f",
+      showgrid = TRUE,
+      gridcolor = "rgba(200, 200, 200, 0.2)",
+      gridwidth = 0.5,
+      zeroline = TRUE,
+      zerolinecolor = "#bdc3c7",
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    hovermode = "x unified",
+    # Botones de actualización
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.5,
+        xanchor = "center",
+        y = 1.15,
+        yanchor = "top",
+        showactive = TRUE,
+        bgcolor = "rgba(255, 255, 255, 0.9)",
+        bordercolor = "#dee2e6",
+        borderwidth = 1,
+        buttons = list(
+          # Botón para mostrar AMBAS series
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, TRUE)),
+              list(title = "<b>Serie Temporal Original y Tendencia del ETF GLTR</b>")
+            ),
+            label = "Mostrar Ambas"
+          ),
+          # Botón para mostrar solo la SERIE ORIGINAL
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(TRUE, FALSE)),
+              list(title = "<b>Serie Temporal Original del ETF GLTR</b>")
+            ),
+            label = "Solo Original"
+          ),
+          # Botón para mostrar solo la TENDENCIA
+          list(
+            method = "update",
+            args = list(
+              list(visible = c(FALSE, TRUE)),
+              list(title = "<b>Tendencia de la Serie Temporal del ETF GLTR</b>")
+            ),
+            label = "Solo Tendencia"
+          )
+        )
+      )
+    ),
+    # Leyenda
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15,
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13
+      ),
+      bgcolor = "rgba(255, 255, 255, 0.8)",
+      bordercolor = "#dee2e6",
+      borderwidth = 1
+    )
+  ) %>%
+  # Información de hover personalizada
+  layout(
+    hoverlabel = list(
+      bgcolor = "white",
+      bordercolor = "#dee2e6",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      )
+    )
+  ) %>%
+  # Añadir anotación explicativa
+  add_annotations(
+    text = "<i>La línea azul clara muestra los precios originales diarios. La línea roja muestra la tendencia suavizada extraída de la serie.</i>",
+    x = 0.5,
+    y = -0.25,
+    xref = "paper",
+    yref = "paper",
+    xanchor = "center",
+    showarrow = FALSE,
+    font = list(
+      family = "Arial, sans-serif",
+      size = 12,
+      color = "#6c757d"
+    )
+  )
+
+# Mostrar el gráfico interactivo
+fig_original_tendencia
+
+```
+
+La gráfica revela una tendencia claramente positiva y persistente a lo largo del período (enero 2023 - octubre 2025).
+La línea de tendencia suavizada muestra una trayectoria ascendente consistente, partiendo de aproximadamente &#88 USD y alcanzando alrededor de &#160 USD.
+La serie original oscila continuamente alrededor de la tendencia, con fluctuaciones de corto plazo que aumentan progresivamente en magnitud conforme avanza el período.
+
+### Heatmap de estacionalidad y rendimiento
+
+El heat map visualiza los rendimientos porcentuales mensuales del ETF GLTR, permitiendo identificar patrones recurrentes estacionales.
+
+```{r Heatmap de estacionalidad y rendimiento}
+# Asegurarse de que la columna Fecha es de tipo Date
+GLTR_df <- GLTR_df %>%
+  mutate(Fecha = as.Date(Fecha))
+
+# Preparar datos para heatmap mensual
+heatmap_df <- GLTR_df %>%
+  filter(Fecha >= "2022-10-31" & Fecha <= "2025-10-31") %>%
+  mutate(
+    Año = format(Fecha, "%Y"),
+    Mes_num = as.numeric(format(Fecha, "%m")),
+    Mes = factor(
+      Mes_num,
+      levels = 1:12,
+      labels = c("Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                 "Jul", "Ago", "Sep", "Oct", "Nov", "Dic")
+    )
+  ) %>%
+  group_by(Año, Mes, Mes_num) %>%
+  summarise(
+    Precio_Inicial = first(Precio, order_by = Fecha),
+    Precio_Final = last(Precio, order_by = Fecha),
+    Precio_Promedio = mean(Precio, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    Rendimiento = ifelse(Precio_Inicial > 0, 
+                         (Precio_Final - Precio_Inicial) / Precio_Inicial * 100,
+                         0)
+  ) %>%
+  arrange(Año, Mes_num)
+
+# Gráfico de heatmap con escala ajustada a -15% a 15%
+fig_estacionalidad_heatmap <- plot_ly(
+  data = heatmap_df,
+  x = ~Mes,
+  y = ~Año,
+  z = ~Rendimiento,
+  type = 'heatmap',
+  colorscale = list(
+    c(0, 'rgb(229, 57, 53)'),      
+    c(0.5, 'rgb(244, 244, 244)'),  
+    c(1, 'rgb(46, 134, 171)')      
+  ),
+  zmin = -15,  
+  zmax = 15,   
+  colorbar = list(
+    title = "Rendimiento (%)",
+    titleside = "right",
+    tickformat = ".1f",
+    len = 0.8,
+    tickvals = seq(-15, 15, by = 5)  # Marcas cada 5%
+  ),
+  hovertemplate = paste(
+    '<b>Año</b>: %{y}<br>',
+    '<b>Mes</b>: %{x}<br>',
+    '<b>Rendimiento</b>: %{z:.2f}%<br>',
+    '<b>Precio inicial</b>: $%{text:.2f}<br>',
+    '<extra></extra>'
+  ),
+  text = ~Precio_Inicial
+) %>%
+  layout(
+    title = list(
+      text = "<b>Heatmap de Estacionalidad Mensual - Rendimientos por Mes</b>",
+      font = list(
+        family = "Arial, sans-serif",
+        size = 22,
+        color = "#2c3e50"
+      ),
+      x = 0.5,
+      xanchor = "center",
+      y = 0.95
+    ),
+    xaxis = list(
+      title = "<b>Mes</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      tickangle = 0,
+      showgrid = FALSE
+    ),
+    yaxis = list(
+      title = "<b>Año</b>",
+      titlefont = list(
+        family = "Arial, sans-serif",
+        size = 16,
+        color = "#2c3e50"
+      ),
+      tickfont = list(
+        family = "Arial, sans-serif",
+        size = 13,
+        color = "#2c3e50"
+      ),
+      autorange = "reversed",
+      showgrid = FALSE,
+      type = "category"
+    ),
+    plot_bgcolor = "rgba(255, 255, 255, 0.95)",
+    paper_bgcolor = "rgba(248, 249, 250, 1)",
+    margin = list(l = 80, r = 40, t = 100, b = 80),
+    annotations = list(
+      list(
+        x = 0.5,
+        y = -0.15,
+        text = "<i>Cada celda muestra el rendimiento porcentual mensual. Escala: -15% a +15%. Rojo = rendimiento negativo, Azul = rendimiento positivo.</i>",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "center",
+        font = list(
+          family = "Arial, sans-serif",
+          size = 12,
+          color = "#6c757d"
+        )
+      )
+    )
+  )
+
+# Mostrar el heatmap
+fig_estacionalidad_heatmap
+
+```
+
+El heat map revela una ausencia de patrones estacionales consistentes y pronunciados en los rendimientos mensuales del ETF GLTR. A diferencia de muchos activos financieros que exhiben "efectos enero" o depresiones estacionales definidas, los rendimientos mensuales de este ETF no muestran una estructura claramente repetible año tras año.
+En 2022, se observa una ligera preponderancia de rendimientos negativos (tonos rosados) en febrero-marzo y mayo-junio, mientras que octubre destaca como mes de rendimiento positivo robusto.
+En 2023, los rendimientos mensuales son mayormente débiles o negativos (predominio de tonos pálidos y rosados), con excepción de marzo y julio que muestran un leve matiz azul.
+En 2024 y 2025, los patrones son aún más irregulares, con meses específicos como octubre de 2022 y octubre de 2024 mostrando rendimientos excepcionales (azul intenso), pero sin que octubre se consolide como mes sistemáticamente favorable en todos los años.
+El análisis identifica al mes de febrero de 2023 como el peor rendimiento histórico del ETF durante el período de entrenamiento, con una depreciación de -9.96% partiendo de un precio inicial de &#91.92 USD.
+En contraste, septiembre de 2025 emerge como el mejor mes, exhibiendo una apreciación robusta de +10.75% desde un precio inicial de &#149.39 USD.
+Esta dicotomía extrema (amplitud de 20.71 puntos porcentuales entre el peor y mejor mes) evidencia la volatilidad considerable en rendimientos mensuales, pero el hecho de que estos extremos ocurren en meses diferentes (febrero y septiembre) y en años distantes refuerza la conclusión de que no existe un efecto estacional genuino y replicable que privilegie o penalice sistemáticamente meses específicos.
+
+### Bandas de volatilidad
+
+Las bandas visualizan la evolución dinámica de la volatilidad, superponiendo el precio de cierre diario, la media y las bandas que se expanden o contraen según la desviación estándar.
+
+```{r Bandas de volatilidad}
+
+# Calcular medias móviles y bandas de volatilidad
+volatilidad_df <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Media_Movil_20 = SMA(Precio, n = 20),
+    Desviacion_20 = runSD(Precio, n = 20),
+    Banda_Superior = Media_Movil_20 + (2 * Desviacion_20),
+    Banda_Inferior = Media_Movil_20 - (2 * Desviacion_20),
+    Ancho_Banda = Banda_Superior - Banda_Inferior
+  )
+
+# Gráfico elegante de bandas de volatilidad
+fig_bandas <- plot_ly(volatilidad_df, x = ~Fecha) %>%
+  # Área entre bandas (volatilidad) - SOLO MUESTRA ANCHO
+  add_ribbons(
+    ymin = ~Banda_Inferior,
+    ymax = ~Banda_Superior,
+    name = 'Banda de Volatilidad',
+    fillcolor = 'rgba(46, 134, 171, 0.15)',
+    line = list(color = 'transparent'),
+    hovertemplate = 'Ancho: $%{customdata:.2f}<extra></extra>',
+    customdata = ~Ancho_Banda  # Solo muestra el ancho de banda
+  ) %>%
+  # Línea de precio
+  add_trace(
+    y = ~Precio, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Precio GLTR',
+    line = list(color = '#2c3e50', width = 1.5),
+    hovertemplate = 'Precio: $%{y:.2f}<extra></extra>'
+  ) %>%
+  # Media móvil
+  add_trace(
+    y = ~Media_Movil_20, 
+    type = 'scatter', 
+    mode = 'lines',
+    name = 'Media Móvil 20 días',
+    line = list(color = '#FF6F61', width = 2, dash = 'dash'),
+    hovertemplate = 'Media 20d: $%{y:.2f}<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Bandas de Volatilidad del ETF GLTR</b><br><sub>Las bandas se expanden en periodos de alta volatilidad y se contraen en calma</sub>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      rangeslider = list(visible = FALSE),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Precio (USD)",
+      tickformat = "$.2f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, TRUE)),
+            label = "Mostrar Todo"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, TRUE, FALSE)),
+            label = "Ocultar Media"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, TRUE)),
+            label = "Ocultar Precio"
+          )
+        )
+      )
+    )
+  )
+
+fig_bandas
+
+
+```
+
+La gráfica exhibe expansión consistente del ancho de las bandas conforme avanza el tiempo.
+Durante 2023, las bandas son extremadamente estrechas (±&#4-6 USD), reflejando volatilidad baja.
+A partir de enero de 2024, el ancho aumenta considerablemente, alcanzando ±&#10-12 USD para mediados de año.
+En 2025, la expansión es dramática, alcanzando un ancho máximo de aproximadamente &#38 USD—el pico de volatilidad del período.
+Un patrón notable es que la expansión de volatilidad acompaña la trayectoria ascendente del precio.
+En períodos donde el precio se estanca (2023 con precios cercanos a &#85-95 USD), las bandas permanecen estrechas.
+Conforme el precio asciende hacia &#100-120 USD en 2024 y luego hacia &#140-190 USD en 2025, las bandas se expanden paralelamente.
+Esto sugiere que la volatilidad no es independiente del nivel de precio, sino que ambas dimensiones están co-determinadas por factores macroeconómicos comunes que impulsan tanto la apreciación como la incertidumbre en los precios de metales preciosos.
+
+### Volatilidad comparada en rangos de tiempo
+
+La visualización de volatilidad en múltiples ventanas temporales (5 días, 20 días, 60 días y anual) permite caracterizar la estructura multiescalar de la variabilidad del ETF GLTR, identificando cómo los shocks y la incertidumbre operan en distintos horizontes temporales.
+
+```{r Volatilidad}
+# Calcular volatilidad en diferentes ventanas temporales
+comparador_volatilidad <- GLTR_df %>%
+  arrange(Fecha) %>%
+  mutate(
+    Rendimiento = (Precio / lag(Precio) - 1) * 100
+  ) %>%
+  filter(!is.na(Rendimiento)) %>%
+  mutate(
+    Vol_5d = rollapply(Rendimiento, width = 5, FUN = sd, fill = NA, align = "right"),
+    Vol_20d = rollapply(Rendimiento, width = 20, FUN = sd, fill = NA, align = "right"),
+    Vol_60d = rollapply(Rendimiento, width = 60, FUN = sd, fill = NA, align = "right"),
+    Vol_252d = rollapply(Rendimiento, width = 252, FUN = sd, fill = NA, align = "right")
+  )
+
+# Gráfico comparativo elegante
+fig_comparativo <- plot_ly(comparador_volatilidad, x = ~Fecha) %>%
+  # Volatilidad a 5 días (corto plazo)
+  add_trace(
+    y = ~Vol_5d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 5 días',
+    line = list(color = '#9fa0ff', width = 1.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 5d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 20 días
+  add_trace(
+    y = ~Vol_20d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 20 días',
+    line = list(color = '#2E86AB', width = 2),
+    visible = TRUE,
+    hovertemplate = 'Vol 20d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 60 días
+  add_trace(
+    y = ~Vol_60d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol 60 días',
+    line = list(color = '#ada7ff', width = 2.5),
+    visible = TRUE,
+    hovertemplate = 'Vol 60d: %{y:.2f}%<extra></extra>'
+  ) %>%
+  # Volatilidad a 252 días (anualizada)
+  add_trace(
+    y = ~Vol_252d,
+    type = 'scatter',
+    mode = 'lines',
+    name = 'Vol Anual',
+    line = list(color = '#757bc8', width = 3),
+    visible = TRUE,
+    hovertemplate = 'Vol Anual: %{y:.2f}%<extra></extra>'
+  ) %>%
+  layout(
+    title = list(
+      text = "<b>Comparativo de Volatilidad en Diferentes Ventanas Temporales</b>",
+      font = list(family = "Arial", size = 20)
+    ),
+    xaxis = list(
+      title = "Fecha",
+      showgrid = TRUE,
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    yaxis = list(
+      title = "Volatilidad (% desviación estándar)",
+      tickformat = ".1f",
+      gridcolor = 'rgba(200,200,200,0.1)'
+    ),
+    plot_bgcolor = '#ffffff',
+    paper_bgcolor = '#f8f9fa',
+    hovermode = 'x unified',
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.15
+    ),
+    updatemenus = list(
+      list(
+        type = "buttons",
+        direction = "right",
+        x = 0.3,
+        y = 1.15,
+        showactive = TRUE,
+        buttons = list(
+          list(
+            method = "restyle",
+            args = list("visible", rep(TRUE, 4)),
+            label = "Mostrar Todas"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(TRUE, FALSE, FALSE, FALSE)),
+            label = "Solo 5 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, TRUE, FALSE, FALSE)),
+            label = "Solo 20 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, TRUE, FALSE)),
+            label = "Solo 60 días"
+          ),
+          list(
+            method = "restyle",
+            args = list("visible", c(FALSE, FALSE, FALSE, TRUE)),
+            label = "Solo Anual"
+          )
+        )
+      )
+    )
+  )
+
+# Mostrar el gráfico
+fig_comparativo
+```
+
+La volatilidad de Corto Plazo exhibe fluctuaciones erráticas y de alta amplitud, oscilando entre aproximadamente 0.5% y 4.0%.
+Esta serie es notoriamente ruidosa, con múltiples picos transitorios que reflejan shocks diarios rápidamente absorbidos por el mercado.
+
+La volatilidad de Mediano Plazo presenta un patrón mucho más suave que la de 5 días, oscilando típicamente entre 0.8% y 2.0%.
+La línea azul filtra el ruido diario y captura la variabilidad subyacente de corto-mediano plazo, con picos menos frecuentes pero más persistentes.
+
+La volatilidad de Largo Plazo muestra la trayectoria más suave y persistente, fluctuando entre aproximadamente 0.8% y 1.5%.
+Las oscilaciones en esta ventana son lentas y deliberadas, reflejando cambios en el ambiente macroeconómico de mediano plazo.
+
+La volatilidad Anual proporciona la perspectiva más agregada, con una evolución particularmente estable, comenzando cercana a 1.0% en 2023 y terminando cercana a 1.5-1.8% en 2025.
+
+El análisis descriptivo ha caracterizado la serie temporal del ETF GLTR a través de sus estadísticas fundamentales, distribución temporal, tendencia, estacionalidad y dinámica de volatilidad en múltiples horizontes.
+Esta exploración integral proporciona la base empírica necesaria para proceder con la especificación y estimación del modelo ARIMA.
+
+# Análisis ARIMA
+
+```{r datos}
+# Configuración de fechas - CAMBIAR SOLO AQUÍ
+fecha_inicio_entrenamiento <- "2022-10-31"
+fecha_fin_entrenamiento <- "2025-10-31"
+fecha_inicio_prueba <- "2025-11-03"
+fecha_fin_prueba <- "2025-11-21"  # ← FECHA FINAL AGREGADA
+
+AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, 
+                         from = fecha_inicio_entrenamiento)
+GLTR <- AccionesEX$GLTR.Close
+
+Entrenamiento_GLTR <- window(GLTR, start = fecha_inicio_entrenamiento, end = fecha_fin_entrenamiento)
+Prueba_GLTR <- window(GLTR, start = fecha_inicio_prueba, end = fecha_fin_prueba)
+
+df_train_GLTR <- data.frame(
+  Fecha = index(Entrenamiento_GLTR),
+  Precio = as.numeric(Entrenamiento_GLTR),
+  Conjunto = "Entrenamiento"
+)
+
+df_test_GLTR <- data.frame(
+  Fecha = index(Prueba_GLTR),
+  Precio = as.numeric(Prueba_GLTR),
+  Conjunto = "Prueba"
+)
+
+df_completo_GLTR <- bind_rows(df_train_GLTR, df_test_GLTR)
+fecha_corte_GLTR <- as.Date("2025-11-01")
+```
+
+```{r paleta}
+gltr_pal <- list(
+  primary = "#2C3E50",
+  secondary = "#cbb2fe",
+  tertiary = "#3498DB",
+  positive = "#27AE60",
+  negative = "#cbb2fe",
+  text_dark = "#2C3E50",
+  text_gray = "#7F8C8D",
+  grid = "#BDC3C7"
+)
+```
+
+## Visualización de la Partición
+
+La serie temporal de precios de cierre diarios de (GLTR) fue dividida en dos conjuntos mutuamente excluyentes siguiendo el enfoque de validación cronológica la partición en entrenamiento y prueba permiten que el modelo se ajuste solo con información pasada y se evalúe con datos futuros.
+
+```{r grafico-particion, fig.height=7}
+ggplot(df_completo_GLTR, aes(x = Fecha, y = Precio)) +
+  geom_ribbon(data = df_train_GLTR, 
+              aes(ymin = min(df_completo_GLTR$Precio) * 0.95, ymax = Precio),
+              fill = gltr_pal$primary, alpha = 0.08) +
+  geom_ribbon(data = df_test_GLTR, 
+              aes(ymin = min(df_completo_GLTR$Precio) * 0.95, ymax = Precio),
+              fill = gltr_pal$secondary, alpha = 0.15) +
+  geom_line(data = df_train_GLTR, color = gltr_pal$primary, linewidth = 0.9) +
+  geom_line(data = df_test_GLTR, color = gltr_pal$secondary, linewidth = 1.1) +
+  geom_vline(xintercept = fecha_corte_GLTR, 
+             linetype = "dashed", color = gltr_pal$negative, linewidth = 0.8) +
+  annotate("text", x = fecha_corte_GLTR, y = max(df_completo_GLTR$Precio) * 1.02,
+           label = "Corte: 01-Nov-2025", hjust = -0.05, vjust = 0,
+           color = gltr_pal$negative, fontface = "bold", size = 3.5) +
+  annotate("label", 
+           x = as.Date("2024-01-01"), 
+           y = max(df_completo_GLTR$Precio) * 0.85,
+           label = paste0("ENTRENAMIENTO\n", nrow(df_train_GLTR), " observaciones"),
+           fill = gltr_pal$primary, color = "white", 
+           fontface = "bold", size = 3.5, label.padding = unit(0.5, "lines")) +
+  annotate("label", 
+           x = max(df_test_GLTR$Fecha) - 1,
+           y = min(df_completo_GLTR$Precio) * 1.15,
+           label = paste0("PRUEBA\n", nrow(df_test_GLTR), " obs."),
+           fill = gltr_pal$secondary, color = "white", 
+           fontface = "bold", size = 3.2, label.padding = unit(0.4, "lines")) +
+  scale_x_date(date_breaks = "4 months", date_labels = "%b %Y",
+               expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = dollar_format(prefix = "$"),
+                     expand = expansion(mult = c(0.05, 0.08))) +
+  labs(
+    title = "Partición de Datos: Entrenamiento vs Prueba",
+    subtitle = "GLTR | Serie de precios de cierre diarios",
+    x = NULL,
+    y = "Precio de Cierre (USD)",
+    caption = paste0("Fuente: Yahoo Finance | Período: ", 
+                     min(df_completo_GLTR$Fecha), " a ", max(df_completo_GLTR$Fecha))
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(face = "bold", size = 16, color = gltr_pal$text_dark,
+                              margin = margin(b = 5)),
+    plot.subtitle = element_text(size = 11, color = gltr_pal$secondary,
+                                 margin = margin(b = 15)),
+    plot.caption = element_text(size = 9, color = gltr_pal$text_gray,
+                                margin = margin(t = 15), hjust = 0),
+    axis.title.y = element_text(face = "bold", size = 10, color = gltr_pal$text_gray),
+    axis.text = element_text(size = 9, color = gltr_pal$text_gray),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major = element_line(color = gltr_pal$grid, linetype = "dashed", linewidth = 0.4),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(20, 25, 15, 15)
+  )
+```
+
+La Figura muestra la serie de precios de cierre diarios de GLTR entre el 31/10/2022 y el 21/11/2025 (aproximadamente 3 años).
+La zona sombreada en gris corresponde al conjunto de entrenamiento, compuesto por 754 observaciones continuas.
+A partir de la línea discontinua roja definimos nuestro conjunto de prueba, formado por las 15 observaciones más recientes, que se reservan exclusivamente para evaluar el desempeño predictivo del modelo.
+El amplio historial de entrenamiento permite capturar la clara tendencia creciente y los patrones de variabilidad de la serie, mientras que la ventana de prueba, situada en el tramo de mayor volatilidad reciente, ofrece un escenario exigente para evaluar la precisión fuera de muestra del modelo ARIMA que se seleccionará.
+
+## Analisis de estacionariedad
+
+### Serie original- ACF
+
+La Figura muestra la función de autocorrelación (ACF) de la serie de precios de cierre de GLTR en niveles, usando solo los datos de entrenamiento.
+
+```{r stationarity-tests}
+acf_data_GLTR <- acf(Entrenamiento_GLTR, lag.max = 30, plot = FALSE)
+
+df_acf_GLTR <- data.frame(
+  Lag = acf_data_GLTR$lag[-1], 
+  ACF = acf_data_GLTR$acf[-1]
+)
+
+n_GLTR <- length(Entrenamiento_GLTR)
+limite_sup_GLTR <- qnorm(0.975) / sqrt(n_GLTR)
+limite_inf_GLTR <- -limite_sup_GLTR
+
+ggplot(df_acf_GLTR, aes(x = Lag, y = ACF)) +
+  geom_segment(aes(xend = Lag, yend = 0), 
+               color = gltr_pal$primary, linewidth = 0.8) +
+  geom_point(color = gltr_pal$primary, size = 2) +
+  geom_hline(yintercept = limite_sup_GLTR, linetype = "dashed", 
+             color = gltr_pal$secondary, linewidth = 0.7) +
+  geom_hline(yintercept = limite_inf_GLTR, linetype = "dashed", 
+             color = gltr_pal$secondary, linewidth = 0.7) +
+  geom_hline(yintercept = 0, color = gltr_pal$text_gray, linewidth = 0.5) +
+  annotate("rect", xmin = -Inf, xmax = Inf, 
+           ymin = limite_inf_GLTR, ymax = limite_sup_GLTR,
+           fill = gltr_pal$secondary, alpha = 0.1) +
+  annotate("label", x = 20, y = 0.5,
+           label = "Serie NO estacionaria",
+           fill = gltr_pal$negative, color = "white",
+           fontface = "bold", size = 3.5, label.padding = unit(0.5, "lines")) +
+  scale_x_continuous(breaks = seq(0, 30, 5)) +
+  scale_y_continuous(limits = c(-0.1, 1.05), breaks = seq(0, 1, 0.25)) +
+  labs(
+    title = "Función de Autocorrelación (ACF) - Serie en Niveles",
+    subtitle = "GLTR: Precio de cierre | Datos de entrenamiento",
+    x = "Rezago (Lag)",
+    y = "Autocorrelación",
+    caption = "Bandas rojas: Límites de significancia al 95%"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "transparent", color = NA),
+    panel.background = element_rect(fill = "transparent", color = NA),
+    plot.title = element_text(face = "bold", size = 14, color = gltr_pal$text_dark),
+    plot.subtitle = element_text(size = 10, color = gltr_pal$secondary),
+    plot.caption = element_text(size = 9, color = gltr_pal$text_gray, hjust = 0),
+    axis.title = element_text(face = "bold", size = 10, color = gltr_pal$text_gray),
+    axis.text = element_text(size = 9, color = gltr_pal$text_gray),
+    panel.grid.major = element_line(color = gltr_pal$grid, linetype = "dashed", linewidth = 0.4),
+    panel.grid.minor = element_blank()
+  )
+```
+
+La autocorrelación en el rezago 1 es cercana a 1, las autocorrelaciones decrecen muy lentamente y se mantienen significativamente distintas de cero más allá del rezago 30 (todas por encima de las bandas rojas al 95%).
+Este patrón indica que contamos con una serie no estacionaria con tendencia, donde los choques tienen efectos persistentes y la memoria de la serie es muy larga.
+
+### Test de Dickey-Fuller Aumentada (ADF)
+
+```{r Test de Dickey-Fuller Aumentada}
+adf_resultado_GLTR <- adf.test(Entrenamiento_GLTR)
+
+tabla_adf_GLTR <- data.frame(
+  Métrica = c("Estadístico Dickey-Fuller", 
+              "Orden de Rezagos (Lag)", 
+              "P-valor",
+              "Nivel de Significancia (α)",
+              "Hipótesis Nula (H₀)",
+              "Decisión"),
+  
+  Valor = c(round(adf_resultado_GLTR$statistic, 4),
+            adf_resultado_GLTR$parameter,
+            round(adf_resultado_GLTR$p.value, 4),
+            "0.05",
+            "Serie tiene raíz unitaria",
+            ifelse(adf_resultado_GLTR$p.value > 0.05, 
+                   "No rechazar H₀", "Rechazar H₀")),
+  
+  Interpretación = c("Valor del estadístico de prueba",
+                     "Rezagos incluidos en el test",
+                     "Probabilidad bajo H₀",
+                     "Umbral de decisión",
+                     "La serie NO es estacionaria",
+                     ifelse(adf_resultado_GLTR$p.value > 0.05,
+                            "Serie NO estacionaria",
+                            "Serie estacionaria"))
+)
+
+kable(tabla_adf_GLTR, 
+      caption = "Prueba de Dickey-Fuller Aumentada (ADF) - Serie en Niveles GLTR",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(3, bold = TRUE, color = "#757bc8") %>% 
+  row_spec(6, bold = TRUE, background = "#fef3f2")
+```
+
+Bajo la hipótesis nula, la serie tiene raíz unitaria (no estacionaria).
+Como el p‑valor 0.984 \> 0.05, no se rechaza $H0$.
+Por tanto, tanto la ACF como el test ADF coinciden en que la serie de precios en niveles NO es estacionaria y requiere la aplicación de una primera diferenciación antes de ajustar un modelo ARIMA, ya que, en su forma original, no cumple el supuesto de estacionariedad en media ni en autocovarianza.
+
+### Diferenciación
+
+Para abordar la no estacionariedad detectada en la serie en niveles, se aplicó una diferenciación de primer orden sobre el conjunto de entrenamiento:
+
+```{r Diferenciacion}
+GLTR_diff <- diff(Entrenamiento_GLTR) %>% na.omit()
+
+GLTR_diff_df <- data.frame(
+  Fecha = as.Date(time(GLTR_diff)),
+  Cambio = as.numeric(GLTR_diff)
+)
+
+GLTR_diff_df$ID <- seq.int(nrow(GLTR_diff_df))
+```
+
+El gráfico de la serie diferenciada muestra ahora los cambios diarios en el precio de GLTR alrededor de un nivel aproximadamente constante, sin tendencia evidente.
+La variabilidad parece relativamente estable en la mayor parte del período, aunque con algunos aumentos de volatilidad hacia el final.
+Este comportamiento respalda la elección de $d = 1$ en el modelo ARIMA, ya que una sola diferenciación elimina la tendencia de largo plazo observada en la serie original.
+
+```{r grafico-diferenciado, fig.width=7, fig.height=5}
+accumulate_by <- function(dat, var) {
+  var <- lazyeval::f_eval(var, dat)
+  lvls <- plotly:::getLevels(var)
+  dats <- lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+GLTR_diff_df <- GLTR_diff_df %>% accumulate_by(~ID)
+
+fig_diff_animated <- plot_ly(
+  data = GLTR_diff_df,
+  x = ~Fecha,  
+  y = ~Cambio,
+  frame = ~frame,
+  type = 'scatter',
+  mode = 'lines',
+  fill = 'tozeroy',
+  fillcolor = 'rgba(0, 100, 200, 0.3)',
+  line = list(color = 'rgb(0, 0, 0)', width = 1.5),
+  text = ~paste(
+    "Fecha: ", format(Fecha, "%d/%m/%Y"),
+    "<br>Cambio: $", round(Cambio, 4)
+  ),
+  hoverinfo = 'text'
+) %>%
+  layout(
+    title = list(
+      text = "<b>Serie diferenciada GLTR</b>",
+      font = list(size = 16, family = "Arial"),
+      x = 0.5,
+      xanchor = 'center'
+    ),
+    xaxis = list(
+      title = "Fecha",
+      range = c(min(GLTR_diff_df$Fecha), max(GLTR_diff_df$Fecha)),
+      showgrid = TRUE,
+      gridcolor = 'rgba(200, 200, 200, 0.3)',
+      zeroline = FALSE
+    ),
+    yaxis = list(
+      title = "Cambio en Precio",
+      showgrid = TRUE,
+      gridcolor = 'rgba(200, 200, 200, 0.3)',
+      zeroline = TRUE,
+      zerolinecolor = 'rgba(0, 0, 0, 0.3)',
+      zerolinewidth = 1
+    ),
+    plot_bgcolor = '#f0f0f0',
+    paper_bgcolor = 'white',
+    hovermode = 'closest'
+  ) %>%
+  animation_opts(
+    frame = 50,
+    transition = 0,
+    redraw = FALSE
+  ) %>%
+  animation_slider(
+    currentvalue = list(
+      prefix = "Fecha: ",
+      font = list(color = "black")
+    )
+  )
+
+fig_diff_animated
+
+```
+
+La Figura muestra la ACF de la serie diferenciada una vez.
+A diferencia de la serie en niveles, ahora contamos con casi todos los coeficientes de autocorrelación caen dentro de las bandas verdes al 95%, no se observa un patrón de decrecimiento lento ni correlaciones altas y persistentes.
+Solo aparecen unos pocos picos aislados, compatibles con ruido alrededor de cero.
+Este comportamiento es coherente con una serie aproximadamente estacionaria, por lo que la elección de $d = 1$ resulta adecuada: una sola diferencia elimina la tendencia sin sobre diferenciar la serie.
+
+### Test ADF - Serie Diferenciada
+
+```{r adf-diferenciada}
+adf_diff_resultado_GLTR <- adf.test(GLTR_diff)
+
+tabla_adf_diff_GLTR <- data.frame(
+  Métrica = c("Estadístico Dickey-Fuller", 
+              "Orden de Rezagos (Lag)", 
+              "P-valor",
+              "Nivel de Significancia (α)",
+              "Hipótesis Nula (H₀)",
+              "Decisión"),
+  Valor = c(round(adf_diff_resultado_GLTR$statistic, 4),
+            adf_diff_resultado_GLTR$parameter,
+            round(adf_diff_resultado_GLTR$p.value, 4),
+            "0.05",
+            "Serie tiene raíz unitaria",
+            ifelse(adf_diff_resultado_GLTR$p.value > 0.05, 
+                   "No rechazar H₀", "Rechazar H₀")),
+  Interpretación = c("Valor del estadístico de prueba",
+                     "Rezagos incluidos en el test",
+                     "Probabilidad bajo H₀",
+                     "Umbral de decisión",
+                     "La serie NO es estacionaria",
+                     ifelse(adf_diff_resultado_GLTR$p.value > 0.05,
+                            "Serie NO estacionaria",
+                            "Serie estacionaria"))
+)
+
+kable(tabla_adf_diff_GLTR, 
+      caption = "Prueba de Dickey-Fuller Aumentada (ADF) - Serie Diferenciada GLTR",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(3, bold = TRUE, color = "#957fef") %>% 
+  row_spec(6, bold = TRUE, background = "#efd9ce")
+```
+
+La prueba ADF aplicada a la serie diferenciada mostró un estadístico de $−10.0227$, con 9 rezagos y un valor p de $0.01$, lo que nos indica que podemos rechazar $(H0)$ y concluir que la serie diferenciada es estacionaria.
+Esto coincide con la ACF, confirmando que con $(d = 1)$ se logra la estacionariedad necesaria para dar paso a la identificación de los valores adecuados de $(p)$ y $(q)$.
+
+En la serie ya diferenciada el ACF no muestra picos grandes ni un patrón de corte claro; las autocorrelaciones son pequeñas y la mayoría cae dentro de las bandas.
+A su vez, en el PACF aparecen algunos picos algo más notorios en rezagos bajos y medios (por ejemplo, alrededor de lag 3 y 24), pero ninguno domina claramente.
+Este comportamiento sugiere que no existe una estructura AR o MA “pura”, es decir las dependencias son débiles y se dispersan en varios rezagos.
+Por ello, resulta más adecuado probar modelos ARIMA de bajo orden que suelen capturar bien la dinámica residual de series diferenciadas con correlaciones débiles y reducen el riesgo de sobreestimar la complejidad del modelo.
+
+# Identificación del modelo
+
+A partir de la serie ya diferenciada $(d=1)$, se analizan las funciones ACF y PACF para sugerir órdenes tentativos de los componentes $AR (p)$ y $MA (q)$.
+
+```{r funcion-acf-pacf}
+crear_grafico_acf_pacf <- function(serie, titulo_serie = "GLTR", lag_max = NULL) {
+  
+  acf_data <- acf(serie, plot = FALSE, lag.max = lag_max)
+  pacf_data <- pacf(serie, plot = FALSE, lag.max = lag_max)
+  
+  acf_df <- data.frame(
+    lag = as.numeric(acf_data$lag)[-1], 
+    acf = as.numeric(acf_data$acf)[-1]
+  )
+  
+  pacf_df <- data.frame(
+    lag = as.numeric(pacf_data$lag), 
+    pacf = as.numeric(pacf_data$acf)
+  )
+  
+  conf_level <- qnorm((1 + 0.95)/2)/sqrt(acf_data$n.used)
+  
+  y_max <- max(c(abs(acf_df$acf), abs(pacf_df$pacf), conf_level)) * 1.2
+  
+  # GRÁFICO ACF
+  p_acf <- ggplot(acf_df, aes(x = lag, y = acf)) +
+    geom_bar(stat = "identity", 
+             width = 0.7,
+             fill = ifelse(acf_df$acf > 0, "#2196F3", "#FF5252"),
+             color = NA,
+             alpha = 0.8) +
+    geom_hline(yintercept = conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = -conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = 0, 
+               color = "#212121", 
+               linewidth = 0.3) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = -conf_level, ymax = conf_level,
+             fill = "#E8F5E9",
+             alpha = 0.2) +
+    geom_text(data = subset(acf_df, abs(acf) > conf_level),
+              aes(label = round(acf, 2)),
+              vjust = ifelse(subset(acf_df, abs(acf) > conf_level)$acf > 0, -0.8, 1.2),
+              size = 3.2,
+              fontface = "bold",
+              color = "#212121") +
+    labs(
+      title = "AUTOCORRELACIÓN (ACF)",
+      subtitle = paste("Serie diferenciada:", titulo_serie),
+      x = "Desfase (Lags)",
+      y = "Autocorrelación",
+      caption = paste(" ")
+    ) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = min(20, max(acf_df$lag)))) +
+    scale_y_continuous(limits = c(-y_max, y_max),
+                       breaks = scales::pretty_breaks(n = 8)) +
+    theme_minimal(base_size = 12) +
+    theme(
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.border = element_rect(color = "#E0E0E0", fill = NA, linewidth = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 14,
+        color = "#0D47A1",
+        hjust = 0,
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 11,
+        color = "#546E7A",
+        hjust = 0,
+        margin = margin(b = 15)
+      ),
+      axis.title = element_text(
+        size = 11,
+        color = "#37474F",
+        face = "bold"
+      ),
+      axis.text = element_text(
+        size = 10,
+        color = "#546E7A"
+      ),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.y = element_line(color = "#F5F5F5", linewidth = 0.5),
+      panel.grid.minor.y = element_blank(),
+      plot.margin = margin(15, 20, 15, 15)
+    )
+  
+  # GRÁFICO PACF
+  p_pacf <- ggplot(pacf_df, aes(x = lag, y = pacf)) +
+    geom_bar(stat = "identity", 
+             width = 0.7,
+             fill = ifelse(pacf_df$pacf > 0, "#4CAF50", "#FF9800"),
+             color = NA,
+             alpha = 0.8) +
+    geom_hline(yintercept = conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = -conf_level, 
+               color = "#757575", 
+               linetype = "dashed", 
+               linewidth = 0.5,
+               alpha = 0.7) +
+    geom_hline(yintercept = 0, 
+               color = "#212121", 
+               linewidth = 0.3) +
+    annotate("rect",
+             xmin = -Inf, xmax = Inf,
+             ymin = -conf_level, ymax = conf_level,
+             fill = "#F3E5F5",
+             alpha = 0.2) +
+    geom_text(data = subset(pacf_df, abs(pacf) > conf_level),
+              aes(label = round(pacf, 2)),
+              vjust = ifelse(subset(pacf_df, abs(pacf) > conf_level)$pacf > 0, -0.8, 1.2),
+              size = 3.2,
+              fontface = "bold",
+              color = "#212121") +
+    labs(
+      title = "AUTOCORRELACIÓN PARCIAL (PACF)",
+      subtitle = paste("Serie diferenciada:", titulo_serie),
+      x = "Desfase (Lags)",
+      y = "Autocorrelación Parcial",
+      caption = paste(" ", 
+                      format(Sys.Date(), "%d/%m/%Y"))
+    ) +
+    scale_x_continuous(breaks = scales::pretty_breaks(n = min(20, max(pacf_df$lag)))) +
+    scale_y_continuous(limits = c(-y_max, y_max),
+                       breaks = scales::pretty_breaks(n = 8)) +
+    theme_minimal(base_size = 12) +
+    theme(
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.background = element_rect(fill = "white", color = NA),
+      panel.border = element_rect(color = "#E0E0E0", fill = NA, linewidth = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 14,
+        color = "#7B1FA2",
+        hjust = 0,
+        margin = margin(b = 8)
+      ),
+      plot.subtitle = element_text(
+        size = 11,
+        color = "#546E7A",
+        hjust = 0,
+        margin = margin(b = 15)
+      ),
+      axis.title = element_text(
+        size = 11,
+        color = "#37474F",
+        face = "bold"
+      ),
+      axis.text = element_text(
+        size = 10,
+        color = "#546E7A"
+      ),
+      panel.grid.major.x = element_blank(),
+      panel.grid.minor.x = element_blank(),
+      panel.grid.major.y = element_line(color = "#F5F5F5", linewidth = 0.5),
+      panel.grid.minor.y = element_blank(),
+      plot.margin = margin(15, 20, 15, 15)
+    )
+  
+  return(list(ACF = p_acf, PACF = p_pacf))
+}
+```
+
+```{r graficos-acf-pacf, fig.width=12, fig.height=6}
+graficos <- crear_grafico_acf_pacf(
+  serie = GLTR_diff,
+  titulo_serie = "GLTR (Diferenciada d=1)",
+  lag_max = 36
+)
+
+panel_completo <- grid.arrange(
+  graficos$ACF,
+  graficos$PACF,
+  nrow = 1,
+  top = textGrob(
+    "",
+    gp = gpar(fontsize = 18, fontface = "bold", col = "#0D47A1"),
+    vjust = 1.5
+  ),
+  bottom = textGrob(
+    paste("Análisis generado:", Sys.Date(), "| Método: Diferenciación (d=1)"),
+    gp = gpar(fontsize = 10, col = "#78909C"),
+    vjust = -0.5
+  ),
+  padding = unit(2, "cm")
+)
+
+```
+
+La ausencia de picos muy dominantes y la presencia de algunas autocorrelaciones moderadas en rezagos bajos motivan la consideración de modelos de bajo a mediano orden, combinando términos $AR$ y $MA$.
+
+Con base en este análisis visual y en el procedimiento automatizado de auto.arima(), se definió el siguiente conjunto de modelos candidatos:
+
+```{r modelos}
+Modelo_GLTR_auto <- auto.arima(Entrenamiento_GLTR)
+Modelo_GLTR_1 <- Arima(Entrenamiento_GLTR, order = c(3, 1, 4))
+Modelo_GLTR_2 <- Arima(Entrenamiento_GLTR, order = c(1, 1, 1))
+Modelo_GLTR_3 <- Arima(Entrenamiento_GLTR, order = c(2, 1, 4))
+Modelo_GLTR_4 <- Arima(Entrenamiento_GLTR, order = c(4, 1, 4))
+```
+
+```{r modelos-t}
+# Crear el dataframe
+datos_modelos <- data.frame(
+  `Etiqueta del Modelo` = c(
+    "Modelo_GLTR_auto",
+    "Modelo_GLTR_1", 
+    "Modelo_GLTR_2",
+    "Modelo_GLTR_3",
+    "Modelo_GLTR_4"
+  ),
+  `Especificación ARIMA` = c(
+    "ARIMA(p, d, q) elegido por auto.arima()",
+    "ARIMA(3, 1, 4)",
+    "ARIMA(1, 1, 1)",
+    "ARIMA(2, 1, 4)",
+    "ARIMA(4, 1, 4)"
+  ),
+  `Motivo de Elección` = c(
+    "Búsqueda automática exhaustiva que minimiza AICc. Sirve como referencia objetiva y verifica si el algoritmo identifica estructuras que no son evidentes en ACF/PACF manual.",
+    "Estructura ARMA balanceada sugerida por picos moderados en PACF (rezagos 1–3) y ACF (rezagos 1–4) de la serie diferenciada. Permite capturar dinámicas de mediano plazo pero puede llegar a sobreparametrizar.",
+    "Modelo parsimonioso de bajo orden, ideal como referencia simple. Consistente con ACF/PACF sin picos dominantes; útil para comparar si modelos más complejos justifican el costo de parsimonia.",
+    "Variante intermedia que aumenta ligeramente el orden MA respecto al AR, sugerida por ligeras persistencias en ACF a rezagos altos. Permite evaluar si componentes MA adicionales mejoran el ajuste.",
+    "Modelo más complejo que captura estructuras AR y MA de mayor orden, útil para verificar si autocorrelaciones parciales en rezagos 3–4 son significativas o solo ruido. Sirve como benchmark de máxima complejidad razonable."
+  ),
+  check.names = FALSE
+)
+
+# Crear tabla profesional con gt
+tabla_modelos <- datos_modelos %>%
+  gt() %>%
+  tab_header(
+    title = md("**Tabla 1: Modelos ARIMA Considerados para la Serie GLTR**"),
+    subtitle = "Especificaciones y justificación de cada configuración"
+  ) %>%
+  cols_label(
+    `Etiqueta del Modelo` = md("**Etiqueta del Modelo**"),
+    `Especificación ARIMA` = md("**Especificación ARIMA**"),
+    `Motivo de Elección` = md("**Motivo de Elección**")
+  ) %>%
+  tab_style(
+    style = cell_text(
+      font = "Segoe UI",
+      size = "small",
+      weight = "normal"
+    ),
+    locations = cells_body()
+  ) %>%
+  tab_style(
+    style = cell_text(
+      font = "Segoe UI",
+      size = "medium",
+      weight = "bold"
+    ),
+    locations = cells_column_labels()
+  ) %>%
+  tab_style(
+    style = cell_fill(color = "#f8f9fa"),
+    locations = cells_body(rows = seq(1, nrow(datos_modelos), by = 2))
+  ) %>%
+  tab_style(
+    style = cell_borders(
+      sides = c("top", "bottom"),
+      color = "#dee2e6",
+      weight = px(1)
+    ),
+    locations = cells_body()
+  ) %>%
+  cols_width(
+    `Etiqueta del Modelo` ~ px(150),
+    `Especificación ARIMA` ~ px(200),
+    `Motivo de Elección` ~ px(500)
+  ) %>%
+  tab_options(
+    table.font.names = "Segoe UI",
+    table.font.size = px(13),
+    heading.title.font.size = px(20),
+    heading.subtitle.font.size = px(15),
+    heading.align = "left",
+    table.width = pct(100),
+    column_labels.border.top.color = "black",
+    column_labels.border.top.width = px(2),
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = px(2),
+    table_body.hlines.color = "#f0f0f0",
+    source_notes.font.size = px(11)
+  ) %>%
+  tab_source_note(
+    source_note = md("**Nota:** Todos los modelos incluyen diferenciación (d=1) para asegurar estacionariedad de la serie.")
+  )
+
+# IMPORTANTE: Mostrar la tabla
+tabla_modelos
+```
+
+# Estimación y comparación de modelos
+
+Estos modelos serán comparados en la siguiente sección usando criterios de información $(AIC, AICc, BIC)$ y métricas de precisión.
+
+```{r t-modelos}
+tabla_modelos_GLTR <- data.frame(
+  Modelo = c('Auto-ARIMA', 'ARIMA(3,1,4)', 'ARIMA(1,1,1)', 'ARIMA(2,1,4)', 'ARIMA(4,1,4)'),
+  AIC = round(c(Modelo_GLTR_auto$aic, Modelo_GLTR_1$aic, Modelo_GLTR_2$aic, 
+                Modelo_GLTR_3$aic, Modelo_GLTR_4$aic), 2),
+  AICc = round(c(Modelo_GLTR_auto$aicc, Modelo_GLTR_1$aicc, Modelo_GLTR_2$aicc, 
+                 Modelo_GLTR_3$aicc, Modelo_GLTR_4$aicc), 2),
+  BIC = round(c(Modelo_GLTR_auto$bic, Modelo_GLTR_1$bic, Modelo_GLTR_2$bic, 
+                Modelo_GLTR_3$bic, Modelo_GLTR_4$bic), 2)
+) %>% arrange(AICc)
+
+kable(tabla_modelos_GLTR, 
+      caption = "Comparación de Modelos ARIMA - Criterios de Información",
+      align = c("l", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(1, bold = TRUE, background = "#efd9ce")
+```
+
+La tabla resume los valores de $AIC, AICc$ y $BIC$ para los cinco modelos ARIMA estimados.
+Aunque el modelo Auto‑ARIMA presenta los menores $AIC y AICc (2637.30 y 2637.41)$, y también el menor $BIC (2665.04)$, la comparación con los modelos manuales permite ver que ninguno logra acercarse lo suficiente como para ser competitivo.
+
+```{r metricas-precision}
+accuracy_auto <- accuracy(Modelo_GLTR_auto)
+accuracy_1 <- accuracy(Modelo_GLTR_1)
+accuracy_2 <- accuracy(Modelo_GLTR_2)
+accuracy_3 <- accuracy(Modelo_GLTR_3)
+accuracy_4 <- accuracy(Modelo_GLTR_4)
+
+tabla_accuracy_GLTR <- data.frame(
+  Modelo = c('Auto-ARIMA', 'ARIMA(3,1,4)', 'ARIMA(1,1,1)', 'ARIMA(2,1,4)', 'ARIMA(4,1,4)'),
+  ME = round(c(accuracy_auto[1], accuracy_1[1], accuracy_2[1], accuracy_3[1], accuracy_4[1]), 4),
+  RMSE = round(c(accuracy_auto[2], accuracy_1[2], accuracy_2[2], accuracy_3[2], accuracy_4[2]), 4),
+  MAE = round(c(accuracy_auto[3], accuracy_1[3], accuracy_2[3], accuracy_3[3], accuracy_4[3]), 4),
+  MAPE = round(c(accuracy_auto[5], accuracy_1[5], accuracy_2[5], accuracy_3[5], accuracy_4[5]), 2)
+)
+
+kable(tabla_accuracy_GLTR, 
+      caption = "Métricas de Precisión - Modelos ARIMA GLTR",
+      align = c("l", "c", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+La tabla compara las métricas de precisión para los cinco modelos los cuales presentan un rendimiento muy similar, con MAPE alrededor de 0.9% y diferencias pequeñas en los errores absolutos.
+Las diferencias en MAE son mínimas $(0.9817$ vs $0.983x)$, aun así, el Auto-ARIMA obtiene los mejores valores de RMSE y MAE, además de un sesgo casi nulo, mientras que los demás muestran un sesgo positivo más evidente.
+Esto indica que, aunque todos los modelos ajustan bien, el Auto-ARIMA se considera el modelo con mejor capacidad de ajuste, aunque la ventaja sobre los modelos manuales es moderada.
+
+En consecuencia, el auto.arima no solo es el más parsimonioso dentro de su complejidad, sino también el que captura mejor la estructura de la serie.
+Por ello se selecciona como el modelo principal para los diagnósticos de residuos para confirmar su validez final.
+
+# Selección del Modelo
+
+Para evaluar si el modelo ARIMA seleccionado cumple con los supuestos fundamentales, se analizan los gráficos de diagnóstico de residuos.
+
+## Diagnóstico de Residuales
+
+```{r residuales-tiempo, fig.height=7}
+residuos_auto <- residuals(Modelo_GLTR_auto)
+
+residuos_df <- data.frame(
+  tiempo = time(residuos_auto),
+  residuales = as.numeric(residuos_auto)
+)
+
+sd_resid <- sd(residuos_df$residuales, na.rm = TRUE)
+residuos_df$extremo <- abs(residuos_df$residuales) > 2 * sd_resid
+residuos_df$muy_extremo <- abs(residuos_df$residuales) > 3 * sd_resid
+
+ggplot(residuos_df, aes(x = tiempo, y = residuales)) +
+  geom_ribbon(
+    aes(ymin = -1.96 * sd_resid, 
+        ymax = 1.96 * sd_resid),
+    fill = "#E8F4F8",
+    alpha = 0.3
+  ) +
+  geom_line(color = "#1E88E5", linewidth = 0.8) +
+  geom_hline(yintercept = 0, color = "#2E5A87", linetype = "solid", 
+             linewidth = 1.2, alpha = 0.8) +
+  geom_smooth(method = "loess", se = TRUE, color = "#957fef", 
+              fill = "#7161ef", alpha = 0.3, linewidth = 0.8) +
+  geom_point(
+    data = residuos_df[residuos_df$extremo, ],
+    aes(x = tiempo, y = residuales),
+    color = "blue",
+    size = 2,
+    alpha = 0.7
+  ) +
+  geom_text(
+    data = residuos_df[residuos_df$muy_extremo, ],
+    aes(x = tiempo, y = residuales, label = round(residuales, 2)),
+    vjust = -1,
+    size = 3,
+    color = "#8187dc"
+  ) +
+  labs(
+    title = "Análisis de Residuales - Modelo Auto ARIMA",
+    subtitle = paste("Especificación del modelo: ARIMA(", 
+                     paste(arimaorder(Modelo_GLTR_auto), collapse = ","), ")"),
+    x = "Período Temporal",
+    y = "Valor de los Residuales",
+    caption = "Fuente: Análisis propio | Línea naranja: tendencia LOESS"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title = element_text(
+      face = "bold", 
+      size = 16,
+      color = "#1E3A5F",
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 12,
+      color = "#4A4A4A",
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    axis.title = element_text(
+      face = "bold",
+      size = 11,
+      color = "#333333"
+    ),
+    panel.grid.major = element_line(
+      color = "#F0F0F0",
+      linewidth = 0.5
+    ),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "#FAFAFA", color = NA),
+    plot.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(20, 30, 20, 30)
+  )
+```
+
+Los residuos se comportan adecuadamente: oscilan alrededor de cero sin tendencia, lo que indica ausencia de sesgo, y no muestran patrones evidentes, por lo que el modelo captura bien la estructura temporal principal.
+Sin embargo, en conjunto, se comportan en general como ruido blanco alrededor de cero, lo que respalda la adecuación del modelo.
+No obstante, la presencia de algunos outliers sugiere episodios de volatilidad no explicados por el ARIMA, algo esperable en datos financieros.
+
+## Histograma de Residuales
+
+```{r histograma-residuales, fig.height=7}
+residuales_valores <- as.numeric(residuos_auto)
+residuales_df <- data.frame(Residuales = residuales_valores)
+
+media_res <- mean(residuales_valores)
+sd_res <- sd(residuales_valores)
+n_res <- length(residuales_valores)
+
+rango_residuales <- range(residuales_valores)
+x_lim_inf <- rango_residuales[1] - 0.1 * diff(rango_residuales)
+x_lim_sup <- rango_residuales[2] + 0.1 * diff(rango_residuales)
+
+dens <- density(residuales_valores)
+max_densidad <- max(dens$y)
+y_lim_sup <- max_densidad * 1.15
+
+ggplot(residuales_df, aes(x = Residuales)) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 30,
+    fill = "#2E5A87",
+    alpha = 0.7,
+    color = "white",
+    size = 0.3
+  ) +
+  geom_density(
+    color = "#efd9ce",
+    linewidth = 1.2,
+    adjust = 1.2
+  ) +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = media_res, sd = sd_res),
+    color = "#009E73",
+    linewidth = 1.2,
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    xintercept = media_res,
+    color = "#333333",
+    linetype = "solid",
+    linewidth = 1,
+    alpha = 0.8
+  ) +
+  geom_vline(
+    xintercept = c(media_res - sd_res, media_res + sd_res),
+    color = "#666666",
+    linetype = "dashed",
+    linewidth = 0.6,
+    alpha = 0.6
+  ) +
+  annotate(
+    "text",
+    x = media_res,
+    y = y_lim_sup * 0.95,
+    label = paste("Media =", round(media_res, 3)),
+    hjust = ifelse(media_res > mean(c(x_lim_inf, x_lim_sup)), 1.1, -0.1),
+    size = 3.5,
+    color = "#333333",
+    fontface = "bold"
+  ) +
+  coord_cartesian(
+    xlim = c(x_lim_inf, x_lim_sup),
+    ylim = c(0, y_lim_sup)
+  ) +
+  labs(
+    title = "Distribución de Residuales - Modelo Auto ARIMA",
+    subtitle = paste(
+      "Media =", round(media_res, 4), 
+      "| SD =", round(sd_res, 4),
+      "| n =", format(n_res, big.mark = ",")
+    ),
+    x = "Valor de los Residuales",
+    y = "Densidad",
+    caption = "Líneas: Media (negra sólida), ±1 SD (gris discontinua), ±2 SD (gris punteada)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(
+      face = "bold", 
+      size = 16,
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 12,
+      color = "gray40",
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    axis.title = element_text(face = "bold", size = 11),
+    panel.grid.major = element_line(color = "gray90", size = 0.3),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white", color = NA)
+  )
+```
+
+En segundo lugar, se analiza la distribución de los residuos del modelo Auto‑ARIMA mediante un histograma con curvas de densidad ajustada y normal teórica.
+Este gráfico permite evaluar si los errores se concentran alrededor de cero y si su forma es aproximadamente simétrica y en campana, como se espera bajo el supuesto de normalidad residual
+
+## ACF de Residuales
+
+```{r acf-residuales}
+acf_residuos <- acf(residuos_auto, lag.max = 40, plot = FALSE)
+
+df_acf_residuos <- data.frame(
+  Lag = acf_residuos$lag[-1], 
+  ACF = acf_residuos$acf[-1]
+)
+
+n_residuos <- length(residuos_auto)
+limite_sup_residuos <- qnorm(0.975) / sqrt(n_residuos)
+limite_inf_residuos <- -limite_sup_residuos
+
+ggplot(df_acf_residuos, aes(x = Lag, y = ACF)) +
+  annotate("rect", 
+           xmin = -Inf, xmax = Inf, 
+           ymin = limite_inf_residuos, ymax = limite_sup_residuos,
+           fill = "#E63946", 
+           alpha = 0.05) +
+  geom_segment(aes(xend = Lag, yend = 0), 
+               color = "#2E86AB", 
+               linewidth = 0.9, 
+               lineend = "round") +
+  geom_point(color = "#2E86AB", 
+             fill = "#2E86AB", 
+             size = 2.5, 
+             shape = 21, 
+             stroke = 0.5) +
+  geom_hline(yintercept = c(limite_sup_residuos, limite_inf_residuos), 
+             linetype = "dashed", 
+             color = "#E63946", 
+             linewidth = 0.6) +
+  geom_hline(yintercept = 0, 
+             color = "#4A4A4A", 
+             linewidth = 0.4) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5),
+                     expand = expansion(mult = c(0.02, 0.02))) +
+  scale_y_continuous(limits = c(-0.35, 0.35),
+                     breaks = seq(-0.3, 0.3, by = 0.1),
+                     expand = expansion(mult = c(0, 0.05))) +
+  labs(
+    title = "FUNCIÓN DE AUTOCORRELACIÓN DE RESIDUALES",
+    subtitle = "Modelo Auto ARIMA | Análisis de independencia de residuales",
+    x = "Rezago (Lag)",
+    y = "Coeficiente de Autocorrelación (ACF)",
+    caption = paste0(
+      "Intervalo de confianza del 95% (±", 
+      round(limite_sup_residuos, 3), 
+      ") | n = ", 
+      format(n_residuos, big.mark = ",")
+    )
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.background = element_rect(fill = "#F8F9FA", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.margin = margin(20, 25, 20, 25),
+    plot.title = element_text(
+      face = "bold", 
+      size = 16, 
+      color = "#212529",
+      hjust = 0.5,
+      margin = margin(b = 8)
+    ),
+    panel.grid.major = element_line(
+      color = "#E9ECEF", 
+      linewidth = 0.3
+    ),
+    panel.grid.minor = element_blank()
+  )
+```
+
+Al examinar la ACF de los residuos, se observa un comportamiento claramente consistente con lo esperado para un buen modelo ARIMA.
+La mayoría de los coeficientes se mantienen dentro de las bandas de confianza y no emerge ningún patrón definido que sugiera dependencia temporal persistente.
+Los pocos rezagos que se aproximan a los límites lo hacen de manera aislada y con poca magnitud.
+
+## Prueba de Ljung-Box
+
+```{r ljung-box}
+ljung_box_result <- Box.test(residuals(Modelo_GLTR_auto), lag = 10, type = "Ljung-Box")
+
+tabla_ljung_box <- data.frame(
+  Estadístico = c("X-squared", "Grados de libertad", "P-valor", "Decisión"),
+  Valor = c(round(ljung_box_result$statistic, 4),
+            ljung_box_result$parameter,
+            round(ljung_box_result$p.value, 4),
+            ifelse(ljung_box_result$p.value > 0.05, 
+                   "No rechazar H₀: Residuos = Ruido Blanco ✓", 
+                   "Rechazar H₀: Residuos ≠ Ruido Blanco ✗"))
+)
+
+kable(tabla_ljung_box, 
+      caption = "Prueba de Ljung-Box - Validación de Residuos",
+      align = c("l", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center") %>%
+  row_spec(4, bold = TRUE, background = "#d5f4e6")
+```
+
+Finalmente, se aplicó la prueba de Ljung‑Box para evaluar la presencia de autocorrelación conjunta en los residuos.
+El estadístico de contraste fue $X2 =4.5822$ con 10 grados de libertad y un valor p de $0.9173$.
+Dado que este valor p es muy superior al nivel de significancia habitual $(α =0.05)$, no se rechaza la hipótesis nula de que los residuos se comportan como ruido blanco.
+En conjunto, los distintos análisis confirman que el modelo ARIMA seleccionado es adecuado, los residuos se mantienen alrededor de cero sin patrones sistemáticos, muestran una distribución razonablemente simétrica y su ACF indica comportamiento de ruido blanco.
+Aunque aparecen algunos outliers típicos de la volatilidad financiera, estos no comprometen el ajuste general, adicionalmente la prueba de Ljung-Box respalda esta conclusión al no evidenciar autocorrelación conjunta $(p = 0.9173)$.
+En síntesis, el modelo cumple razonablemente con los supuestos fundamentales y puede considerarse estadísticamente consistente para fines de pronóstico.
+
+# Pronóstico y Evaluación
+
+## Generación del Pronóstico
+
+```{r pronostico, fig.height=7}
+h_value <- length(Prueba_GLTR)
+pronostico_GLTR <- Modelo_GLTR_auto %>% 
+  forecast(h = h_value, level = 0.95)
+
+pronostico_GLTR %>% 
+  autoplot(include = 100) +
+  labs(
+    title = "Pronóstico del Precio de Cierre GLTR",
+    subtitle = paste0("Modelo: ", Modelo_GLTR_auto, " | Intervalo de Confianza: 95%"),
+    x = "Fecha",
+    y = "Precio de Cierre (USD)",
+    caption = paste0("Horizonte de pronóstico: ", h_value, " observaciones")
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(
+      face = "bold",
+      size = 16,
+      hjust = 0.5,
+      margin = margin(b = 5),
+      color = "#2C3E50"
+    ),
+    plot.subtitle = element_text(
+      size = 11,
+      hjust = 0.5,
+      margin = margin(b = 15),
+      color = "#7F8C8D"
+    ),
+    axis.title.x = element_text(
+      face = "bold",
+      size = 12,
+      margin = margin(t = 10),
+      color = "#34495E"
+    ),
+    axis.title.y = element_text(
+      face = "bold",
+      size = 12,
+      margin = margin(r = 10),
+      color = "#34495E"
+    ),
+    panel.grid.major = element_line(color = "#ECF0F1", linewidth = 0.5),
+    panel.grid.minor = element_line(color = "#F8F9F9", linewidth = 0.3),
+    legend.position = "bottom",
+    plot.margin = margin(20, 20, 15, 20)
+  ) +
+  scale_color_manual(
+    values = c("Data" = "#3498DB", "Forecast" = "#E74C3C"),
+    name = "Serie"
+  ) +
+  scale_fill_manual(
+    values = c("95%" = alpha("#E74C3C", 0.2)),
+    name = "Intervalo"
+  )
+```
+
+El gráfico muestra el pronóstico del precio de cierre de GLTR a partir del modelo ARIMA(2,1,2) con drift para un horizonte de 15 observaciones.
+El modelo genera una proyección que mantiene el nivel actual del precio con ligeras variaciones y con una incertidumbre creciente en el tiempo, lo cual es coherente con la naturaleza estocástica de una serie financiera: a medida que se pronostican pasos más lejanos, el rango de valores posibles se amplía.
+
+## Tabla Comparativa
+
+```{r t-comparativa}
+tabla_comparativa_GLTR <- data.frame(
+  Día = 1:length(Prueba_GLTR),
+  Fecha = format(index(Prueba_GLTR), "%Y-%m-%d"),
+  Real = round(as.numeric(Prueba_GLTR), 2),
+  Pronóstico = round(as.numeric(pronostico_GLTR$mean), 2),
+  Error_USD = round(as.numeric(Prueba_GLTR) - as.numeric(pronostico_GLTR$mean), 2),
+  Error_Pct = round(((as.numeric(Prueba_GLTR) - as.numeric(pronostico_GLTR$mean)) / 
+                       as.numeric(Prueba_GLTR)) * 100, 3)
+)
+
+kable(tabla_comparativa_GLTR[1:5, ], 
+      caption = "Comparación: Valores Reales vs Pronósticos GLTR",
+      align = c("c", "c", "c", "c", "c", "c")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+## Gráfico: Predicho vs Real
+
+```{r predicho-vs-real}
+fechas_pronostico_GLTR <- index(Prueba_GLTR)
+
+ggplot() +
+  geom_line(data = data.frame(Fecha = index(Entrenamiento_GLTR), 
+                              Precio = as.numeric(Entrenamiento_GLTR)),
+            aes(x = Fecha, y = Precio), color = 'black', alpha = 0.6) +
+  geom_line(data = data.frame(Fecha = index(Prueba_GLTR), 
+                              Precio = as.numeric(Prueba_GLTR)),
+            aes(x = Fecha, y = Precio), color = gltr_pal$negative, linewidth = 1.2) +
+  geom_line(data = data.frame(Fecha = fechas_pronostico_GLTR,
+                              Precio = as.numeric(pronostico_GLTR$mean)),
+            aes(x = Fecha, y = Precio), color = gltr_pal$tertiary, linewidth = 1) +
+  labs(
+    title = "GLTR: Pronóstico vs Real",
+    subtitle = paste0("Negro=Entrenamiento | Rojo=Real | Azul=Pronóstico ", Modelo_GLTR_auto),
+    x = "Fecha", 
+    y = "Precio USD"
+  ) +
+  theme_minimal()
+```
+
+# Métricas de Desempeño
+
+```{r metricas-finales}
+MAE_GLTR <- mean(abs(tabla_comparativa_GLTR$Error_USD))
+RMSE_GLTR <- sqrt(mean(tabla_comparativa_GLTR$Error_USD^2))
+MAPE_GLTR <- mean(abs(tabla_comparativa_GLTR$Error_Pct))
+
+tabla_metricas_finales <- data.frame(
+  Métrica = c("MAE (Error Absoluto Medio)", 
+              "RMSE (Raíz del Error Cuadrático Medio)", 
+              "MAPE (Error Porcentual Absoluto Medio)"),
+  Valor = c(round(MAE_GLTR, 4), 
+            round(RMSE_GLTR, 4), 
+            paste0(round(MAPE_GLTR, 2), "%")),
+  Interpretación = c("Promedio de errores en USD", 
+                     "Penaliza errores grandes", 
+                     "Error promedio en porcentaje")
+)
+
+kable(tabla_metricas_finales, 
+      caption = "Métricas de Desempeño del Pronóstico - Datos de Prueba",
+      align = c("l", "c", "l")) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+# Conclusiones
+
+## Hallazgos Principales
+
+El análisis ARIMA realizado permite caracterizar la serie temporal mediante la identificación de su estructura de autocorrelación, estacionariedad y componentes de tendencia y estacionalidad.
+Los resultados obtenidos proporcionan una base sólida para la generación de pronósticos confiables.
+
+::: {.alert .alert-info}
+📌 **Síntesis de Hallazgos:**
+
+-   La serie presenta componentes de tendencia y estacionalidad claros
+-   El modelo seleccionado captura adecuadamente la estructura temporal
+-   Los pronósticos generados mantienen intervalos de confianza razonables
+-   La validación de residuos indica un buen ajuste del modelo
+:::
+
+## Implicaciones y Recomendaciones
+
+Los pronósticos obtenidos pueden utilizarse para:
+
+-   Planificación estratégica a corto y mediano plazo
+-   Asignación eficiente de recursos
+-   Identificación de desviaciones significativas
+-   Apoyo en la toma de decisiones basada en evidencia
+
+::: {.alert .alert-warning}
+⚠️ **Limitaciones Metodológicas:**
+
+-   Los pronósticos pierden precisión en horizontes muy lejanos
+-   Cambios estructurales no capturados afectarían la predicción
+-   La calidad de los datos es fundamental para la confiabilidad
+-   Validación con datos nuevos es recomendada
+:::
+
+# Referencias Bibliográficas
+
+Box, G. E. P., Jenkins, G. M., Reinsel, G. C., & Ljung, G. M.
+(2016).
+Time series analysis: Forecasting and control (5th ed.).
+Wiley.
+Brockwell, P. J., & Davis, R. A.
+(2016).
+Introduction to time series and forecasting (3rd ed.).
+Springer.
+DataCamp.
+(2024).
+Time series analysis in Python.
+<https://www.datacamp.com/tutorial/time-series-analysis-python> finance.yahoo.com.
+(2025).
+abrdn Physical Precious Metals Basket Shares ETF (GLTR) – Performance.
+<https://finance.yahoo.com/quote/GLTR/performance/> gainesvillecoins.com.
+(2025).
+Gold \$3269, platinum surges 47%: Bullion brief July 2025.
+<https://gainesvillecoins.com/blog/gold-3269-platinum-surges-47-bullion-brief-july-2025> goldavenue.com.
+(2025).
+Gold price forecast 2025: Will precious metals prices go up.
+<https://www.goldavenue.com/gold-price-forecast-2025> Hyndman, R. J., & Athanasopoulos, G.
+(2021).
+Forecasting: Principles and practice (3rd ed.).
+OTexts.
+<https://otexts.com/fpp3/> NumXL.
+(2024).
+Box-Jenkins methodology.
+<https://www.numxl.com/support/docs/reference_manual/arima/box-jenkins-methodology> repec.org.
+(n.d.).
+Geopolitical shocks and commodity market dynamics – NBER Working Papers.
+<https://repec.org/> sciencedirect.com.
+(2024).
+Precious metals and currency markets during the Russia-Ukraine war.
+<https://www.sciencedirect.com/science/article/pii/S1544612324000085> seekingalpha.com.
+(2025).
+Precious metals in 2025: GLTR for a diversified approach.
+<https://seekingalpha.com/article/4747357-precious-metals-in-2025-gltr-for-a-diversified-approach> Shumway, R. H., & Stoffer, D. S.
+(2017).
+Time series analysis and its applications: With R examples (4th ed.).
+Springer.
+stockanalysis.com.
+(2025).
+abrdn Physical Precious Metals Basket Shares ETF (GLTR).
+<https://stockanalysis.com/etf/gltr/> tradingview.com.
+(2025).
+Análisis ETF GLTR – TradingView.
+<https://es.tradingview.com/symbols/BMV-GLTR/analysis/> Wikipedia.
+(2014).
+Ljung-Box test.
+<https://en.wikipedia.org/wiki/Ljung%E2%80%93Box_test> worldbank.org.
+(2022).
+Commodity markets outlook, April 2022.
+<https://www.worldbank.org/en/research/commodity-markets>
+
+```{=html}
+<div class="footer">
+<strong>Universidad del Valle</strong> | <em>Facultad de Ingeniería</em> | Gestión de Datos<br>
+Profesor: Orlando Joaqui Barandica | Series de Tiempo y Pronósticos | 2024-2025<br>
+<strong>Documento generado:</strong> `r format(Sys.Date(), '%d de %B de %Y')`
+</div>
+```
