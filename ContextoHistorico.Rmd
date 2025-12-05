@@ -6,7 +6,6 @@ output: html_document
 ---
 
 ```{r}
-# Cargar librerías adicionales para visualización
 library(quantmod)
 library(tidyverse)
 library(ggplot2)
@@ -21,31 +20,28 @@ library(tseries)
 library(forecast)
 library(fpp2)
 
-# Definir paleta de colores profesional
 color_palette <- c(
-  "#1E3A8A",  # Azul oscuro principal
-  "#DC2626",  # Rojo para eventos críticos
-  "#059669",  # Verde para crecimiento
-  "#D97706",  # Ámbar para metales
-  "#7C3AED",  # Púrpura para comparaciones
-  "#0EA5E9"   # Azul claro para fondos
+  "#1E3A8A",  
+  "#DC2626",  
+  "#059669",  
+  "#D97706",  
+  "#7C3AED",  
+  "#0EA5E9"   
 )
 ```
 
 ```{r grafico dona}
-# Cargar librerías necesarias
+
 library(plotly)
 library(dplyr)
 library(RColorBrewer)
 
-# Datos de composición del ETF
 composition_data <- data.frame(
   Metal = c("Oro Físico", "Plata Física", "Paladio Físico", "Platino Físico"),
   Porcentaje = c(61.77, 30.72, 4.26, 3.26),
   Valor_Mercado = c("1B", "702M", "97M", "74M")
 )
 
-# Añadir etiquetas detalladas
 composition_data <- composition_data %>%
   mutate(
     Etiqueta = paste0(
@@ -53,9 +49,7 @@ composition_data <- composition_data %>%
       Porcentaje, "%<br>",
       "(", Valor_Mercado, ")"
     ),
-    # Colores metálicos realistas
-    Color = c("goldenrod", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
-    # Texto para hover
+    Color = c("#D4AF37", "#C0C0C0", "#B8B8B8", "#E5E4E2"),
     HoverText = paste0(
       "<b>", Metal, "</b><br>",
       "Composición: <b>", Porcentaje, "%</b><br>",
@@ -70,31 +64,29 @@ composition_data <- composition_data %>%
     )
   )
 
-# Crear donut chart interactivo
 donut_interactive <- plot_ly(
   composition_data,
   labels = ~Metal,
   values = ~Porcentaje,
   type = 'pie',
-  hole = 0.5,  # Esto crea el efecto donut
+  hole = 0.5,
   textposition = 'outside',
   textinfo = 'label+percent',
   hoverinfo = 'text',
   text = ~HoverText,
   marker = list(
     colors = ~Color,
-    line = list(color = '#FFFFFF', width = 2)
+    line = list(color = '#FFFFFF', width = 3)
   ),
-  # Añadir texto en el centro
   domain = list(x = c(0, 1), y = c(0, 1))
 ) %>%
   layout(
     title = list(
-      text = "<b>Composición del ETF GLTR<br>Aberdeen Standard Physical<br>Precious Metals Basket Shares</b>",
+      text = "<b>Composición del ETF GLTR</b><br><span style='font-size:14px;'>Aberdeen Standard Physical Precious Metals Basket Shares</span>",
       font = list(
-        size = 20,
-        color = "#1E3A8A",
-        family = "Arial, sans-serif"
+        size = 18,
+        color = "#001A5C",
+        family = "Roboto, sans-serif"
       ),
       x = 0.5,
       y = 0.95
@@ -104,29 +96,47 @@ donut_interactive <- plot_ly(
       orientation = "v",
       x = 1.05,
       y = 0.5,
-      font = list(size = 12),
+      bgcolor = "#F5F7FA",
+      bordercolor = "#D1D8E0",
+      borderwidth = 1,
+      font = list(
+        size = 11,
+        family = "Inter, sans-serif",
+        color = "#2E3842"
+      ),
       title = list(
-        text = "<b>Metales</b>",
-        font = list(size = 14)
+        text = "<b>Metales Preciosos</b>",
+        font = list(
+          size = 12,
+          family = "Roboto, sans-serif",
+          color = "#001A5C"
+        )
       )
     ),
-    # Añadir anotación en el centro del donut
     annotations = list(
       list(
-        text = "<b>Total AUM</b><br>~$1.9B",
+        text = "<b style='font-size:16px;color:#001A5C;'>Total AUM</b><br><span style='font-size:14px;color:#0056B3;'>~$1.9B</span>",
         x = 0.5,
         y = 0.5,
         font = list(
-          size = 16,
-          color = "#1E3A8A",
-          family = "Arial, sans-serif"
+          family = "Roboto, sans-serif"
         ),
         showarrow = FALSE
       )
     ),
-    paper_bgcolor = "#F8F9FA",
-    plot_bgcolor = "#F8F9FA",
-    margin = list(t = 100, b = 80, l = 20, r = 150)
+    paper_bgcolor = "#FFFFFF",
+    plot_bgcolor = "#FFFFFF",
+    margin = list(t = 120, b = 80, l = 20, r = 180),
+    font = list(
+      family = "Inter, sans-serif",
+      size = 11,
+      color = "#2E3842"
+    )
+  ) %>%
+  config(
+    displayModeBar = TRUE,
+    displaylogo = FALSE,
+    modeBarButtonsToRemove = c('pan2d', 'lasso2d', 'select2d')
   )
 
 # Mostrar donut chart
@@ -192,7 +202,6 @@ ficha_tecnica <- data.frame(
   )
 )
 
-# Formatear la tabla profesional
 ficha_tecnica %>%
   kable(align = "lcl", 
         caption = "Tabla 1. FICHA TÉCNICA DEL ETF GLTR - METALES PRECIOSOS") %>%
@@ -204,12 +213,11 @@ ficha_tecnica %>%
   column_spec(2, width = "35%") %>%
   column_spec(3, width = "40%", 
               color = "#666666") %>%
-  # Resaltar valores importantes
   column_spec(2,
               color = ifelse(
-                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  # Verde para rendimientos positivos
+                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  
                 ifelse(
-                  grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    # Azul para valores monetarios
+                  grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    
                   "black"
                 )
               ),
@@ -227,29 +235,134 @@ library(quantmod)
 library(dplyr)
 library(zoo)
 
-# Descargar datos
+
 GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2010-01-01")
 
-# Preparar datos
+
 GLTR_df <- data.frame(
   Fecha = index(GLTR),
   Precio = as.numeric(Cl(GLTR))
 )
 
-# Gráfico interactivo
 plot_ly(GLTR_df, x = ~Fecha, y = ~Precio, type = "scatter", mode = "lines",
-        line = list(color = "#1E3A8A", width = 2),
+        line = list(color = "#0056B3", width = 2.5),
         hoverinfo = "text",
-        text = ~paste("Fecha:", Fecha, "<br>Precio: $", round(Precio, 2))) %>%
+        text = ~paste("<b>Fecha:</b>", format(Fecha, "%d/%m/%Y"), 
+                      "<br><b>Precio:</b> $", round(Precio, 2)),
+        name = "Precio de Cierre") %>%
   layout(
-    title = "<b>ETF GLTR - Serie Histórica (2010-2025)</b>",
-    xaxis = list(title = "Fecha", rangeslider = list(visible = TRUE)),
-    yaxis = list(title = "Precio (USD)", tickformat = "$,.2f"),
-    hovermode = "x unified"
+    title = list(
+      text = "<b>ETF GLTR - Serie Histórica (2010-2025)</b><br><span style='font-size:13px;color:#5D6D7E;'>Aberdeen Standard Physical Precious Metals Basket Shares</span>",
+      font = list(
+        size = 18,
+        color = "#001A5C",
+        family = "Roboto, sans-serif"
+      ),
+      x = 0.5,
+      xanchor = "center"
+    ),
+    xaxis = list(
+      title = list(
+        text = "<b>Fecha</b>",
+        font = list(
+          size = 12,
+          color = "#0056B3",
+          family = "Roboto, sans-serif"
+        )
+      ),
+      tickfont = list(
+        size = 10,
+        color = "#5D6D7E",
+        family = "Inter, sans-serif"
+      ),
+      showgrid = TRUE,
+      gridcolor = "#E8ECF1",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#0056B3",
+      linewidth = 1,
+      rangeslider = list(
+        visible = TRUE,
+        bgcolor = "#F5F7FA",
+        bordercolor = "#D1D8E0",
+        borderwidth = 1,
+        thickness = 0.08
+      )
+    ),
+    yaxis = list(
+      title = list(
+        text = "<b>Precio (USD)</b>",
+        font = list(
+          size = 12,
+          color = "#0056B3",
+          family = "Roboto, sans-serif"
+        )
+      ),
+      tickfont = list(
+        size = 10,
+        color = "#5D6D7E",
+        family = "Inter, sans-serif"
+      ),
+      tickformat = "$,.2f",
+      showgrid = TRUE,
+      gridcolor = "#E8ECF1",
+      gridwidth = 0.5,
+      showline = TRUE,
+      linecolor = "#0056B3",
+      linewidth = 1,
+      zeroline = FALSE
+    ),
+    hovermode = "x unified",
+    hoverlabel = list(
+      bgcolor = "#FFFFFF",
+      bordercolor = "#0056B3",
+      font = list(
+        family = "Inter, sans-serif",
+        size = 11,
+        color = "#2E3842"
+      )
+    ),
+    paper_bgcolor = "#FFFFFF",
+    plot_bgcolor = "#FFFFFF",
+    font = list(
+      family = "Inter, sans-serif",
+      size = 11,
+      color = "#2E3842"
+    ),
+    margin = list(t = 100, b = 100, l = 80, r = 50),
+    legend = list(
+      orientation = "h",
+      x = 0.5,
+      xanchor = "center",
+      y = -0.2,
+      bgcolor = "#F5F7FA",
+      bordercolor = "#D1D8E0",
+      borderwidth = 1,
+      font = list(
+        size = 11,
+        family = "Inter, sans-serif",
+        color = "#2E3842"
+      )
+    )
+  ) %>%
+  config(
+    displayModeBar = TRUE,
+    displaylogo = FALSE,
+    modeBarButtonsToRemove = c('lasso2d', 'select2d'),
+    toImageButtonOptions = list(
+      format = "png",
+      filename = "GLTR_Serie_Historica",
+      width = 1200,
+      height = 600
+    )
   )
 ```
 ```{r 2010-2012}
-# Plata 2010–2012 (proxy: SLV)
+
+library(quantmod)
+library(ggplot2)
+library(plotly)
+
 silver_10_12 <- getSymbols("SLV", src = "yahoo", auto.assign = FALSE,
                            from = "2010-01-01", to = "2012-12-31")
 silver_10_12_close <- Cl(silver_10_12)
@@ -260,13 +373,136 @@ silver_10_12_df <- data.frame(
 )
 
 g_plata_10_12 <- ggplot(silver_10_12_df, aes(x = fecha, y = precio)) +
-  geom_line(color = "gray40", linewidth = 0.8) +
-  labs(title = "Precio de la plata 2010–2012 (proxy: SLV)",
-       subtitle = "Rally post-crisis y máximos asociados a QE e inflación esperada",
-       x = "Fecha", y = "Precio de cierre (USD)") +
-  theme_minimal()
+  geom_line(color = "#A6ACB5", linewidth = 1.2) +  
+  labs(
+    title = "Precio de la plata 2010–2012 (proxy: SLV)",
+    subtitle = "Rally post-crisis y máximos asociados a QE e inflación esperada",
+    x = "Fecha", 
+    y = "Precio de cierre (USD)"
+  ) +
+  theme_minimal() +
+  theme(
+    
+    plot.title = element_text(
+      family = 'Roboto',
+      color = '#001A5C',
+      size = 18,
+      face = "bold",
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    
+    
+    plot.subtitle = element_text(
+      family = 'Inter',
+      color = '#5D6D7E',
+      size = 14,
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    
+    
+    axis.title = element_text(
+      family = 'Roboto',
+      color = '#0056B3',
+      size = 13,
+      face = "bold"
+    ),
+    
+    
+    axis.text = element_text(
+      family = 'Inter',
+      color = '#5D6D7E',
+      size = 11
+    ),
+    
+    
+    panel.grid.major = element_line(
+      color = '#E8ECF1',
+      linewidth = 0.5
+    ),
+    panel.grid.minor = element_blank()
+  )
 
-g_plata_10_12_int <- ggplotly(g_plata_10_12)
+
+g_plata_10_12_int <- ggplotly(g_plata_10_12) %>%
+  layout(
+    
+    title = list(
+      text = "<b>Precio de la plata 2010–2012 (proxy: SLV)</b><br><span style='font-size:14px;color:#5D6D7E'>Rally post-crisis y máximos asociados a QE e inflación esperada</span>",
+      font = list(
+        family = 'Roboto, Arial',
+        size = 18,
+        color = '#001A5C'
+      ),
+      y = 0.95,
+      x = 0.5,
+      xanchor = 'center',
+      yanchor = 'top'
+    ),
+    
+    
+    xaxis = list(
+      title = list(
+        text = "<b>Fecha</b>",
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E'
+      ),
+      gridcolor = '#E8ECF1',
+      type = 'date',
+      tickformat = '%b %Y'
+    ),
+    
+    
+    yaxis = list(
+      title = list(
+        text = "<b>Precio de cierre (USD)</b>",
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E'
+      ),
+      gridcolor = '#E8ECF1',
+      tickformat = '$.2f'
+    ),
+    
+    
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F5F7FA',
+    
+    
+    margin = list(t = 120, b = 80, l = 80, r = 40),
+    
+    
+    hovermode = 'x unified',
+    hoverlabel = list(
+      bgcolor = 'white',
+      bordercolor = '#0056B3',
+      font = list(
+        family = 'Inter, Arial',
+        size = 12,
+        color = '#2E3842'
+      )
+    )
+  )
+
+
+g_plata_10_12_int$x$layout$title <- NULL
+
 g_plata_10_12_int
 
 ```
@@ -278,34 +514,35 @@ library(plotly)
 library(quantmod)
 library(dplyr)
 
-# Descargar datos si no los tienes
+
 GLTR <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2020-01-01", to = "2020-12-31")
 
-# Preparar datos para 2020
+
 datos_2020 <- data.frame(
   Fecha = index(GLTR),
   Precio = as.numeric(Cl(GLTR))
 )
 
-# Crear gráfico interactivo
+
 plot_ly(datos_2020, x = ~Fecha) %>%
   add_trace(y = ~Precio, type = 'scatter', mode = 'lines',
-            line = list(color = '#1E3A8A', width = 3),
+            line = list(color = '#001A5C', width = 3),  
             name = 'Precio GLTR',
             hoverinfo = 'text',
             text = ~paste('<b>Fecha:</b>', Fecha, '<br><b>Precio:</b> $', round(Precio, 2))) %>%
   
-  # Eventos clave
+  
   add_trace(x = as.Date('2020-03-16'), y = ~Precio[Fecha == as.Date('2020-03-16')],
             type = 'scatter', mode = 'markers',
-            marker = list(color = '#DC2626', size = 12, symbol = 'circle'),
+            marker = list(color = '#E74C3C', size = 12, symbol = 'circle'),  
             name = 'Colapso mercados',
             hoverinfo = 'text',
             text = '<b>16 Mar 2020:</b> Colapso de mercados globales<br>Fed anuncia estímulos de emergencia') %>%
   
+  
   add_trace(x = as.Date('2020-08-07'), y = ~Precio[Fecha == as.Date('2020-08-07')],
             type = 'scatter', mode = 'markers',
-            marker = list(color = '#059669', size = 12, symbol = 'diamond'),
+            marker = list(color = '#D4AF37', size = 12, symbol = 'diamond'),  
             name = 'Récord oro',
             hoverinfo = 'text',
             text = '<b>07 Ago 2020:</b> Oro supera $2,000/oz<br>Rally histórico de metales preciosos') %>%
@@ -313,43 +550,50 @@ plot_ly(datos_2020, x = ~Fecha) %>%
   layout(
     title = list(
       text = '<b>Comportamiento del ETF GLTR durante la Pandemia COVID-19 (2020)</b>',
-      font = list(size = 18, color = '#1E3A8A', family = 'Arial'),
-      y = 0.98,  # Posición vertical del título
-      x = 0.5,   # Posición horizontal centrada
+      font = list(size = 18, color = '#001A5C', family = 'Roboto, Arial'),  
+      y = 0.98,
+      x = 0.5,
       xanchor = 'center',
       yanchor = 'top'
     ),
     xaxis = list(
       title = '<b>Fecha</b>',
+      titlefont = list(family = 'Roboto, Arial'),  
       type = 'date',
       tickformat = '%b %Y',
+      tickfont = list(family = 'Inter, Arial'),  
+      gridcolor = '#E8ECF1',  
       rangeslider = list(visible = TRUE)
     ),
     yaxis = list(
       title = '<b>Precio (USD)</b>',
+      titlefont = list(family = 'Roboto, Arial'),
       tickformat = '$.2f',
-      gridcolor = 'lightgray'
+      tickfont = list(family = 'Inter, Arial'), 
+      gridcolor = '#E8ECF1'  
     ),
     hovermode = 'x unified',
     plot_bgcolor = 'white',
-    paper_bgcolor = '#F8F9FA',
-    margin = list(t = 120, b = 80, l = 80, r = 40),  # Aumentado margen superior
+    paper_bgcolor = '#F5F7FA',  
+    margin = list(t = 120, b = 80, l = 80, r = 40),
     showlegend = TRUE,
     legend = list(
       orientation = 'h',
       x = 0.5,
       xanchor = 'center',
       y = -0.2,
-      yanchor = 'top'
+      yanchor = 'top',
+      font = list(family = 'Inter, Arial')  
     )
   )
 ```
+
 ```{r oro 2022}
 library(quantmod)
 library(ggplot2)
 library(plotly)
 
-# Oro 2022 (proxy: GLD)
+
 gold_2022 <- getSymbols("GLD", src = "yahoo", auto.assign = FALSE,
                         from = "2022-01-01", to = "2022-12-31")
 gold_2022_close <- Cl(gold_2022)
@@ -359,14 +603,87 @@ gold_2022_df <- data.frame(
   precio = as.numeric(gold_2022_close)
 )
 
-g_oro_2022 <- ggplot(gold_2022_df, aes(x = fecha, y = precio)) +
-  geom_line(color = "goldenrod", linewidth = 0.8) +
-  labs(title = "Precio del oro en 2022 (proxy: GLD)",
-       subtitle = "Volatilidad por guerra en Ucrania e incremento de tasas",
-       x = "Fecha", y = "Precio de cierre (USD)") +
-  theme_minimal()
 
-g_oro_2022_int <- ggplotly(g_oro_2022)
+g_oro_2022 <- ggplot(gold_2022_df, aes(x = fecha, y = precio)) +
+  geom_line(color = "#D4AF37", linewidth = 1.2) +  
+  labs(
+    title = "Precio del oro en 2022 (proxy: GLD)",
+    subtitle = "Volatilidad por guerra en Ucrania e incremento de tasas",
+    x = "Fecha", 
+    y = "Precio de cierre (USD)"
+  ) +
+  theme_minimal() +
+  theme(
+    
+    plot.title = element_text(
+      family = 'Roboto',
+      color = '#001A5C',
+      size = 18,
+      face = "bold",
+      hjust = 0.5,
+      margin = margin(b = 10)
+    ),
+    
+    
+    plot.subtitle = element_text(
+      family = 'Inter',
+      color = '#5D6D7E',
+      size = 14,
+      hjust = 0.5,
+      margin = margin(b = 15)
+    ),
+    
+    
+    axis.title = element_text(
+      family = 'Roboto',
+      color = '#0056B3',
+      size = 13,
+      face = "bold"
+    ),
+    
+    
+    axis.text = element_text(
+      family = 'Inter',
+      color = '#5D6D7E',
+      size = 11
+    ),
+    
+    
+    panel.grid.major = element_line(
+      color = '#E8ECF1',
+      linewidth = 0.5
+    ),
+    panel.grid.minor = element_blank()
+  )
+
+
+g_oro_2022_int <- ggplotly(g_oro_2022) %>%
+  layout(
+    
+    plot_bgcolor = 'white',
+    paper_bgcolor = '#F5F7FA',
+    
+    
+    margin = list(t = 100, b = 80, l = 80, r = 40),
+    
+    
+    hovermode = 'x unified',
+    hoverlabel = list(
+      bgcolor = 'white',
+      bordercolor = '#0056B3',
+      font = list(
+        family = 'Inter, Arial',
+        size = 12,
+        color = '#2E3842'
+      )
+    )
+  )
+
+
+if (!is.null(g_oro_2022_int$x$layout$title)) {
+  g_oro_2022_int$x$layout$title <- NULL
+}
+
 g_oro_2022_int
 ```
 
@@ -378,11 +695,11 @@ library(quantmod)
 library(dplyr)
 library(tidyr)
 
-# Descargar datos para 2023 y 2024
+
 GLTR_2023 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01", to = "2023-12-31")
 GLTR_2024 <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2024-01-01", to = "2024-12-31")
 
-# Preparar datos para 2023
+
 datos_2023 <- data.frame(
   Fecha = index(GLTR_2023),
   Precio = as.numeric(Cl(GLTR_2023))
@@ -393,7 +710,6 @@ datos_2023 <- data.frame(
     Precio_Norm = Precio / first(Precio) * 100
   )
 
-# Preparar datos para 2024
 datos_2024 <- data.frame(
   Fecha = index(GLTR_2024),
   Precio = as.numeric(Cl(GLTR_2024))
@@ -404,17 +720,14 @@ datos_2024 <- data.frame(
     Precio_Norm = Precio / first(Precio) * 100
   )
 
-# Combinar datos
 datos_comparativos <- bind_rows(datos_2023, datos_2024)
 
-# Crear gráfico comparativo interactivo
 plot_ly(datos_comparativos, x = ~Dia) %>%
-  # Línea para 2023
   add_trace(data = subset(datos_comparativos, Año == "2023"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines',
-            line = list(color = '#DC2626', width = 3),
+            line = list(color = '#001A5C', width = 3),
             name = '2023',
             hoverinfo = 'text',
             text = ~paste('<b>2023 - Día', Dia, '</b><br>',
@@ -422,12 +735,12 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
                           'Precio: $', round(Precio, 2), '<br>',
                           'Normalizado:', round(Precio_Norm, 1))) %>%
   
-  # Línea para 2024
+  
   add_trace(data = subset(datos_comparativos, Año == "2024"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines',
-            line = list(color = '#059669', width = 3),
+            line = list(color = '#00A859', width = 3),  
             name = '2024',
             hoverinfo = 'text',
             text = ~paste('<b>2024 - Día', Dia, '</b><br>',
@@ -435,37 +748,78 @@ plot_ly(datos_comparativos, x = ~Dia) %>%
                           'Precio: $', round(Precio, 2), '<br>',
                           'Normalizado:', round(Precio_Norm, 1))) %>%
   
-  # Línea de referencia en 100
+  
   add_trace(x = c(0, max(datos_comparativos$Dia)),
             y = c(100, 100),
             type = 'scatter',
             mode = 'lines',
-            line = list(color = 'gray', width = 1, dash = 'dash'),
+            line = list(color = '#5D6D7E', width = 1, dash = 'dash'), 
             name = 'Línea base (100)',
             showlegend = FALSE) %>%
   
-  # Layout
   layout(
     title = list(
       text = '<b>Comparativo de Desempeño: ETF GLTR 2023 vs 2024</b>',
-      font = list(size = 22, color = '#1E3A8A')
+      font = list(
+        family = 'Roboto, Arial',
+        size = 22,
+        color = '#001A5C'  
+      )
     ),
     xaxis = list(
-      title = '<b>Días de negociación en el año</b>',
-      gridcolor = 'lightgray'
+      title = list(
+        text = '<b> </b>',
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'  
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E'  
+      ),
+      gridcolor = '#E8ECF1'  
     ),
     yaxis = list(
-      title = '<b>Precio Normalizado (Inicio = 100)</b>',
-      gridcolor = 'lightgray'
+      title = list(
+        text = '<b>Precio Normalizado (Inicio = 100)</b>',
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'  
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E'  
+      ),
+      gridcolor = '#E8ECF1' 
     ),
     hovermode = 'x unified',
+    hoverlabel = list(
+      bgcolor = 'white',
+      bordercolor = '#0056B3',  
+      font = list(
+        family = 'Inter, Arial',
+        size = 12,
+        color = '#2E3842'  
+      )
+    ),
     plot_bgcolor = 'white',
-    paper_bgcolor = '#F8F9FA',
+    paper_bgcolor = '#F5F7FA',  
     legend = list(
       orientation = 'h',
       x = 0.5,
       y = -0.15,
-      xanchor = 'center'
+      xanchor = 'center',
+      font = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#2E3842'  
+      )
     ),
     margin = list(t = 80, b = 100, l = 80, r = 40)
   )
@@ -477,23 +831,21 @@ library(quantmod)
 library(dplyr)
 library(lubridate)
 
-# Descargar datos desde 2023
 GLTR_all <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE, from = "2023-01-01")
 
-# Función para preparar datos por año
 preparar_datos_año <- function(año, datos) {
-  # Filtrar por año
+  
   datos_año <- datos[year(index(datos)) == año]
   
   if (nrow(datos_año) == 0) return(NULL)
   
-  # Crear dataframe
+  
   df <- data.frame(
     Fecha = index(datos_año),
     Precio = as.numeric(Cl(datos_año))
   )
   
-  # Calcular día del año y precio normalizado
+  
   df <- df %>%
     mutate(
       Dia_del_año = row_number(),
@@ -505,24 +857,21 @@ preparar_datos_año <- function(año, datos) {
   return(df)
 }
 
-# Preparar datos para cada año
+
 datos_2023 <- preparar_datos_año(2023, GLTR_all)
 datos_2024 <- preparar_datos_año(2024, GLTR_all)
 datos_2025 <- preparar_datos_año(2025, GLTR_all)
 
-# Combinar todos los datos
 datos_todos <- bind_rows(datos_2023, datos_2024, datos_2025)
 
-# Crear gráfico interactivo
 plot_ly(datos_todos, x = ~Dia_del_año) %>%
   
-  # Año 2023
   add_trace(data = subset(datos_todos, Año == "2023"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines+markers',
-            line = list(color = '#DC2626', width = 2.5),
-            marker = list(size = 6, color = '#DC2626'),
+            line = list(color = '#0056B3', width = 2.5),  
+            marker = list(size = 6, color = '#0056B3'),
             name = '2023',
             hoverinfo = 'text',
             text = ~paste('<b>2023 - Día', Dia_del_año, '</b><br>',
@@ -531,13 +880,12 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Año 2024
   add_trace(data = subset(datos_todos, Año == "2024"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines+markers',
-            line = list(color = '#059669', width = 2.5),
-            marker = list(size = 6, color = '#059669'),
+            line = list(color = '#00A859', width = 2.5),  
+            marker = list(size = 6, color = '#00A859'),
             name = '2024',
             hoverinfo = 'text',
             text = ~paste('<b>2024 - Día', Dia_del_año, '</b><br>',
@@ -546,13 +894,12 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Año 2025 (hasta la fecha disponible)
   add_trace(data = subset(datos_todos, Año == "2025"),
             y = ~Precio_Norm,
             type = 'scatter',
             mode = 'lines+markers',
-            line = list(color = '#1E3A8A', width = 2.5),
-            marker = list(size = 6, color = '#1E3A8A'),
+            line = list(color = '#001A5C', width = 2.5),  
+            marker = list(size = 6, color = '#001A5C'),
             name = '2025 (hasta fecha)',
             hoverinfo = 'text',
             text = ~paste('<b>2025 - Día', Dia_del_año, '</b><br>',
@@ -561,70 +908,134 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
                           'Normalizado:', round(Precio_Norm, 1), '<br>',
                           'Retorno:', round(Retorno, 1), '%')) %>%
   
-  # Línea de referencia en 100
   add_trace(x = c(0, max(datos_todos$Dia_del_año, na.rm = TRUE)),
             y = c(100, 100),
             type = 'scatter',
             mode = 'lines',
-            line = list(color = 'gray', width = 1, dash = 'dash'),
+            line = list(color = '#5D6D7E', width = 1, dash = 'dash'),  
             name = 'Línea base (100)',
             showlegend = FALSE,
             hoverinfo = 'skip') %>%
   
-  # Layout
+  
   layout(
     title = list(
-      text = '<b>Comparativo de Desempeño Anual - ETF GLTR</b><br><span style="font-size:14px">Cada año normalizado a 100 en su primer día de negociación</span>',
-      font = list(size = 22, color = '#1E3A8A')
+      text = '<b>Comparativo de Desempeño Anual - ETF GLTR</b><br><span style="font-size:14px;color:#5D6D7E">Cada año normalizado a 100 en su primer día de negociación</span>',
+      font = list(
+        family = 'Roboto, Arial',
+        size = 22,
+        color = '#001A5C'  
+      )
     ),
     xaxis = list(
-      title = '<b>Día del año de negociación</b>',
-      gridcolor = 'lightgray'
+      title = list(
+        text = '<b> </b>',
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'  
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E' 
+      ),
+      gridcolor = '#E8ECF1'  
     ),
     yaxis = list(
-      title = '<b>Índice Normalizado (Inicio = 100)</b>',
-      gridcolor = 'lightgray'
+      title = list(
+        text = '<b>Índice Normalizado (Inicio = 100)</b>',
+        font = list(
+          family = 'Roboto, Arial',
+          size = 13,
+          color = '#0056B3'  
+        )
+      ),
+      tickfont = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#5D6D7E'  
+      ),
+      gridcolor = '#E8ECF1'  
     ),
     hovermode = 'x unified',
+    hoverlabel = list(
+      bgcolor = 'white',
+      bordercolor = '#0056B3',  
+      font = list(
+        family = 'Inter, Arial',
+        size = 12,
+        color = '#2E3842'  
+      )
+    ),
     plot_bgcolor = 'white',
-    paper_bgcolor = '#F8F9FA',
+    paper_bgcolor = '#F5F7FA',  
     legend = list(
       orientation = 'h',
       x = 0.5,
       y = -0.15,
       xanchor = 'center',
-      bgcolor = 'rgba(255,255,255,0.8)'
+      bgcolor = 'rgba(255,255,255,0.8)',
+      font = list(
+        family = 'Inter, Arial',
+        size = 11,
+        color = '#2E3842'  
+      )
     ),
     margin = list(t = 100, b = 100, l = 80, r = 40),
     
-    # Anotaciones con rendimiento final de cada año
     annotations = list(
       list(
         x = max(datos_2023$Dia_del_año, na.rm = TRUE),
         y = tail(datos_2023$Precio_Norm, 1),
         text = paste('2023:', round(tail(datos_2023$Retorno, 1), 1), '%'),
         showarrow = FALSE,
-        font = list(size = 12, color = '#DC2626'),
+        font = list(
+          family = 'Inter, Arial',
+          size = 12,
+          color = '#0056B3'  
+        ),
         xanchor = 'left',
-        xshift = 10
+        xshift = 10,
+        bgcolor = 'rgba(255,255,255,0.9)',
+        bordercolor = '#0056B3',
+        borderwidth = 1,
+        borderpad = 4
       ),
       list(
         x = max(datos_2024$Dia_del_año, na.rm = TRUE),
         y = tail(datos_2024$Precio_Norm, 1),
         text = paste('2024:', round(tail(datos_2024$Retorno, 1), 1), '%'),
         showarrow = FALSE,
-        font = list(size = 12, color = '#059669'),
+        font = list(
+          family = 'Inter, Arial',
+          size = 12,
+          color = '#00A859'  
+        ),
         xanchor = 'left',
-        xshift = 10
+        xshift = 10,
+        bgcolor = 'rgba(255,255,255,0.9)',
+        bordercolor = '#00A859',
+        borderwidth = 1,
+        borderpad = 4
       ),
       list(
         x = max(datos_2025$Dia_del_año, na.rm = TRUE),
         y = tail(datos_2025$Precio_Norm, 1),
         text = paste('2025:', round(tail(datos_2025$Retorno, 1), 1), '%'),
         showarrow = FALSE,
-        font = list(size = 12, color = '#1E3A8A'),
+        font = list(
+          family = 'Inter, Arial',
+          size = 12,
+          color = '#001A5C'  
+        ),
         xanchor = 'left',
-        xshift = 10
+        xshift = 10,
+        bgcolor = 'rgba(255,255,255,0.9)',
+        bordercolor = '#001A5C',
+        borderwidth = 1,
+        borderpad = 4
       )
     )
   )
@@ -634,7 +1045,6 @@ plot_ly(datos_todos, x = ~Dia_del_año) %>%
 
 library(kableExtra)
 
-# Crear tabla de síntesis histórica
 sintesis_historica <- data.frame(
   Período = c(
     "2010–2012",
@@ -668,7 +1078,6 @@ sintesis_historica <- data.frame(
   )
 )
 
-# Crear tabla profesional
 sintesis_historica %>%
   kable(
     align = "lll",
@@ -709,7 +1118,6 @@ sintesis_historica %>%
     width = "65%",
     background = "#FFFFFF"
   ) %>%
-  # Añadir notas al pie
   footnote(
     general = "Fuente: Análisis histórico basado en datos de Yahoo Finance, Bloomberg y Aberdeen Standard Investments",
     general_title = "Nota:",

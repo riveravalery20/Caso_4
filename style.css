@@ -1,0 +1,824 @@
+/* ==========================================================================
+   RESET PARA HIGHLIGHT.JS - CRÍTICO
+   ========================================================================== */
+.hljs,
+.hljs-subst,
+pre code.hljs {
+  background: #ffffff !important;
+  color: #000000 !important;
+  display: block !important;
+  overflow-x: auto !important;
+  padding: 0 !important;
+}
+
+/* Desactivar TODOS los estilos de highlight.js */
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #000000 !important; }
+.hljs-string, .hljs-title, .hljs-name, .hljs-type { color: #000000 !important; }
+.hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #000000 !important; }
+.hljs-variable, .hljs-template-tag, .hljs-template-variable { color: #000000 !important; }
+.hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta { color: #6b7280 !important; font-style: italic !important; }
+
+/* ==========================================================================
+   PALETA DE COLORES iSHARES
+   ========================================================================== */
+:root {
+  --ishares-blue-dark: #001A5C;        /* Azul oscuro principal iShares */
+  --ishares-blue-medium: #0056B3;      /* Azul medio */
+  --ishares-blue-light: #007BFF;       /* Azul claro/accent */
+  --ishares-cyan: #00B0F0;             /* Cian para gráficos */
+  --ishares-gray-dark: #2E3842;        /* Gris oscuro para texto */
+  --ishares-gray-medium: #5D6D7E;      /* Gris medio */
+  --ishares-gray-light: #F5F7FA;       /* Gris claro de fondo */
+  --ishares-white: #FFFFFF;            /* Blanco puro */
+  --ishares-green: #00A859;            /* Verde para positivos */
+  --ishares-red: #E74C3C;              /* Rojo para negativos */
+  --ishares-gold: #D4AF37;             /* Dorado para destacados */
+  --border-light: #D1D8E0;             /* Bordes sutiles */
+  --accent-silver: #A6ACB5;            /* Plata para elementos secundarios */
+}
+
+/* ==========================================================================
+   FUENTES PROFESIONALES FINANCIERAS
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+
+/* ==========================================================================
+   RESET Y CONFIGURACIÓN GENERAL
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Roboto', 'Helvetica Neue', sans-serif;
+  line-height: 1.6;
+  color: var(--ishares-gray-dark);
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* ==========================================================================
+   ESTRUCTURA PRINCIPAL
+   ========================================================================== */
+.container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   SIDEBAR - TEMA iSHARES
+   ========================================================================== */
+.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, var(--ishares-blue-dark) 0%, #000F3C 100%);
+  color: white;
+  padding: 2rem 1.5rem;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 4px 0 20px rgba(0, 26, 92, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logo-ishares {
+  width: 140px;
+  height: 60px;
+  margin: 0 auto 1rem;
+  display: block;
+  object-fit: contain;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.logo-ishares:hover {
+  transform: scale(1.05);
+}
+
+.sidebar h1 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.sidebar h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* MENÚ DE NAVEGACIÓN */
+.sidebar-nav {
+  list-style: none;
+  margin-top: 2rem;
+}
+
+.sidebar-nav li {
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-left-color: var(--ishares-cyan);
+  transform: translateX(3px);
+}
+
+.sidebar-nav a.active {
+  background: rgba(0, 86, 179, 0.3);
+  color: white;
+  font-weight: 600;
+  border-left-color: var(--ishares-cyan);
+}
+
+.sidebar-nav .icon {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* ==========================================================================
+   CONTENIDO PRINCIPAL
+   ========================================================================== */
+.main-content {
+  margin-left: 280px;
+  padding: 2rem;
+  width: calc(100% - 280px);
+  background: white;
+  min-height: 100vh;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* ENCABEZADO PRINCIPAL */
+.main-header {
+  background: linear-gradient(135deg, var(--ishares-blue-dark) 0%, var(--ishares-blue-medium) 100%);
+  color: white;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 25px rgba(0, 26, 92, 0.25);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+  background-size: cover;
+}
+
+.main-header h1 {
+  font-family: 'Roboto', sans-serif;
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.5px;
+}
+
+.main-header h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  opacity: 0.95;
+  margin-bottom: 0.5rem;
+  color: white;
+  position: relative;
+  z-index: 2;
+}
+
+.main-header h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 300;
+  opacity: 0.9;
+  color: white;
+  position: relative;
+  z-index: 2;
+  margin-top: 1rem;
+}
+
+.main-header h4 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  opacity: 0.8;
+  margin-top: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   TARJETAS DE CONTENIDO - ESTILO FINANCIERO
+   ========================================================================== */
+.content-card {
+  background: white;
+  border-radius: 10px;
+  padding: 2.2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(46, 56, 66, 0.08);
+  border: 1px solid var(--border-light);
+  border-top: 4px solid var(--ishares-blue-medium);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 86, 179, 0.04), transparent);
+  transition: left 0.6s;
+}
+
+.content-card:hover::before {
+  left: 100%;
+}
+
+.content-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(46, 56, 66, 0.12);
+  border-top-color: var(--ishares-cyan);
+}
+
+.content-card h2 {
+  font-family: 'Roboto', sans-serif;
+  color: var(--ishares-blue-dark);
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.content-card h2::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 24px;
+  background: var(--ishares-blue-medium);
+  margin-right: 12px;
+  border-radius: 3px;
+}
+
+.content-card:hover h2 {
+  color: var(--ishares-blue-dark);
+  transform: translateX(5px);
+}
+
+.content-card h3 {
+  font-family: 'Roboto', sans-serif;
+  color: var(--ishares-blue-medium);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-top: 1.8rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.content-card h4 {
+  font-family: 'Inter', sans-serif;
+  color: var(--ishares-gray-medium);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.content-card p {
+  font-family: 'Inter', sans-serif;
+  margin: 0 0 1.2rem 0;
+  padding: 0;
+  line-height: 1.7;
+  text-align: justify;
+  color: var(--ishares-gray-dark);
+  font-size: 1rem;
+}
+
+.content-card p + p {
+  margin-top: 1.2rem;
+}
+
+/* Listas dentro de content-card */
+.content-card ul,
+.content-card ol {
+  margin: 1rem 0;
+  padding-left: 1.8rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--ishares-gray-dark);
+}
+
+.content-card li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   TABLAS FINANCIERAS - MEJORADAS
+   ========================================================================== */
+table {
+  border-collapse: collapse;
+  margin: 1.8rem auto;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 26, 92, 0.08);
+  background: white;
+  border: 1px solid var(--border-light);
+}
+
+table thead {
+  background: linear-gradient(135deg, var(--ishares-blue-dark) 0%, var(--ishares-blue-medium) 100%);
+  color: white;
+}
+
+table th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  color: white !important;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+}
+
+table td {
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--ishares-gray-dark);
+  font-family: 'Inter', sans-serif;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: rgba(0, 26, 92, 0.02);
+}
+
+table tbody tr:hover {
+  background-color: rgba(0, 86, 179, 0.05);
+  transition: background-color 0.2s ease;
+}
+
+table caption {
+  caption-side: top;
+  font-weight: 700;
+  color: var(--ishares-blue-dark);
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.1rem;
+  background: rgba(0, 86, 179, 0.05);
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 0;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Estilos para footnotes de tablas */
+.table_footnote {
+  font-size: 0.85rem;
+  color: var(--ishares-gray-medium);
+  padding: 0.5rem 1rem;
+  background: rgba(0, 26, 92, 0.02);
+  border-top: 1px solid var(--border-light);
+  font-family: 'Inter', sans-serif;
+}
+
+/* ==========================================================================
+   CONTENEDORES DE GRÁFICOS - ESTILO FINANCIERO
+   ========================================================================== */
+.plot-container,
+.ggplot-container,
+.figure,
+div.figure {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 2rem auto;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 3px 10px rgba(0, 26, 92, 0.08);
+  border-top: 3px solid var(--ishares-blue-medium);
+  transition: all 0.3s ease;
+}
+
+.plot-container:hover,
+.ggplot-container:hover,
+.figure:hover,
+div.figure:hover {
+  box-shadow: 0 6px 18px rgba(0, 26, 92, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Títulos de figuras */
+.figure p.caption,
+p.caption {
+  text-align: center;
+  font-weight: 600;
+  color: var(--ishares-blue-dark);
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ==========================================================================
+   COMPONENTES AUXILIARES
+   ========================================================================== */
+/* CAJAS DE VARIABLES FINANCIERAS */
+.variables-box {
+  background: rgba(0, 86, 179, 0.05);
+  border: 1px solid rgba(0, 86, 179, 0.2);
+  border-radius: 8px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  border-left: 4px solid var(--ishares-blue-medium);
+}
+
+.variables-box strong {
+  color: var(--ishares-blue-dark);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.variables-box ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.2rem;
+}
+
+.variables-box li {
+  margin: 0.3rem 0;
+  color: var(--ishares-gray-dark);
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+}
+
+/* BLOCKQUOTES FINANCIEROS */
+blockquote {
+  border-left: 4px solid var(--ishares-cyan);
+  background: rgba(0, 176, 240, 0.05);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--ishares-gray-medium);
+  border-radius: 0 8px 8px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ==========================================================================
+   CÓDIGO - ESTILOS MEJORADOS
+   ========================================================================== */
+div.sourceCode {
+  background: #f8fafc !important;
+  border-radius: 8px !important;
+  padding: 1.5rem !important;
+  margin: 1.5rem 0 !important;
+  border: 1px solid var(--border-light) !important;
+  border-left: 4px solid var(--ishares-blue-medium) !important;
+  box-shadow: 0 2px 8px rgba(0, 26, 92, 0.05) !important;
+  transition: all 0.3s ease !important;
+  overflow: auto !important;
+  display: block !important;
+  width: 100% !important;
+  max-height: 600px !important;
+}
+
+div.sourceCode:hover {
+  border-left-color: var(--ishares-cyan) !important;
+  box-shadow: 0 4px 12px rgba(0, 26, 92, 0.1) !important;
+  transform: translateX(3px) !important;
+}
+
+div.sourceCode pre,
+pre.sourceCode {
+  background: transparent !important;
+  color: #000000 !important;
+  font-family: 'Courier New', Monaco, 'Roboto Mono', monospace !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  overflow: visible !important;
+  white-space: pre !important;
+  word-wrap: normal !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+code.sourceCode {
+  background: transparent !important;
+  color: #000000 !important;
+  font-family: 'Courier New', Monaco, 'Roboto Mono', monospace !important;
+}
+
+/* Outputs de código (resultados) */
+pre:not(.sourceCode) {
+  background: #f8fafc !important;
+  color: var(--ishares-gray-dark) !important;
+  border-left: 4px solid var(--ishares-cyan) !important;
+  border: 1px solid var(--border-light) !important;
+  padding: 1rem !important;
+  margin: 1rem 0 !important;
+  border-radius: 8px !important;
+  overflow-x: auto !important;
+  white-space: pre-wrap !important;
+  font-family: 'Courier New', Monaco, 'Roboto Mono', monospace !important;
+}
+
+/* Resaltado de sintaxis financiera */
+span.kw { color: #d73a49 !important; font-weight: 600 !important; }
+span.st { color: #22863a !important; }
+span.dv, span.fl { color: #0056B3 !important; }
+span.co { color: #6b7280 !important; font-style: italic !important; }
+span.fu { color: #6f42c1 !important; font-weight: 500 !important; }
+span.op { color: #000000 !important; }
+
+/* ==========================================================================
+   BOTÓN FLOTANTE - ESTILO FINANCIERO
+   ========================================================================== */
+.floating-code-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: linear-gradient(135deg, var(--ishares-blue-dark) 0%, var(--ishares-blue-medium) 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 26, 92, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.3px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.floating-code-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(0, 26, 92, 0.4);
+  background: linear-gradient(135deg, #001144 0%, #004494 100%);
+}
+
+.floating-code-btn:active {
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Efecto de pulso financiero */
+@keyframes pulse-finance {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(0, 26, 92, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(0, 26, 92, 0.5);
+  }
+}
+
+.floating-code-btn {
+  animation: pulse-finance 2.5s infinite;
+}
+
+/* Animación al mostrar código */
+@keyframes slideInFinance {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.code-visible {
+  animation: slideInFinance 0.3s ease !important;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.footer {
+  text-align: center;
+  padding: 2rem;
+  margin-top: 3rem;
+  border-top: 1px solid var(--border-light);
+  color: var(--ishares-gray-medium);
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  background: rgba(0, 26, 92, 0.02);
+}
+
+.footer p {
+  margin: 0.3rem 0;
+}
+
+/* ==========================================================================
+   ENLACES
+   ========================================================================== */
+a {
+  color: var(--ishares-blue-medium);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+a:hover {
+  color: var(--ishares-blue-dark);
+  border-bottom-color: var(--ishares-cyan);
+}
+
+/* ==========================================================================
+   SCROLLBAR PERSONALIZADO
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ishares-gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ishares-blue-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ishares-blue-dark);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .main-header h1 {
+    font-size: 2rem;
+  }
+  
+  .main-header h2 {
+    font-size: 1.2rem;
+  }
+  
+  .floating-code-btn {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+  }
+  
+  .content-card {
+    padding: 1.5rem;
+  }
+  
+  .content-card h2 {
+    font-size: 1.5rem;
+  }
+  
+  table {
+    font-size: 0.85rem;
+  }
+  
+  table th,
+  table td {
+    padding: 0.7rem 0.8rem;
+  }
+  
+  div.sourceCode {
+    padding: 1rem !important;
+  }
+  
+  div.sourceCode pre,
+  pre.sourceCode {
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-header {
+    padding: 2rem 1rem;
+  }
+  
+  .main-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .content-card {
+    padding: 1rem;
+  }
+  
+  .content-card h2 {
+    font-size: 1.3rem;
+  }
+}
+
+/* Control definitivo de tamaño de imágenes */
+.main-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem auto;
+}
+
+.figure img,
+div.figure img,
+.plot-container img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+}
+
+/* Elementos específicos para análisis financiero */
+.financial-indicator {
+  background: rgba(0, 86, 179, 0.08);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid var(--ishares-green);
+}
+
+.financial-indicator.negative {
+  border-left-color: var(--ishares-red);
+}
+
+.price-change {
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.price-change.positive {
+  background: rgba(0, 168, 89, 0.1);
+  color: var(--ishares-green);
+}
+
+.price-change.negative {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--ishares-red);
+}
