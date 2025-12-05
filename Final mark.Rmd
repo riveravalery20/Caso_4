@@ -841,7 +841,7 @@ AccionesEX <- getSymbols("GLTR", src = "yahoo", auto.assign = FALSE,
 names(AccionesEX)
 GLTR <- AccionesEX$GLTR.Close
 
-# Preparar dataframe para análisis descriptivo
+
 GLTR_df <- data.frame(
   Fecha = index(GLTR),
   Precio = as.numeric(GLTR),
@@ -856,7 +856,7 @@ GLTR_df <- data.frame(
 <p>GLTR está estructurado como un grantor trust respaldado por lingotes físicos, custodiados en bóvedas certificadas en centros financieros como Londres y Zúrich. Esta configuración evita riesgos asociados a derivados y contratos de futuros, vinculando el valor del fondo directamente a los precios spot de los metales subyacentes. El activo bajo gestión asciende a aproximadamente 1.850 millones de USD, validando su relevancia y liquidez en los mercados institucionales y de retail.</p>
 
 ```{r ficha técnica-stats}
-# Crear tabla comparativa estilo profesional
+
 ficha_tecnica <- data.frame(
   Característica = c(
     "Nombre del ETF",
@@ -911,7 +911,6 @@ ficha_tecnica <- data.frame(
   )
 )
 
-# Formatear la tabla profesional
 ficha_tecnica %>%
   kable(align = "lcl", 
         caption = "Tabla 1. FICHA TÉCNICA DEL ETF GLTR - METALES PRECIOSOS") %>%
@@ -923,10 +922,10 @@ ficha_tecnica %>%
   column_spec(2, width = "35%") %>%
   column_spec(3, width = "40%", 
               color = "#666666") %>%
-  # Resaltar valores importantes
+  
   column_spec(2,
               color = ifelse(
-                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  # Verde para rendimientos positivos
+                grepl("\\+[0-9]", ficha_tecnica$Valor), "#27AE60",  
                 ifelse(
                   grepl("^\\$", ficha_tecnica$Valor), "#3498DB",    # Azul para valores monetarios
                   "black"
